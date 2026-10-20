@@ -1,75 +1,65 @@
 # QCM — Annales d'examens & simulateur (UT2J, L2 Psychologie)
 
-Applications web statiques d'entraînement aux examens, une par UE. Chaque UE a son propre dossier (`304/`, `301/`, …) ; le code HTML/JS est **partagé** et généré par un unique script de build.
+Applications web statiques d'entraînement aux examens universitaires (Université Toulouse Jean Jaurès, L2 Psychologie). Le code HTML/JS est partagé et généré par un script de build modulaire.
 
 ## 🚀 Fonctionnalités
-- **Annales officielles** (QCM + questions ouvertes avec réponses détaillées).
-- **Entraînement flexible** : par thématique de cours ou par document d'annale source.
-- **Générateur IA intégré** : banque de questions complémentaires (Gemini / OpenAI avec votre propre clé).
-- **Accès restreint par email + PIN** (hachage SHA-256, liens magiques en 1 clic).
-- **Mode sombre**, raccourcis clavier, accessibilité clavier.
+- **Annales officielles exhaustives** : QCM et questions ouvertes d'examen avec repères de correction et corrigés modèles rédigés.
+- **Origine précise des corrections** : distinction visuelle entre corrigé officiel, validation par le polycopié de cours (syllabus) ou générateur IA.
+- **Modes d'entraînement flexibles** : révision pas-à-pas (avec feedback immédiat et auto-évaluation) ou simulation d'examen chronométrée.
+- **Filtrage par thématique de cours** ou par document d'annale source.
+- **Observatoire statistique des récurrences** : détection automatique des questions récurrentes tombées sur plusieurs sessions d'examen.
+- **Générateur IA intégré** : banque d'entraînement complémentaire et génération de nouvelles questions d'examen inédites (Gemini / OpenAI).
+- **Navigation inter-UE** : bascule directe d'un enseignement à l'autre depuis le portail d'accueil et les en-têtes d'épreuves.
+- **Mode sombre**, raccourcis clavier, accessibilité et design responsive.
 
 ## 📂 Structure du projet
 ```
 qcm_project/
-├── build.py                 # Script de build unique (python3 build.py [UE...])
+├── build.py                 # Script de compilation unique (python3 build.py [UE...])
 ├── template/app.html        # Gabarit HTML/JS partagé (source de vérité de l'interface)
-├── index.html               # Page d'accueil générée (liste des UE) — servie par GitHub Pages
-├── package.json             # Outil de build : CLI Tailwind
+├── index.html               # Page d'accueil du portail (choix de l'UE)
+├── package.json             # Outil de build : CLI Tailwind CSS
 ├── tailwind.config.js
-├── archive/                 # Anciennes maquettes (ignoré par git)
-├── 304/                     # UE 304 — Psychologie Clinique
-│   ├── ue.json              # Identité de l'UE (code, titre, niveau)
-│   ├── data/                # questions_database.json, open_questions.json, embedded_ai_bank.json
-│   ├── docs/                # PDF de cours, fichiers Excel (local uniquement)
-│   ├── scripts/             # Scripts de maintenance des données
-│   ├── allowed_emails.json  # Accès autorisés (local uniquement, voir l'exemple)
-│   └── index.html           # Application générée pour cette UE
-└── 301/                     # (à créer) même structure
-```
-Ne modifiez jamais les `index.html` à la main : ils sont écrasés à chaque build. Modifiez `template/app.html` (interface) ou les fichiers de `data/`.
-
-## ➕ Ajouter une UE (ex. 301)
-1. Créez `301/ue.json` :
-   ```json
-   { "code": "301", "title": "Titre de l'UE", "short_title": "Titre court", "level": "L2 Psychologie" }
-   ```
-2. Ajoutez `301/data/questions_database.json`, `open_questions.json` et `embedded_ai_bank.json` (même format que `304/data/`).
-3. Ajoutez `301/allowed_emails.json` (voir `304/allowed_emails.example.json`).
-4. `python3 build.py 301` — la page d'accueil se met à jour automatiquement.
-
-> ⚠️ **Limite actuelle** : l'identité (code, titre) et les données sont paramétrées, mais la structure thématique de l'interface (Parties 1 & 2, chapitres et filtres de `CHAPTER_CATEGORIES`, liste `OFFICIAL_DOCUMENTS`, liste des thèmes du générateur IA et textes des prompts IA) est encore propre à l'UE 304 dans `template/app.html`. Elle devra être adaptée/paramétrée selon le plan de cours de la 301.
-
-## 🛠️ Utilisation locale
-
-### 1. Configurer les emails autorisés
-Modifiez `304/allowed_emails.json` :
-```json
-[
-  { "email": "mon.email@gmail.com", "pin": "1234" },
-  { "email": "ami1@gmail.com", "pin": "5678" }
-]
+├── 301/                     # UE 301 — Psychologie du Développement
+│   ├── ue.json              # Métadonnées de l'UE (code, titre, niveau)
+│   ├── config.json          # Configuration des chapitres et documents officiels
+│   ├── data/                # Bases de données JSON (questions_database.json, open_questions.json)
+│   ├── docs/                # Documents de cours, corrigés officiels et bases Excel
+│   ├── scripts/             # Scripts de génération et maintenance de la base
+│   └── index.html           # Application web générée pour l'UE 301
+└── 304/                     # UE 304 — Psychologie Clinique & Psychopathologie
+    ├── ue.json              # Métadonnées de l'UE
+    ├── config.json          # Configuration des chapitres et documents officiels
+    ├── data/                # Bases de données JSON
+    ├── docs/                # Documents de cours et base Excel
+    ├── scripts/             # Scripts de maintenance
+    └── index.html           # Application web générée pour l'UE 304
 ```
 
-### 2. Générer
+> **Note** : Ne modifiez jamais les fichiers `<UE>/index.html` à la main : ils sont générés automatiquement par le script de build. Pour modifier l'interface, éditez `template/app.html` ; pour modifier les questions, éditez les fichiers du dossier `data/`.
+
+## 🛠️ Utilisation locale & Compilation
+
+### Compilation des applications
 ```bash
-npm install            # une seule fois (installe le CLI Tailwind, outil de build uniquement)
-python3 build.py       # toutes les UE + la page d'accueil
-python3 build.py 304   # une seule UE
+npm install            # une seule fois (installe Tailwind CSS pour la compilation locale)
+python3 build.py       # compile toutes les UE et la page d'accueil
+python3 build.py 301   # compile uniquement l'UE 301
+python3 build.py 304   # compile uniquement l'UE 304
 ```
-Le script précompile Tailwind (CSS inliné, aucun CDN requis ; repli sur le CDN si `npm install` n'a pas été fait), injecte les empreintes cryptographiques anonymisées et affiche les liens magiques (`304/?email=…&pin=…`).
 
-## ⌨️ Raccourcis clavier (onglet Quiz)
+Le script précompile et inline le CSS Tailwind (aucun appel externe ni CDN requis en production) et assemble les données dans les fichiers `index.html` statiques autonomes.
+
+## ⌨️ Raccourcis clavier (Session Quiz)
 - `←` / `→` : question précédente / suivante
-- `A`–`E` : cocher/décocher une proposition
-- `Entrée` : valider la réponse
-- `Échap` : fermer le générateur IA
-
-> ⚠️ **Note sécurité** : l'accès par email + PIN est une barrière légère côté navigateur. Les questions sont embarquées dans la page et restent lisibles via le code source.
+- `A` – `G` : cocher / décocher une proposition
+- `Entrée` : valider la réponse (mode révision)
+- `Échap` : fermer les fenêtres modales (générateur IA)
 
 ## 🌐 Déploiement GitHub Pages
-1. Dépôt GitHub : `https://github.com/edantes6109/ut2j_app`
-2. Dans **Settings** > **Pages** > **Build and deployment** > **Branch**, sélectionnez `main` et le dossier `/ (root)`.
-3. Après build, committez `index.html` (accueil) et les `<UE>/index.html` générés. L'application est en ligne à :
-   - Accueil : `https://edantes6109.github.io/ut2j_app/`
-   - UE 304 : `https://edantes6109.github.io/ut2j_app/304/`
+1. Dans le dépôt GitHub : **Settings** > **Pages** > **Build and deployment**.
+2. Sélectionnez la branche `main` et le dossier `/ (root)`.
+3. Le site est servi directement :
+   - Portail d'accueil : `https://<username>.github.io/<repo>/`
+   - UE 301 : `https://<username>.github.io/<repo>/301/index.html`
+   - UE 304 : `https://<username>.github.io/<repo>/304/index.html`

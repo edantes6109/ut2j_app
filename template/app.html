@@ -147,6 +147,31 @@
 </head>
 <body class="bg-slate-50 text-slate-900 antialiased min-h-screen p-3 sm:p-5 lg:p-7 flex flex-col justify-start">
 
+  <script>
+    // Detection if template/app.html is opened directly without being compiled by build.py
+    if (window.location && (window.location.pathname.endsWith('app.html') || window.location.href.includes('template/app.html'))) {
+      window.addEventListener('DOMContentLoaded', () => {
+        const warning = document.createElement('div');
+        warning.className = 'fixed top-4 left-4 right-4 z-[10000] p-4 bg-amber-500 text-slate-950 font-bold rounded-2xl shadow-2xl border-2 border-amber-300 text-center text-sm space-y-1.5';
+        warning.innerHTML = `
+          <div class="flex items-center justify-center gap-2 text-base">
+            <span>⚠️</span> <span>Fichier source modèle non exécutable directement</span>
+          </div>
+          <p class="font-normal text-xs text-slate-900 max-w-xl mx-auto">
+            Vous avez ouvert directement le modèle source <code>template/app.html</code>. Ce fichier contient des balises dynamiques non compilées et bloque l'authentification.
+          </p>
+          <div class="pt-1 flex items-center justify-center gap-2 flex-wrap text-xs">
+            <span>👉 Veuillez ouvrir la version compilée de votre choix :</span>
+            <a href="../301/index.html" class="px-3 py-1 bg-white text-indigo-700 rounded-lg shadow-xs hover:bg-indigo-50 font-extrabold">UE 301</a>
+            <a href="../304/index.html" class="px-3 py-1 bg-white text-indigo-700 rounded-lg shadow-xs hover:bg-indigo-50 font-extrabold">UE 304</a>
+            <a href="../index.html" class="px-3 py-1 bg-white text-slate-800 rounded-lg shadow-xs hover:bg-slate-50 font-bold">Portail Général</a>
+          </div>
+        `;
+        document.body.prepend(warning);
+      });
+    }
+  </script>
+
   <!-- ============================================================== -->
   <!-- MODAL D'AUTHENTIFICATION PAR EMAIL (ACCÈS RESTREINT) -->
   <!-- ============================================================== -->
@@ -210,9 +235,15 @@
         </button>
       </form>
 
-      <div class="pt-3 border-t border-slate-100 flex items-center justify-center gap-1.5 text-[11px] text-slate-400">
-        <span>✨</span>
-        <span>Accès mémorisé automatiquement sur cet appareil</span>
+      <div class="pt-3 border-t border-slate-100 flex flex-col items-center gap-2 text-[11px] text-slate-500">
+        <a href="../index.html" class="inline-flex items-center gap-1.5 font-bold text-indigo-600 hover:text-indigo-800 hover:underline transition">
+          <span>←</span>
+          <span>Choisir une autre UE (Page d'accueil)</span>
+        </a>
+        <div class="flex items-center gap-1 text-slate-400">
+          <span>✨</span>
+          <span>Accès mémorisé automatiquement sur cet appareil</span>
+        </div>
       </div>
     </div>
   </div>
@@ -225,14 +256,18 @@
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-4 border-b border-slate-200">
       <div>
         <div class="flex items-center gap-2 flex-wrap">
+          <a href="../index.html" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-white hover:bg-slate-50 text-slate-700 hover:text-indigo-600 border border-slate-300 hover:border-indigo-300 shadow-2xs transition group" title="Retourner à la page d'accueil pour choisir votre unité d'enseignement">
+            <span class="group-hover:-translate-x-0.5 transition-transform">←</span>
+            <span>Changer d'UE</span>
+          </a>
           <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-600 text-white shadow-xs">
             UT2J • UE {{UE_CODE}} L2
           </span>
           <span class="text-xs text-slate-500 font-mono font-medium" id="header-total-badge">
-            130 questions officielles (120 QCM • 10 Questions ouvertes)
+            {{TOTAL_QUESTIONS}} questions officielles ({{TOTAL_QCM}} QCM • {{TOTAL_OPEN}} Questions ouvertes)
           </span>
-          <span class="text-xs px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 font-semibold border border-emerald-200">
-            7 Sessions d'Annales UT2J
+          <span class="text-xs px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 font-semibold border border-emerald-200" id="header-sessions-badge">
+            {{TOTAL_SESSIONS}} Sessions d'Annales UT2J
           </span>
           <span class="text-xs px-2 py-0.5 rounded-md bg-purple-50 text-purple-700 font-semibold border border-purple-200 flex items-center gap-1">
             <span>✨</span> Générateur IA intégré
@@ -333,7 +368,7 @@
             <div class="flex-1">
               <div class="flex items-center justify-between gap-2">
                 <span class="text-xs sm:text-sm font-bold text-slate-900">QCM (Questions à choix multiples)</span>
-                <span class="px-2 py-0.5 rounded-full text-xs font-bold bg-indigo-100 text-indigo-800" id="badge-count-qcm-total">120 QCM</span>
+                <span class="px-2 py-0.5 rounded-full text-xs font-bold bg-indigo-100 text-indigo-800" id="badge-count-qcm-total">{{TOTAL_QCM}} QCM</span>
               </div>
               <p class="text-xs text-slate-500 mt-0.5">Propositions A à E issues des examens officiels et de l'IA</p>
             </div>
@@ -344,7 +379,7 @@
             <div class="flex-1">
               <div class="flex items-center justify-between gap-2">
                 <span class="text-xs sm:text-sm font-bold text-slate-900">Questions ouvertes ✍️</span>
-                <span class="px-2 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800" id="badge-count-open-total">10 épreuves</span>
+                <span class="px-2 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800" id="badge-count-open-total">{{TOTAL_OPEN}} épreuves</span>
               </div>
               <p class="text-xs text-slate-500 mt-0.5">Questions rédactionnelles notées sur barème officiel (4 à 12 pts)</p>
             </div>
@@ -399,11 +434,14 @@
                     <span class="text-emerald-600 font-bold">✓</span> Tout cocher
                   </button>
                   <button type="button" onclick="toggleAllThemes(false)" class="px-2.5 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-600 font-semibold transition flex items-center gap-1 shadow-2xs" title="Tout décocher">
-                    <span class="text-rose-500 font-bold">✕</span> Décocher
+                    <span class="text-rose-500 font-bold">✕</span> Tout décocher
                   </button>
                   <button type="button" id="btn-toggle-accordions" onclick="toggleAllAccordions()" class="px-2.5 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 font-semibold transition flex items-center gap-1 shadow-2xs" title="Replier ou déplier tous les chapitres">
                     <span id="accordion-toggle-icon">▲</span> <span id="accordion-toggle-label">Replier tout</span>
                   </button>
+                  <span class="hidden md:inline-flex items-center gap-1 text-[11px] text-slate-500 bg-slate-100 border border-slate-200 px-2.5 py-1.5 rounded-lg select-none" title="Maintenez la touche Maj (Shift) enfoncée et cliquez sur un autre chapitre ou sous-thème pour sélectionner toute la plage">
+                    <kbd class="px-1.5 py-0.5 rounded bg-white border border-slate-300 text-[10px] font-mono font-bold text-slate-700 shadow-2xs">Maj ⇧</kbd> + Clic : sélection de plage
+                  </span>
                 </div>
               </div>
 
@@ -422,29 +460,7 @@
                 <button type="button" onclick="filterCategoryPill('selected')" data-cat-id="selected" class="cat-pill px-2.5 py-1 rounded-lg font-semibold bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 transition whitespace-nowrap flex items-center gap-1">
                   <span>★</span> <span>Sélectionnés (<span id="pill-selected-count">0</span>)</span>
                 </button>
-                <span class="text-slate-300 font-light px-0.5">|</span>
-                <button type="button" onclick="filterCategoryPill('p1_ch1')" data-cat-id="p1_ch1" class="cat-pill px-2.5 py-1 rounded-lg font-semibold bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 transition whitespace-nowrap">
-                  🧠 Ch.1 Métapsychologie
-                </button>
-                <button type="button" onclick="filterCategoryPill('p1_ch2')" data-cat-id="p1_ch2" class="cat-pill px-2.5 py-1 rounded-lg font-semibold bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 transition whitespace-nowrap">
-                  🧠 Ch.2 Symptôme & Trauma
-                </button>
-                <button type="button" onclick="filterCategoryPill('p1_ch3')" data-cat-id="p1_ch3" class="cat-pill px-2.5 py-1 rounded-lg font-semibold bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 transition whitespace-nowrap">
-                  🧠 Ch.3 Psychopathologie
-                </button>
-                <span class="text-slate-300 font-light px-0.5">|</span>
-                <button type="button" onclick="filterCategoryPill('p2_ch1')" data-cat-id="p2_ch1" class="cat-pill px-2.5 py-1 rounded-lg font-semibold bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 transition whitespace-nowrap">
-                  📊 P2 : Méthodes
-                </button>
-                <button type="button" onclick="filterCategoryPill('p2_ch2')" data-cat-id="p2_ch2" class="cat-pill px-2.5 py-1 rounded-lg font-semibold bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 transition whitespace-nowrap">
-                  📊 P2 : DSM
-                </button>
-                <button type="button" onclick="filterCategoryPill('p2_ch3')" data-cat-id="p2_ch3" class="cat-pill px-2.5 py-1 rounded-lg font-semibold bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 transition whitespace-nowrap">
-                  📊 P2 : Modèles
-                </button>
-                <button type="button" onclick="filterCategoryPill('p2_ch4')" data-cat-id="p2_ch4" class="cat-pill px-2.5 py-1 rounded-lg font-semibold bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 transition whitespace-nowrap">
-                  📊 P2 : Annonce
-                </button>
+                {{DYNAMIC_PILLS_HTML}}
               </div>
             </div>
 
@@ -453,12 +469,12 @@
               <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-3">
                 <div class="flex items-start sm:items-center gap-2.5 flex-wrap">
                   <div class="w-8 h-8 rounded-xl bg-indigo-100 text-indigo-700 font-bold text-base flex items-center justify-center shrink-0">
-                    🧠
+                    {{PART1_ICON}}
                   </div>
                   <div>
                     <div class="flex items-center gap-2 flex-wrap">
                       <span class="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-indigo-800">
-                        Partie 1 • Psychanalyse & Structures Psychopathologiques
+                        {{PART1_TITLE}}
                       </span>
                       <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200" id="count-badge-p1">0 question</span>
                     </div>
@@ -489,12 +505,12 @@
               <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-3">
                 <div class="flex items-start sm:items-center gap-2.5 flex-wrap">
                   <div class="w-8 h-8 rounded-xl bg-teal-100 text-teal-700 font-bold text-base flex items-center justify-center shrink-0">
-                    📊
+                    {{PART2_ICON}}
                   </div>
                   <div>
                     <div class="flex items-center gap-2 flex-wrap">
                       <span class="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-teal-800">
-                        Partie 2 • Approche Multidimensionnelle & DSM
+                        {{PART2_TITLE}}
                       </span>
                       <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-teal-50 text-teal-700 border border-teal-200" id="count-badge-p2">0 question</span>
                     </div>
@@ -575,7 +591,7 @@
                     Sélectionnez les sessions d'examens réelles ou lancez un sujet complet en un clic.
                   </p>
                 </div>
-                <span class="text-xs text-slate-500 font-semibold whitespace-nowrap" id="count-badge-sources-total">7 sessions</span>
+                <span class="text-xs text-slate-500 font-semibold whitespace-nowrap" id="count-badge-sources-total">{{TOTAL_SESSIONS}} sessions</span>
               </div>
 
               <div class="space-y-3 pt-1" id="sources-list-container">
@@ -609,20 +625,20 @@
                 <button type="button" onclick="setQuizCount('all')" class="count-btn py-1 text-xs font-semibold rounded-md border border-slate-300 bg-white hover:bg-slate-100 text-slate-800 transition text-center" data-val="all">Tout</button>
               </div>
               <div class="flex items-center gap-2">
-                <input type="range" id="q-count-slider" min="1" max="130" value="10"
+                <input type="range" id="q-count-slider" min="1" max="{{TOTAL_QUESTIONS}}" value="10"
                   oninput="onCustomSliderInput(this.value)"
                   aria-label="Nombre de questions"
                   class="flex-1 min-w-0 accent-indigo-600 cursor-pointer h-1.5 bg-slate-200 rounded-lg">
                 <div class="flex items-center border border-slate-300 rounded-md overflow-hidden bg-white shrink-0">
                   <button type="button" onclick="adjustQuizCount(-1)" title="Diminuer d'une question" aria-label="Diminuer" class="px-1.5 py-0.5 text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-bold text-xs transition border-r border-slate-200">−</button>
-                  <input type="number" id="q-custom-count-input" min="1" max="130" value="10"
+                  <input type="number" id="q-custom-count-input" min="1" max="{{TOTAL_QUESTIONS}}" value="10"
                     oninput="onCustomCountInput(this.value)"
                     aria-label="Nombre de questions (saisie libre)"
                     class="w-10 text-center py-0.5 text-xs font-bold text-slate-900 focus:outline-none bg-transparent">
                   <button type="button" onclick="adjustQuizCount(1)" title="Augmenter d'une question" aria-label="Augmenter" class="px-1.5 py-0.5 text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-bold text-xs transition border-l border-slate-200">+</button>
                 </div>
               </div>
-              <div class="text-[10px] text-slate-400 font-medium text-right" id="slider-max-label">Max : 130</div>
+              <div class="text-[10px] text-slate-400 font-medium text-right" id="slider-max-label">Max : {{TOTAL_QUESTIONS}}</div>
             </div>
 
             <!-- Quiz Mode Selector -->
@@ -721,6 +737,12 @@
               </span>
               <span class="text-xs text-slate-500 font-medium" id="quiz-source-badge">
                 Source : Annale
+              </span>
+              <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold border hidden" id="quiz-correction-source-badge">
+                Corrigé
+              </span>
+              <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-100 text-rose-800 border border-rose-300 hidden" id="quiz-retry-mode-badge">
+                🎯 Session erreurs
               </span>
             </div>
             <div class="text-sm font-bold text-slate-900">
@@ -842,11 +864,12 @@
 
       <!-- Question Palette / Grid Navigation -->
       <div class="card-white rounded-2xl p-4 shadow-sm">
-        <div class="flex items-center justify-between mb-3">
+        <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
           <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Palette des questions</span>
-          <div class="flex items-center gap-3 text-xs text-slate-600 font-medium flex-wrap">
-            <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-indigo-600"></span> QCM répondu</span>
-            <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> Question ouverte</span>
+          <div class="flex items-center gap-2.5 sm:gap-3 text-xs text-slate-600 font-medium flex-wrap">
+            <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-600"></span> Correct</span>
+            <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-rose-600"></span> Erreur</span>
+            <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-indigo-600"></span> Répondu</span>
             <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-slate-200 border border-slate-300"></span> En attente</span>
             <span class="flex items-center gap-1">⭐ Marquée</span>
           </div>
@@ -891,6 +914,21 @@
               <div class="text-sm font-bold text-amber-600 mt-0.5" id="res-missed-count">0</div>
             </div>
           </div>
+
+          <!-- Quick Action Banner for Missed Questions in Hero Card -->
+          <div id="res-hero-retry-banner" class="pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-center gap-2.5">
+            <button onclick="retryMissedQuestions()" id="hero-btn-retry-missed" class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs sm:text-sm shadow-sm transition flex items-center justify-center gap-2">
+              <span>🎯</span>
+              <span>Recommencer un quiz avec mes <span id="hero-retry-count">0</span> erreurs</span>
+            </button>
+            <button onclick="restartCurrentQuiz()" class="w-full sm:w-auto px-4 py-2.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs sm:text-sm transition flex items-center justify-center gap-1.5">
+              <span>🔄</span>
+              <span>Rejouer toute la série</span>
+            </button>
+          </div>
+          <div id="res-hero-perfect-badge" class="pt-3 border-t border-slate-100 text-xs font-bold text-emerald-700 hidden">
+            🎉 Félicitations ! 100% de réussite, aucune question incorrecte à retravailler.
+          </div>
         </div>
       </div>
 
@@ -919,8 +957,8 @@
           </div>
 
           <div class="space-y-2 pt-2">
-            <button onclick="retryMissedQuestions()" id="btn-retry-missed" class="w-full py-2.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs sm:text-sm font-bold shadow-xs transition flex items-center justify-center gap-2">
-              <span>🔄 Rejouer uniquement les erreurs</span>
+            <button onclick="retryMissedQuestions()" id="btn-retry-missed" class="w-full py-2.5 px-4 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs sm:text-sm font-bold shadow-xs transition flex items-center justify-center gap-2">
+              <span>🎯 Rejouer uniquement les erreurs</span>
             </button>
             <button onclick="restartCurrentQuiz()" class="w-full py-2.5 px-4 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-xs sm:text-sm font-semibold text-slate-800 transition flex items-center justify-center gap-2">
               <span>🔄 Recommencer cette série</span>
@@ -928,6 +966,10 @@
             <button onclick="navigateTab('themes')" class="w-full py-2.5 px-4 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-xs sm:text-sm font-semibold text-slate-800 transition flex items-center justify-center gap-2">
               <span>← Choisir d'autres questions</span>
             </button>
+            <a href="../index.html" class="w-full py-2.5 px-4 rounded-xl border border-slate-300 bg-slate-50 hover:bg-slate-100 text-xs sm:text-sm font-semibold text-slate-700 transition flex items-center justify-center gap-2">
+              <span>🏛️</span>
+              <span>Changer d'UE (Retour à l'accueil)</span>
+            </a>
           </div>
         </div>
 
@@ -940,6 +982,30 @@
         </h3>
         <div class="space-y-3" id="res-detailed-list">
           <!-- Dynamically populated question reviews -->
+        </div>
+      </div>
+
+      <!-- Bottom Recreate Missed Quiz Card -->
+      <div id="res-bottom-action-card" class="card-white rounded-2xl p-5 sm:p-6 shadow-sm border border-slate-200 text-center space-y-3">
+        <h4 class="text-sm font-bold text-slate-900">
+          Prêt à perfectionner votre score ?
+        </h4>
+        <p class="text-xs text-slate-600 max-w-md mx-auto">
+          Recréez instantanément un quiz ciblé contenant uniquement les questions auxquelles vous n'avez pas répondu correctement.
+        </p>
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+          <button onclick="retryMissedQuestions()" id="bottom-btn-retry-missed" class="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs sm:text-sm shadow-sm transition flex items-center justify-center gap-2">
+            <span>🎯</span>
+            <span>Recréer un quiz avec mes <span id="bottom-retry-count">0</span> erreurs</span>
+          </button>
+          <button onclick="restartCurrentQuiz()" class="w-full sm:w-auto px-4 py-2.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs sm:text-sm transition flex items-center justify-center gap-1.5">
+            <span>🔄</span>
+            <span>Rejouer toute la série</span>
+          </button>
+          <button onclick="navigateTab('themes')" class="w-full sm:w-auto px-4 py-2.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-xs sm:text-sm transition flex items-center justify-center gap-1.5">
+            <span>←</span>
+            <span>Choisir d'autres questions</span>
+          </button>
         </div>
       </div>
 
@@ -956,13 +1022,13 @@
           <div class="space-y-2 max-w-2xl">
             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-extrabold bg-indigo-100 text-indigo-800 border border-indigo-200">
               <span>📊</span>
-              <span>OBSERVATOIRE DES ANNALES (2018 - 2025)</span>
+              <span>OBSERVATOIRE DES ANNALES ({{ANNALES_YEARS_RANGE}})</span>
             </div>
             <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
               Statistiques d'Examens & Probabilités de Sortie
             </h2>
             <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
-              Analyse comparative approfondie sur <strong>7 sessions officielles</strong> (130 questions). Découvrez les questions qui retombent systématiquement aux partiels et estimez vos chances pour les <strong>2 sessions annuelles</strong> (Session 1 & Rattrapage).
+              Analyse comparative approfondie sur <strong id="stats-sessions-count-text">{{TOTAL_SESSIONS}} sessions officielles</strong> ({{TOTAL_QUESTIONS}} questions). Découvrez les questions qui retombent systématiquement aux partiels.
             </p>
           </div>
 
@@ -1004,7 +1070,7 @@
               <span class="text-base">💎</span>
             </div>
             <div class="text-2xl sm:text-3xl font-extrabold text-emerald-600" id="stats-kpi-unique-count">67</div>
-            <p class="text-[11px] text-slate-500 leading-snug">questions distinctes recensées sur 130 au total.</p>
+            <p class="text-[11px] text-slate-500 leading-snug">questions distinctes recensées sur {{TOTAL_QUESTIONS}} au total.</p>
           </div>
 
           <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs space-y-1">
@@ -1012,10 +1078,55 @@
               <span>Chapitre n°1 partiels</span>
               <span class="text-base">📘</span>
             </div>
-            <div class="text-base sm:text-lg font-bold text-slate-900 truncate" id="stats-kpi-top-chapter">Ch.3 Psychopathologie</div>
-            <p class="text-[11px] text-slate-500 leading-snug">48% des points & 6 questions présentes dans 5 des 7 examens (100% des sessions QCM).</p>
+            <div class="text-base sm:text-lg font-bold text-slate-900 truncate" id="stats-kpi-top-chapter">—</div>
+            <p class="text-[11px] text-slate-500 leading-snug" id="stats-kpi-top-chapter-desc">Enseignement le plus représenté aux examens.</p>
           </div>
         </div>
+      </div>
+
+      <!-- TEACHER ADVICE & STRATEGIC RECOMMENDATIONS CARD -->
+      <div class="card-white rounded-3xl p-5 sm:p-7 shadow-sm border border-amber-200/90 bg-gradient-to-br from-amber-50/70 via-white to-indigo-50/40 space-y-4 relative overflow-hidden">
+        
+        <!-- Header with teacher badge -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-amber-200/70 pb-3.5">
+          <div class="flex items-center gap-3">
+            <span class="w-9 h-9 rounded-xl bg-amber-100 border border-amber-300 text-amber-900 flex items-center justify-center text-lg shadow-2xs">
+              👨‍🏫
+            </span>
+            <div>
+              <h3 class="text-sm sm:text-base font-extrabold text-slate-900 flex items-center gap-2 flex-wrap">
+                <span>Le Mot de l'Enseignant • Cadrage Pédagogique & Points Clés</span>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-200/80 text-amber-900 border border-amber-300">
+                  Conseils UT2J
+                </span>
+              </h3>
+              <p class="text-xs text-slate-500">
+                Recommandations méthodologiques et analyse statistique pour cibler vos révisions d'examens
+              </p>
+            </div>
+          </div>
+          <div class="text-[11px] font-mono font-bold text-amber-900 bg-amber-100/70 px-3 py-1 rounded-lg border border-amber-200/90 self-start sm:self-auto shadow-2xs">
+            UE {{UE_CODE}} • L2 S3
+          </div>
+        </div>
+
+        <!-- Dynamic Content injected per UE -->
+        <div id="stats-teacher-advice-content" class="space-y-3.5 text-xs text-slate-700 leading-relaxed">
+          <!-- Populated by JS in renderStatsTab() -->
+        </div>
+
+        <!-- Bottom Action CTA inside Teacher Note -->
+        <div class="pt-3.5 border-t border-amber-200/70 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div class="flex items-center gap-2 text-xs text-slate-600">
+            <span>💡</span>
+            <span><strong>Règle d'or :</strong> Ne faites jamais d'impasse sur les questions à probabilité de sortie ≥ 75%.</span>
+          </div>
+          <button onclick="startTopRecurrentQuiz(75)" class="w-full sm:w-auto px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-xs transition flex items-center justify-center gap-1.5 whitespace-nowrap">
+            <span>🔥</span>
+            <span>Lancer le Quiz des Incontournables (P ≥ 75%)</span>
+          </button>
+        </div>
+
       </div>
 
       <!-- Chapter Distribution Overview & Educational Model Explanation -->
@@ -1052,23 +1163,23 @@
             <div class="space-y-2 pt-1 text-xs text-slate-600">
               <div class="flex items-start gap-2">
                 <span class="font-bold text-indigo-600">1.</span>
-                <span><strong>Fréquence empirique :</strong> nombre d'examens où la question est apparue ($k / 7$ examens analysés au total).</span>
+                <span><strong>Fréquence empirique :</strong> nombre d'examens où la question est apparue ($k / {{TOTAL_SESSIONS}}$ examens analysés au total, dont {{TOTAL_QCM_SESSIONS}} sessions QCM).</span>
               </div>
               <div class="flex items-start gap-2">
                 <span class="font-bold text-indigo-600">2.</span>
-                <span><strong>Lissage bayésien de Laplace :</strong> projection bayésienne sur les 7 examens avec bonus de récence (+5% si présente en 2024-2025).</span>
+                <span><strong>Lissage bayésien de Laplace :</strong> projection bayésienne calculée sur l'ensemble des {{TOTAL_SESSIONS}} examens avec bonus de récence (+5% si présente lors des dernières sessions).</span>
               </div>
               <div class="flex items-start gap-2">
                 <span class="font-bold text-indigo-600">3.</span>
-                <span><strong>Probabilité annuelle :</strong> chance de rencontrer la question sur au moins l'une des 2 sessions : $P = 1 - (1 - P_{	ext{session}})^2$.</span>
+                <span><strong>Probabilité annuelle :</strong> chance de rencontrer la question sur au moins l'une des 2 sessions : $P = 1 - (1 - P_{\text{session}})^2$.</span>
               </div>
             </div>
           </div>
 
           <div class="p-3 bg-white rounded-xl border border-slate-200 text-xs space-y-1">
             <span class="font-bold text-slate-800">💡 Conseil méthodologique :</span>
-            <p class="text-[11px] text-slate-500 leading-snug">
-              Les 12 questions ayant une probabilité ≥ 75% représentent statistiquement plus de 30% des points d'un sujet d'examen type !
+            <p class="text-[11px] text-slate-500 leading-snug" id="stats-conseil-text">
+              Les questions ayant une probabilité ≥ 75% représentent statistiquement une part majeure des points d'un sujet d'examen type !
             </p>
           </div>
         </div>
@@ -1138,7 +1249,7 @@
             <thead class="bg-slate-50 text-slate-600 font-bold uppercase text-[11px] border-b border-slate-200 tracking-wider">
               <tr>
                 <th class="py-3 px-3.5">Question & Chapitre</th>
-                <th class="py-3 px-3.5 text-center whitespace-nowrap">Présence (sur 7 examens)</th>
+                <th class="py-3 px-3.5 text-center whitespace-nowrap">Présence (sur {{TOTAL_SESSIONS}} examens)</th>
                 <th class="py-3 px-3.5 text-center whitespace-nowrap">Probabilité Session</th>
                 <th class="py-3 px-3.5 text-center whitespace-nowrap">Probabilité Année (2 sess.)</th>
                 <th class="py-3 px-3.5 text-right whitespace-nowrap">Action</th>
@@ -1545,8 +1656,10 @@
           matched.items.push(q);
           const doc = q.document || 'UE {{UE_CODE}}';
           if (!matched.allDocuments.includes(doc)) matched.allDocuments.push(doc);
-          // Prioritize richer option sets or explanations
-          if ((q.options || []).length > (matched.canonical.options || []).length) {
+          // Prioritize official corrections, richer option sets or explanations
+          if (q.correction_source_type === 'official' && matched.canonical.correction_source_type !== 'official') {
+            matched.canonical = q;
+          } else if ((q.options || []).length > (matched.canonical.options || []).length) {
             matched.canonical = q;
           } else if (q.explanation && (!matched.canonical.explanation || q.explanation.length > matched.canonical.explanation.length)) {
             matched.canonical = q;
@@ -1563,27 +1676,32 @@
         }
       }
 
-      // Compute statistical probabilities for each family
+      // Compute statistical probabilities for each family dynamically
+      const totalQcmSessions = new Set(QCM_DATASET.map(q => q.document).filter(Boolean)).size || 1;
+      const totalOpenSessions = new Set(OPEN_DATASET.map(q => q.document).filter(Boolean)).size || 1;
+      const totalAllSessions = (typeof OFFICIAL_DOCUMENTS !== 'undefined' ? OFFICIAL_DOCUMENTS.length : 0) || new Set([...QCM_DATASET, ...OPEN_DATASET].map(q => q.document).filter(Boolean)).size || 1;
+
       clusters.forEach(c => {
-        const k = c.allDocuments.length;
+        const k = c.allDocuments.filter(d => !d.includes('IA')).length || c.allDocuments.length;
         const isQ = c.type === 'qcm';
+        const totalSessionsForType = isQ ? totalQcmSessions : totalOpenSessions;
+        const ratio = totalSessionsForType > 0 ? (k / totalSessionsForType) : (k / totalAllSessions);
+
         let p = 0;
-        if (isQ) {
-          // 5 historical QCM sessions observed
-          if (k >= 5) p = 95;
-          else if (k === 4) p = 80;
-          else if (k === 3) p = 65;
-          else if (k === 2) p = 45;
-          else p = 22;
+        if (ratio >= 0.70 || k >= 4) {
+          p = 95;
+        } else if (ratio >= 0.50 || k === 3) {
+          p = 80;
+        } else if (ratio >= 0.30 || k === 2) {
+          p = 60;
+        } else if (ratio >= 0.15 || k === 1) {
+          p = 35;
         } else {
-          // 4 historical Open Question sessions observed
-          if (k >= 3) p = 75;
-          else if (k === 2) p = 55;
-          else p = 25;
+          p = 20;
         }
 
-        // Recency momentum: appeared in latest 2024-2025 exam
-        const hasLatest = c.allDocuments.some(d => d && d.includes('2024-2025'));
+        // Recency momentum: appeared in latest official exam
+        const hasLatest = c.allDocuments.some(d => d && (d.includes('2025-2026') || d.includes('2024-2025')));
         if (hasLatest) {
           p = Math.min(98, p + 5);
         }
@@ -1620,71 +1738,7 @@
     }
 
     // Metadata of Official Documents / Sessions
-    const OFFICIAL_DOCUMENTS = [
-      {
-        id: "doc-2024-2025-s1",
-        name: "2024-2025 – Session 1",
-        filename: "304_Annale_-_202452025_Session_1.docx",
-        format: "40 QCM",
-        year: "2024-2025",
-        session: "Session 1",
-        description: "Dernière annale officielle en date (40 QCMs complets couvrant l'ensemble du semestre)."
-      },
-      {
-        id: "doc-2023-2024-s1",
-        name: "2023-2024 – Session 1",
-        filename: "304_Annale_-_2023_2024_-_Session_1.pdf",
-        format: "20 QCM • 2 Questions ouvertes",
-        year: "2023-2024",
-        session: "Session 1",
-        description: "Épreuve complète : 20 QCMs + 2 questions rédactionnelles d'examen (P1 et P2)."
-      },
-      {
-        id: "doc-2023-2024-s2",
-        name: "2023-2024 – Session 2",
-        filename: "304_Annale_-_2023-2024_Session_2.pdf",
-        format: "3 Questions ouvertes",
-        year: "2023-2024",
-        session: "Session 2 (Rattrapage)",
-        description: "Épreuve rédactionnelle approfondie avec barèmes officiels (4 à 8 points)."
-      },
-      {
-        id: "doc-2022-2023-s1",
-        name: "2022-2023 – Session 1",
-        filename: "304_Annale_-_Examen_2022-2023_session_1.docx",
-        format: "20 QCM",
-        year: "2022-2023",
-        session: "Session 1",
-        description: "20 QCMs centrés sur la métapsychologie, les névroses, le délire et les structures psychopathologiques."
-      },
-      {
-        id: "doc-2021-2022-s1",
-        name: "2021-2022 – Session 1",
-        filename: "304_Annale_-_2021-2022_session1.pdf",
-        format: "20 QCM • 2 Questions ouvertes",
-        year: "2021-2022",
-        session: "Session 1",
-        description: "Sujet officiel avec correction détaillée des questions ouvertes (symptôme, trauma, organisation psychique)."
-      },
-      {
-        id: "doc-2020-2021-s1",
-        name: "2020-2021 – Session 1",
-        filename: "304_Annale_-_2020-2021_Session_1.pdf",
-        format: "3 Questions ouvertes",
-        year: "2020-2021",
-        session: "Session 1",
-        description: "3 questions rédactionnelles majeures (Éthique et principes cliniques, Pulsions de mort, DSM vs psychanalyse)."
-      },
-      {
-        id: "doc-2018-2019-s1",
-        name: "2018-2019 – Session 1",
-        filename: "304_Annale_-_2018-2019_Session_1.pdf",
-        format: "20 QCM",
-        year: "2018-2019",
-        session: "Session 1",
-        description: "20 QCMs avec corrigé officiel certifié (niveaux descriptif/explicatif, Schreber, perversion, etc.)."
-      }
-    ];
+    const OFFICIAL_DOCUMENTS = {{OFFICIAL_DOCUMENTS_JS}};
 
     // State
     let selectionMode = 'theme'; // 'theme' | 'source'
@@ -1910,7 +1964,55 @@
       checkAuthOnLoad();
     });
 
+    function initAiThemeSelect() {
+      const sel = document.getElementById('ai-form-theme');
+      if (!sel) return;
+      sel.innerHTML = '<option value="all">🎲 Toutes thématiques confondues</option>';
+      const allThemes = Array.from(new Set([...QCM_DATASET, ...OPEN_DATASET].map(q => q.theme))).sort();
+      allThemes.forEach(t => {
+        const opt = document.createElement('option');
+        opt.value = t;
+        opt.textContent = t;
+        sel.appendChild(opt);
+      });
+    }
+
+    function initDynamicBadges() {
+      const qcmCount = QCM_DATASET.filter(isQcm).length;
+      const openCount = OPEN_DATASET.filter(isOpen).length;
+      const totalCount = qcmCount + openCount;
+      const sessionsCount = OFFICIAL_DOCUMENTS.length;
+
+      const headerTotalEl = document.getElementById('header-total-badge');
+      if (headerTotalEl) headerTotalEl.textContent = `${totalCount} questions officielles (${qcmCount} QCM • ${openCount} Questions ouvertes)`;
+
+      const headerSessionsEl = document.getElementById('header-sessions-badge');
+      if (headerSessionsEl) headerSessionsEl.textContent = `${sessionsCount} Sessions d'Annales UT2J`;
+
+      const qcmBadgeEl = document.getElementById('badge-count-qcm-total');
+      if (qcmBadgeEl) qcmBadgeEl.textContent = `${qcmCount} QCM`;
+
+      const openBadgeEl = document.getElementById('badge-count-open-total');
+      if (openBadgeEl) openBadgeEl.textContent = `${openCount} épreuves`;
+
+      const sourcesBadgeEl = document.getElementById('count-badge-sources-total');
+      if (sourcesBadgeEl) sourcesBadgeEl.textContent = `${sessionsCount} sessions`;
+
+      const slider = document.getElementById('q-count-slider');
+      const customInput = document.getElementById('q-custom-count-input');
+      const maxLabel = document.getElementById('slider-max-label');
+      if (slider) slider.max = totalCount;
+      if (customInput) customInput.max = totalCount;
+      if (maxLabel) maxLabel.textContent = `Max : ${totalCount}`;
+
+      const statsSessionsEl = document.getElementById('stats-sessions-count-text');
+      if (statsSessionsEl) statsSessionsEl.textContent = `${sessionsCount} sessions officielles`;
+    }
+
     function initAppSelections() {
+      initAiThemeSelect();
+      initDynamicBadges();
+
       // Initialize themes
       const allUniqueThemes = new Set([...QCM_DATASET, ...OPEN_DATASET, ...getAiQuestions()].map(q => q.theme));
       selectedThemes = new Set(allUniqueThemes);
@@ -1954,13 +2056,18 @@
       const countEl = document.getElementById('modal-saved-ai-count');
       if (countEl) countEl.textContent = count;
 
-      const headerTotal = 130 + count;
-      const qcmTotal = 120 + aiList.filter(isQcm).length;
-      const openTotal = 10 + aiList.filter(isOpen).length;
+      const baseQcm = QCM_DATASET.filter(isQcm).length;
+      const baseOpen = OPEN_DATASET.filter(isOpen).length;
+      const qcmTotal = baseQcm + aiList.filter(isQcm).length;
+      const openTotal = baseOpen + aiList.filter(isOpen).length;
+      const headerTotal = qcmTotal + openTotal;
 
-      document.getElementById('header-total-badge').textContent = `${headerTotal} questions (${qcmTotal} QCM • ${openTotal} Questions ouvertes)`;
-      document.getElementById('badge-count-qcm-total').textContent = `${qcmTotal} QCM`;
-      document.getElementById('badge-count-open-total').textContent = `${openTotal} épreuves`;
+      const headerTotalEl = document.getElementById('header-total-badge');
+      if (headerTotalEl) headerTotalEl.textContent = `${headerTotal} questions (${qcmTotal} QCM • ${openTotal} Questions ouvertes)`;
+      const qcmBadgeEl = document.getElementById('badge-count-qcm-total');
+      if (qcmBadgeEl) qcmBadgeEl.textContent = `${qcmTotal} QCM`;
+      const openBadgeEl = document.getElementById('badge-count-open-total');
+      if (openBadgeEl) openBadgeEl.textContent = `${openTotal} épreuves`;
     }
 
     // Tab Navigation
@@ -2058,57 +2165,7 @@
     // ==============================================================
     // CHAPTER CATEGORIES & THEMES RENDERING
     // ==============================================================
-    const CHAPTER_CATEGORIES = [
-      {
-        id: "p1_ch1",
-        partNum: 1,
-        title: "Chapitre 1 • Repères Cliniques & Métapsychologie Freudienne",
-        description: "Définition, éthique, 1re & 2e topiques, dynamique, économique, pulsions, stades & Œdipe",
-        filterFn: (t) => t.includes('Ch.1')
-      },
-      {
-        id: "p1_ch2",
-        partNum: 1,
-        title: "Chapitre 2 • Clinique du Symptôme et le Trauma",
-        description: "Symptôme psychanalytique, causalité psychique, fixation et traumatisme",
-        filterFn: (t) => t.includes('Ch.2')
-      },
-      {
-        id: "p1_ch3",
-        partNum: 1,
-        title: "Chapitre 3 • Structures de Personnalité & Psychopathologie",
-        description: "Approche structurale, névroses (obsessionnelle), psychoses (schizophrénie, délires/paranoïa), perversion",
-        filterFn: (t) => t.includes('Ch.3')
-      },
-      {
-        id: "p2_ch1",
-        partNum: 2,
-        title: "Chapitre 1 • Démarche Clinique, Entretiens & Évaluation",
-        description: "Entretien clinique, examen psychologique, observation, relation patient-praticien",
-        filterFn: (t) => t.startsWith('P2') && (t.toLowerCase().includes('méthode') || t.toLowerCase().includes('entretien') || t.toLowerCase().includes('évaluation'))
-      },
-      {
-        id: "p2_ch2",
-        partNum: 2,
-        title: "Chapitre 2 • Classifications Diagnostiques & DSM-5",
-        description: "Histoire des classifications, DSM, approche catégorielle vs dimensionnelle, utilité et limites",
-        filterFn: (t) => t.startsWith('P2') && (t.toLowerCase().includes('dsm') || t.toLowerCase().includes('classification'))
-      },
-      {
-        id: "p2_ch3",
-        partNum: 2,
-        title: "Chapitre 3 • Modèles Multidimensionnels & Psychopathologie Développementale",
-        description: "Facteurs biopsychosociaux, facteurs de risque et de protection, trajectoires développementales",
-        filterFn: (t) => t.startsWith('P2') && (t.toLowerCase().includes('modèle') || t.toLowerCase().includes('risque') || t.toLowerCase().includes('développement'))
-      },
-      {
-        id: "p2_ch4",
-        partNum: 2,
-        title: "Chapitre 4 • Annonce Diagnostique & Psychoéducation",
-        description: "Éthique de l'annonce, alliance thérapeutique, psychoéducation et accompagnement",
-        filterFn: (t) => t.startsWith('P2') && t.toLowerCase().includes('annonce')
-      }
-    ];
+    const CHAPTER_CATEGORIES = {{CHAPTER_CATEGORIES_JS}};
 
     // Set to keep track of collapsed categories
     const collapsedCategories = new Set();
@@ -2126,7 +2183,7 @@
       }
 
       // Remove P1/P2 and Ch.X prefixes
-      clean = clean.replace(/^P[12]\s*[-–•:]\s*(?:Ch\.[0-9]+\s*)?/i, "");
+      clean = clean.replace(/^(?:P[12]\s*[-–•:]\s*)?(?:Ch\.[0-9]+\s*[-–•:]?\s*)?/i, "");
       clean = clean.replace(/^(?:Approche multidimensionnelle|Les méthodes)\s*:\s*/i, "");
       clean = clean.replace(/^[-–•:]\s*/, "").trim();
       if (clean.length > 0) {
@@ -2208,7 +2265,7 @@
 
       // AI questions
       let totalAi = 0;
-      const aiThemes = allThemes.filter(t => !t.startsWith('P1') && !t.startsWith('P2'));
+      const aiThemes = allThemes.filter(t => !CHAPTER_CATEGORIES.some(cat => cat.filterFn(t)));
       if (listAi) {
         aiThemes.forEach(theme => {
           const c = counts[theme] || { total: 0, qcm: 0, open: 0 };
@@ -2267,14 +2324,14 @@
 
       block.innerHTML = `
         <div class="category-header cursor-pointer select-none bg-slate-50/70 hover:bg-slate-100/80 p-3 sm:p-4 transition border-b border-transparent ${!isCollapsed ? 'border-slate-200/70' : ''}" 
-             onclick="toggleCategoryAccordion('${cat.id}')">
+             onclick="toggleCategoryAccordion('${cat.id}', event)">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
             <div class="flex items-start gap-2.5 flex-1 min-w-0">
               <div class="flex items-center gap-2 pt-0.5 sm:pt-0">
                 <input type="checkbox" id="cat-cb-${cat.id}" 
                   class="cat-master-checkbox h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
-                  onclick="event.stopPropagation(); toggleCategoryCheckbox('${cat.id}', this.checked)"
-                  title="Tout cocher / décocher ce chapitre">
+                  onclick="event.stopPropagation(); handleCategoryMasterClick(event, '${cat.id}')"
+                  title="Tout cocher / décocher ce chapitre (Maj + Clic pour sélectionner une série de chapitres)">
                 <span class="cat-chevron inline-flex items-center justify-center text-slate-400 ${isCollapsed ? 'is-collapsed' : ''}" id="chevron-${cat.id}">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
                 </span>
@@ -2342,8 +2399,9 @@
       card.innerHTML = `
         <label class="flex items-center gap-2.5 cursor-pointer flex-1 min-w-0">
           <input type="checkbox" value="${escapeHtml(theme)}" ${isChecked ? 'checked' : ''} 
-            onchange="onThemeCheckboxChange(this)" 
-            class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 h-4 w-4 shrink-0 cursor-pointer">
+            onclick="handleThemeCheckboxClick(event, this)" 
+            class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 h-4 w-4 shrink-0 cursor-pointer"
+            title="Cocher ce sous-thème (Maj + Clic pour sélectionner une plage)">
           ${sectionBadge}
           <span class="text-xs sm:text-sm font-medium text-slate-800 leading-snug flex-1 break-words" title="${escapeHtml(theme)}">${escapeHtml(parsed.clean)}</span>
           <div class="flex items-center gap-1 shrink-0 whitespace-nowrap">${badgesHtml}</div>
@@ -2361,36 +2419,75 @@
       return card;
     }
 
-    function onThemeCheckboxChange(cb) {
+    // Shift + Click range multi-selection tracking
+    let lastClickedCatId = null;
+    let lastClickedThemeCheckbox = null;
+
+    function handleThemeCheckboxClick(event, cb) {
+      const isChecked = cb.checked;
       const theme = cb.value;
-      if (cb.checked) {
+
+      if (event && event.shiftKey && lastClickedThemeCheckbox && lastClickedThemeCheckbox !== cb) {
+        const visibleCards = Array.from(document.querySelectorAll('#selection-view-theme .theme-card:not(.hidden)'));
+        const visibleCheckboxes = visibleCards.map(c => c.querySelector('input[type="checkbox"]')).filter(Boolean);
+        const lastIdx = visibleCheckboxes.indexOf(lastClickedThemeCheckbox);
+        const curIdx = visibleCheckboxes.indexOf(cb);
+
+        if (lastIdx !== -1 && curIdx !== -1) {
+          const start = Math.min(lastIdx, curIdx);
+          const end = Math.max(lastIdx, curIdx);
+          for (let i = start; i <= end; i++) {
+            const targetCb = visibleCheckboxes[i];
+            targetCb.checked = isChecked;
+            const t = targetCb.value;
+            if (isChecked) selectedThemes.add(t);
+            else selectedThemes.delete(t);
+            const card = targetCb.closest('.theme-card');
+            if (card) card.classList.toggle('theme-card-active', isChecked);
+          }
+          lastClickedThemeCheckbox = cb;
+          syncAllState();
+          return;
+        }
+      }
+
+      if (isChecked) {
         selectedThemes.add(theme);
       } else {
         selectedThemes.delete(theme);
       }
       const card = cb.closest('.theme-card');
       if (card) {
-        card.classList.toggle('theme-card-active', cb.checked);
+        card.classList.toggle('theme-card-active', isChecked);
       }
+      lastClickedThemeCheckbox = cb;
       syncAllState();
     }
 
-    function syncAllState() {
-      const allUniqueThemes = Array.from(new Set([...QCM_DATASET, ...OPEN_DATASET, ...getAiQuestions()].map(q => q.theme)));
+    function onThemeCheckboxChange(cb) {
+      handleThemeCheckboxClick({ shiftKey: false }, cb);
+    }
 
-      // Sync Each Category Master Checkbox & Badge
-      CHAPTER_CATEGORIES.forEach(cat => {
-        const catThemes = allUniqueThemes.filter(cat.filterFn);
-        if (catThemes.length === 0) return;
-        const selectedInCat = catThemes.filter(t => selectedThemes.has(t));
-        const cb = document.getElementById(`cat-cb-${cat.id}`);
-        const badge = document.getElementById(`cat-badge-sel-${cat.id}`);
+    function syncAllState() {
+      // 1. Sync selectedThemes from all checked theme checkboxes in DOM
+      selectedThemes = new Set(
+        Array.from(document.querySelectorAll('#selection-view-theme .theme-card input[type="checkbox"]:checked'))
+          .map(cb => cb.value)
+      );
+
+      // 2. Sync Each Category Master Checkbox & Badge from its own theme checkboxes
+      document.querySelectorAll('.category-block').forEach(block => {
+        const catId = block.dataset.catId;
+        const cb = document.getElementById(`cat-cb-${catId}`);
+        const badge = document.getElementById(`cat-badge-sel-${catId}`);
+        const themeCbs = block.querySelectorAll('.theme-card input[type="checkbox"]');
+        const checkedCbs = block.querySelectorAll('.theme-card input[type="checkbox"]:checked');
 
         if (cb) {
-          if (selectedInCat.length === catThemes.length) {
+          if (themeCbs.length > 0 && checkedCbs.length === themeCbs.length) {
             cb.checked = true;
             cb.indeterminate = false;
-          } else if (selectedInCat.length === 0) {
+          } else if (checkedCbs.length === 0) {
             cb.checked = false;
             cb.indeterminate = false;
           } else {
@@ -2400,10 +2497,10 @@
         }
 
         if (badge) {
-          badge.textContent = `${selectedInCat.length} / ${catThemes.length} thèmes`;
-          if (selectedInCat.length === catThemes.length) {
+          badge.textContent = `${checkedCbs.length} / ${themeCbs.length} thèmes`;
+          if (themeCbs.length > 0 && checkedCbs.length === themeCbs.length) {
             badge.className = 'cat-selection-badge is-full px-2 py-0.5 rounded-full text-[11px] font-bold bg-indigo-100 text-indigo-800 border border-indigo-200 whitespace-nowrap';
-          } else if (selectedInCat.length === 0) {
+          } else if (checkedCbs.length === 0) {
             badge.className = 'cat-selection-badge is-empty px-2 py-0.5 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-500 border border-slate-200 whitespace-nowrap';
           } else {
             badge.className = 'cat-selection-badge is-partial px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-200 whitespace-nowrap';
@@ -2411,69 +2508,87 @@
         }
       });
 
-      // Sync Partie 1
-      const p1Themes = allUniqueThemes.filter(t => t.startsWith('P1'));
-      const p1Selected = p1Themes.filter(t => selectedThemes.has(t));
+      // 3. Sync Partie 1
+      const p1ThemeCbs = document.querySelectorAll('#themes-list-p1 .theme-card input[type="checkbox"]');
+      const p1CheckedCbs = document.querySelectorAll('#themes-list-p1 .theme-card input[type="checkbox"]:checked');
       const statusP1 = document.getElementById('selection-status-p1');
       if (statusP1) {
-        if (p1Selected.length === p1Themes.length) {
+        if (p1ThemeCbs.length > 0 && p1CheckedCbs.length === p1ThemeCbs.length) {
           statusP1.textContent = 'Tous les sous-thèmes cochés (100%)';
-        } else if (p1Selected.length === 0) {
+        } else if (p1CheckedCbs.length === 0) {
           statusP1.textContent = 'Aucun sous-thème coché';
         } else {
-          statusP1.textContent = `${p1Selected.length} / ${p1Themes.length} sous-thèmes cochés`;
+          statusP1.textContent = `${p1CheckedCbs.length} / ${p1ThemeCbs.length} sous-thèmes cochés`;
         }
       }
 
-      // Sync Partie 2
-      const p2Themes = allUniqueThemes.filter(t => t.startsWith('P2'));
-      const p2Selected = p2Themes.filter(t => selectedThemes.has(t));
+      // 4. Sync Partie 2
+      const p2ThemeCbs = document.querySelectorAll('#themes-list-p2 .theme-card input[type="checkbox"]');
+      const p2CheckedCbs = document.querySelectorAll('#themes-list-p2 .theme-card input[type="checkbox"]:checked');
       const statusP2 = document.getElementById('selection-status-p2');
       if (statusP2) {
-        if (p2Selected.length === p2Themes.length) {
+        if (p2ThemeCbs.length > 0 && p2CheckedCbs.length === p2ThemeCbs.length) {
           statusP2.textContent = 'Tous les sous-thèmes cochés (100%)';
-        } else if (p2Selected.length === 0) {
+        } else if (p2CheckedCbs.length === 0) {
           statusP2.textContent = 'Aucun sous-thème coché';
         } else {
-          statusP2.textContent = `${p2Selected.length} / ${p2Themes.length} sous-thèmes cochés`;
+          statusP2.textContent = `${p2CheckedCbs.length} / ${p2ThemeCbs.length} sous-thèmes cochés`;
         }
       }
 
-      // Sync Selected Pill Count
+      // 5. Sync Selected Pill Count
       const pillSelCount = document.getElementById('pill-selected-count');
       if (pillSelCount) {
         pillSelCount.textContent = selectedThemes.size;
       }
 
-      // Update right panel and sticky bar summary
+      // 6. Update right panel and sticky bar summary
       updateSelectedSummary();
     }
 
-    function toggleCategoryCheckbox(catId, isChecked) {
-      const cat = CHAPTER_CATEGORIES.find(c => c.id === catId);
-      if (!cat) return;
-      const allUniqueThemes = Array.from(new Set([...QCM_DATASET, ...OPEN_DATASET, ...getAiQuestions()].map(q => q.theme)));
-      const catThemes = allUniqueThemes.filter(cat.filterFn);
-
-      catThemes.forEach(t => {
-        if (isChecked) selectedThemes.add(t);
-        else selectedThemes.delete(t);
-      });
-
+    function applyCategorySelection(catId, isChecked) {
       const block = document.querySelector(`.category-block[data-cat-id="${catId}"]`);
       if (block) {
         block.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-          if (cb.classList.contains('cat-master-checkbox')) {
-            cb.checked = isChecked;
-            cb.indeterminate = false;
-          } else {
-            cb.checked = isChecked;
-            const card = cb.closest('.theme-card');
-            if (card) card.classList.toggle('theme-card-active', isChecked);
-          }
+          cb.checked = isChecked;
+          cb.indeterminate = false;
+          const card = cb.closest('.theme-card');
+          if (card) card.classList.toggle('theme-card-active', isChecked);
         });
       }
+    }
 
+    function handleCategoryMasterClick(event, catId) {
+      const cb = document.getElementById(`cat-cb-${catId}`);
+      if (!cb) return;
+      const targetChecked = cb.checked;
+
+      if (event && event.shiftKey && lastClickedCatId && lastClickedCatId !== catId) {
+        const visibleCatBlocks = Array.from(document.querySelectorAll('#selection-view-theme .category-block:not(.hidden)'));
+        const visibleCatIds = visibleCatBlocks.map(b => b.dataset.catId);
+        const lastIdx = visibleCatIds.indexOf(lastClickedCatId);
+        const curIdx = visibleCatIds.indexOf(catId);
+
+        if (lastIdx !== -1 && curIdx !== -1) {
+          const start = Math.min(lastIdx, curIdx);
+          const end = Math.max(lastIdx, curIdx);
+          for (let i = start; i <= end; i++) {
+            applyCategorySelection(visibleCatIds[i], targetChecked);
+          }
+          lastClickedCatId = catId;
+          syncAllState();
+          return;
+        }
+      }
+
+      applyCategorySelection(catId, targetChecked);
+      lastClickedCatId = catId;
+      syncAllState();
+    }
+
+    function toggleCategoryCheckbox(catId, isChecked) {
+      applyCategorySelection(catId, isChecked);
+      lastClickedCatId = catId;
       syncAllState();
     }
 
@@ -2483,20 +2598,14 @@
 
     function launchSingleCategory(catId) {
       selectionMode = 'theme';
-      const cat = CHAPTER_CATEGORIES.find(c => c.id === catId);
-      if (!cat) return;
-      const allThemes = Array.from(new Set([...QCM_DATASET, ...OPEN_DATASET, ...getAiQuestions()].map(q => q.theme)));
-      const catThemes = allThemes.filter(cat.filterFn);
+      const block = document.querySelector(`.category-block[data-cat-id="${catId}"]`);
+      if (!block) return;
 
-      selectedThemes = new Set(catThemes);
-
-      document.querySelectorAll('#selection-view-theme input[type="checkbox"]').forEach(cb => {
-        if (!cb.classList.contains('cat-master-checkbox')) {
-          const isSel = selectedThemes.has(cb.value);
-          cb.checked = isSel;
-          const card = cb.closest('.theme-card');
-          if (card) card.classList.toggle('theme-card-active', isSel);
-        }
+      document.querySelectorAll('#selection-view-theme .theme-card input[type="checkbox"]').forEach(cb => {
+        const inThisCat = block.contains(cb);
+        cb.checked = inThisCat;
+        const card = cb.closest('.theme-card');
+        if (card) card.classList.toggle('theme-card-active', inThisCat);
       });
 
       syncAllState();
@@ -2506,15 +2615,11 @@
 
     function launchSingleTheme(themeName) {
       selectionMode = 'theme';
-      selectedThemes = new Set([themeName]);
-
-      document.querySelectorAll('#selection-view-theme input[type="checkbox"]').forEach(cb => {
-        if (!cb.classList.contains('cat-master-checkbox')) {
-          const isSel = cb.value === themeName;
-          cb.checked = isSel;
-          const card = cb.closest('.theme-card');
-          if (card) card.classList.toggle('theme-card-active', isSel);
-        }
+      document.querySelectorAll('#selection-view-theme .theme-card input[type="checkbox"]').forEach(cb => {
+        const isSel = cb.value === themeName;
+        cb.checked = isSel;
+        const card = cb.closest('.theme-card');
+        if (card) card.classList.toggle('theme-card-active', isSel);
       });
 
       syncAllState();
@@ -2523,15 +2628,8 @@
     }
 
     function togglePart(partNum, check) {
-      const prefix = partNum === 1 ? 'P1' : 'P2';
-      const allThemes = Array.from(new Set([...QCM_DATASET, ...OPEN_DATASET, ...getAiQuestions()].map(q => q.theme)));
-      const partThemes = allThemes.filter(t => t.startsWith(prefix));
-
-      partThemes.forEach(t => {
-        if (check) selectedThemes.add(t);
-        else selectedThemes.delete(t);
-      });
-
+      lastClickedCatId = null;
+      lastClickedThemeCheckbox = null;
       const container = document.getElementById(`themes-list-p${partNum}`);
       if (container) {
         container.querySelectorAll('input[type="checkbox"]').forEach(cb => {
@@ -2541,25 +2639,19 @@
           if (card) card.classList.toggle('theme-card-active', check);
         });
       }
-
       syncAllState();
     }
 
     function launchPart(partNum) {
       selectionMode = 'theme';
-      const prefix = partNum === 1 ? 'P1' : 'P2';
-      const allThemes = Array.from(new Set([...QCM_DATASET, ...OPEN_DATASET, ...getAiQuestions()].map(q => q.theme)));
-      const partThemes = allThemes.filter(t => t.startsWith(prefix));
+      const container = document.getElementById(`themes-list-p${partNum}`);
+      if (!container) return;
 
-      selectedThemes = new Set(partThemes);
-
-      document.querySelectorAll('#selection-view-theme input[type="checkbox"]').forEach(cb => {
-        if (!cb.classList.contains('cat-master-checkbox')) {
-          const isSel = selectedThemes.has(cb.value);
-          cb.checked = isSel;
-          const card = cb.closest('.theme-card');
-          if (card) card.classList.toggle('theme-card-active', isSel);
-        }
+      document.querySelectorAll('#selection-view-theme .theme-card input[type="checkbox"]').forEach(cb => {
+        const inThisPart = container.contains(cb);
+        cb.checked = inThisPart;
+        const card = cb.closest('.theme-card');
+        if (card) card.classList.toggle('theme-card-active', inThisPart);
       });
 
       syncAllState();
@@ -2567,7 +2659,20 @@
       startQuiz();
     }
 
-    function toggleCategoryAccordion(catId) {
+    function toggleCategoryAccordion(catId, event) {
+      // If Shift key is held when clicking the header, toggle selection across chapters
+      if (event && event.shiftKey) {
+        if (event.preventDefault) event.preventDefault();
+        const cb = document.getElementById(`cat-cb-${catId}`);
+        if (cb) {
+          const newChecked = !cb.checked || cb.indeterminate;
+          cb.checked = newChecked;
+          cb.indeterminate = false;
+          handleCategoryMasterClick(event, catId);
+        }
+        return;
+      }
+
       const body = document.getElementById(`cat-body-${catId}`);
       const chevron = document.getElementById(`chevron-${catId}`);
       if (!body) return;
@@ -2775,12 +2880,8 @@
     }
 
     function toggleAllThemes(check) {
-      const allThemes = Array.from(new Set([...QCM_DATASET, ...OPEN_DATASET, ...getAiQuestions()].map(q => q.theme)));
-      if (check) {
-        selectedThemes = new Set(allThemes);
-      } else {
-        selectedThemes.clear();
-      }
+      lastClickedCatId = null;
+      lastClickedThemeCheckbox = null;
       document.querySelectorAll('#selection-view-theme input[type="checkbox"]').forEach(cb => {
         cb.checked = check;
         cb.indeterminate = false;
@@ -2892,12 +2993,14 @@
     }
 
     function toggleAllSources(check) {
+      if (!check) {
+        selectedSources.clear();
+      }
       const checkboxes = document.querySelectorAll('#sources-list-container input[type="checkbox"]');
       checkboxes.forEach(cb => {
         if (cb.value) {
           cb.checked = check;
           if (check) selectedSources.add(cb.value);
-          else selectedSources.delete(cb.value);
         }
       });
       updateSelectedSummary();
@@ -3093,7 +3196,7 @@
     // ==============================================================
     // QUIZ SESSION ENGINE
     // ==============================================================
-    function startQuiz(customQuestionList = null) {
+    function startQuiz(customQuestionList = null, isRetrySession = false) {
       let pool = customQuestionList ? [...customQuestionList] : getActivePool();
       if (pool.length === 0) {
         alert("Aucune question disponible avec vos filtres actuels.");
@@ -3203,6 +3306,7 @@
         checkedState: {},
         scores: {},
         mode: currentQuizSettings.mode,
+        isRetrySession: !!isRetrySession,
         initialExamDurationSec: initialDurationSec,
         timerSeconds: initialDurationSec,
         startTime: Date.now(),
@@ -3213,7 +3317,11 @@
       renderCurrentQuestion();
       renderPalette();
       navigateTab('quiz');
-      document.getElementById('nav-quiz-label').textContent = `2. Quiz (${prepared.length})`;
+      const navLabel = document.getElementById('nav-quiz-label');
+      if (navLabel) {
+        navLabel.textContent = isRetrySession ? `2. Erreurs (${prepared.length})` : `2. Quiz (${prepared.length})`;
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     function stopTimer() {
@@ -3400,6 +3508,42 @@
         aiBadge.classList.add('hidden');
       }
 
+      // Retry mode badge
+      const retryBadge = document.getElementById('quiz-retry-mode-badge');
+      if (retryBadge) {
+        if (activeQuiz && activeQuiz.isRetrySession) {
+          retryBadge.classList.remove('hidden');
+          retryBadge.textContent = `🎯 Session erreurs (${activeQuiz.questions.length})`;
+        } else {
+          retryBadge.classList.add('hidden');
+        }
+      }
+
+      // Correction source badge
+      const corrBadge = document.getElementById('quiz-correction-source-badge');
+      if (corrBadge) {
+        const corrType = q.correction_source_type || (q.isAiGenerated ? 'ai' : 'syllabus');
+        const corrDetail = q.correction_source_detail || q.correction_source || '';
+        if (corrType === 'official') {
+          corrBadge.className = 'px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 shadow-2xs';
+          corrBadge.textContent = '✅ Corrigé officiel';
+          corrBadge.title = corrDetail ? `Source de la correction : ${corrDetail}` : 'Validé par la correction officielle UT2J';
+          corrBadge.classList.remove('hidden');
+        } else if (corrType === 'syllabus') {
+          corrBadge.className = 'px-2 py-0.5 rounded-full text-[11px] font-bold bg-blue-100 text-blue-800 border border-blue-300 shadow-2xs';
+          corrBadge.textContent = '📖 PDF du cours';
+          corrBadge.title = corrDetail ? `Source de la correction : ${corrDetail}` : 'Validé d\'après le polycopié de cours officiel';
+          corrBadge.classList.remove('hidden');
+        } else if (corrType === 'ai') {
+          corrBadge.className = 'px-2 py-0.5 rounded-full text-[11px] font-bold bg-purple-100 text-purple-800 border border-purple-300 shadow-2xs';
+          corrBadge.textContent = '🤖 Corrigé IA';
+          corrBadge.title = corrDetail ? `Source de la correction : ${corrDetail}` : 'Généré par intelligence artificielle';
+          corrBadge.classList.remove('hidden');
+        } else {
+          corrBadge.classList.add('hidden');
+        }
+      }
+
       const isQcmType = isQcm(q);
 
       if (isQcmType) {
@@ -3554,22 +3698,55 @@
           content.innerHTML = '';
           evalControls.innerHTML = '';
 
+          // Determine correction source
+          const corrType = q.correction_source_type || (q.isAiGenerated ? 'ai' : 'syllabus');
+          const corrDetail = q.correction_source_detail || q.correction_source || '';
+          let sourceBannerHtml = '';
+          if (corrType === 'official') {
+            sourceBannerHtml = `
+              <div class="flex items-start gap-2 p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-950 text-xs shadow-2xs">
+                <span class="px-2 py-0.5 rounded-md font-bold text-[11px] bg-emerald-600 text-white shrink-0">✅ Corrigé officiel</span>
+                <div class="leading-relaxed">
+                  <span class="font-semibold text-emerald-900">Origine certifiée :</span> ${escapeHtml(corrDetail || 'Document officiel de notation UT2J')}
+                </div>
+              </div>
+            `;
+          } else if (corrType === 'syllabus') {
+            sourceBannerHtml = `
+              <div class="flex items-start gap-2 p-2.5 rounded-xl bg-blue-50 border border-blue-200 text-blue-950 text-xs shadow-2xs">
+                <span class="px-2 py-0.5 rounded-md font-bold text-[11px] bg-blue-600 text-white shrink-0">📖 PDF du cours</span>
+                <div class="leading-relaxed">
+                  <span class="font-semibold text-blue-900">Origine cours :</span> Réponse validée d'après le polycopié officiel <em>${escapeHtml(corrDetail || 'Polycopié de référence')}</em>
+                </div>
+              </div>
+            `;
+          } else {
+            sourceBannerHtml = `
+              <div class="flex items-start gap-2 p-2.5 rounded-xl bg-purple-50 border border-purple-200 text-purple-950 text-xs shadow-2xs">
+                <span class="px-2 py-0.5 rounded-md font-bold text-[11px] bg-purple-600 text-white shrink-0">🤖 Corrigé IA</span>
+                <div class="leading-relaxed">
+                  <span class="font-semibold text-purple-900">Origine IA :</span> ${escapeHtml(corrDetail || 'Généré par modèle d\'intelligence artificielle')}
+                </div>
+              </div>
+            `;
+          }
+
           if (isQcm(q)) {
             feedbackBox.className = 'p-4 rounded-xl border border-indigo-200 bg-indigo-50/80 text-xs space-y-3';
             document.getElementById('quiz-feedback-title').textContent = '💡 Correction & Explication QCM';
             document.getElementById('quiz-feedback-badge').textContent = q.correct && q.correct.length > 0 ? `Réponse(s) attendue(s) : ${q.correct.join(', ')}` : 'Sujet officiel';
 
-            content.innerHTML = `<p>${escapeHtml(q.explanation || "Solution validée par les annales et corrigés officiels de l'Université Toulouse Jean Jaurès.")}</p>`;
-            document.getElementById('quiz-self-eval-label').textContent = 'Auto-évaluation QCM :';
-
-            const userScore = activeQuiz.scores[idx];
-            evalControls.innerHTML = `
-              <button onclick="setScoreForCurrent(1)" class="px-3 py-1 rounded-lg border ${userScore === 1 ? 'bg-emerald-600 text-white border-emerald-600 font-bold' : 'bg-white hover:bg-slate-50 border-slate-300 text-slate-700 font-medium'} text-xs transition">
-                ✓ 1 / 1 pt (Correct)
-              </button>
-              <button onclick="setScoreForCurrent(0)" class="px-3 py-1 rounded-lg border ${userScore === 0 ? 'bg-rose-600 text-white border-rose-600 font-bold' : 'bg-white hover:bg-slate-50 border-slate-300 text-slate-700 font-medium'} text-xs transition">
-                ✗ 0 / 1 pt (Erreur)
-              </button>
+            content.innerHTML = sourceBannerHtml + `<div class="p-3 rounded-lg bg-white/80 border border-indigo-100 text-slate-800 leading-relaxed font-normal"><p>${escapeHtml(q.explanation || "Solution validée par les annales et corrigés officiels de l'Université Toulouse Jean Jaurès.")}</p></div>`;
+            const isOk = activeQuiz.scores[idx] === 1;
+            document.getElementById('quiz-self-eval-label').textContent = 'Résultat de votre réponse :';
+            evalControls.innerHTML = isOk ? `
+              <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 text-white font-bold text-xs shadow-2xs">
+                <span>✅</span> <span>Réponse correcte (+1 pt)</span>
+              </span>
+            ` : `
+              <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-rose-600 text-white font-bold text-xs shadow-2xs">
+                <span>❌</span> <span>Réponse incorrecte (0 / 1 pt)</span>
+              </span>
             `;
           } else {
             // Open question feedback
@@ -3596,7 +3773,7 @@
                 </div>
               `;
             }
-            content.innerHTML = guidelinesHtml;
+            content.innerHTML = sourceBannerHtml + guidelinesHtml;
 
             document.getElementById('quiz-self-eval-label').textContent = `Attribuez-vous une note (sur ${q.points || 5} pts) :`;
 
@@ -3688,6 +3865,7 @@
         const btn = document.createElement('button');
         const isActive = idx === activeQuiz.currentIndex;
         const isMarked = activeQuiz.bookmarked.has(idx);
+        const isChecked = Boolean(activeQuiz.checkedState && activeQuiz.checkedState[idx]);
 
         let isAnswered = false;
         if (isQcm(q)) {
@@ -3696,9 +3874,34 @@
           isAnswered = Boolean(activeQuiz.userOpenAnswers[idx] && activeQuiz.userOpenAnswers[idx].trim());
         }
 
+        let isCorrect = false;
+        if (isChecked) {
+          if (isQcm(q)) {
+            if (activeQuiz.scores[idx] !== undefined) {
+              isCorrect = activeQuiz.scores[idx] === 1;
+            } else if (q.correct && q.correct.length > 0) {
+              const userSel = Array.from(activeQuiz.userQcmSelections[idx] || []).sort();
+              isCorrect = arraysEqual(userSel, [...q.correct].sort());
+            }
+          } else {
+            const earned = activeQuiz.scores[idx] !== undefined ? activeQuiz.scores[idx] : 0;
+            const maxPts = parseInt(q.points) || 5;
+            isCorrect = earned >= maxPts * 0.5;
+          }
+        }
+
         let btnClass = 'h-9 rounded-lg font-bold text-xs transition relative ';
 
-        if (isActive) {
+        if (isChecked) {
+          if (isCorrect) {
+            btnClass += 'bg-emerald-600 text-white hover:bg-emerald-700 shadow-xs ';
+          } else {
+            btnClass += 'bg-rose-600 text-white hover:bg-rose-700 shadow-xs ';
+          }
+          if (isActive) {
+            btnClass += 'ring-2 ring-indigo-600 ring-offset-2 ring-offset-white font-extrabold scale-105 z-10 ';
+          }
+        } else if (isActive) {
           btnClass += 'ring-2 ring-indigo-600 bg-indigo-50 text-indigo-900 ';
         } else if (isAnswered) {
           if (isOpen(q)) {
@@ -3712,6 +3915,7 @@
 
         btn.className = btnClass;
         btn.innerHTML = `${idx + 1} ${isOpen(q) ? '✍️' : ''} ${isMarked ? '<span class="absolute -top-1 -right-1 text-[10px]">⭐</span>' : ''}`;
+        btn.title = `Question ${idx + 1}${isChecked ? (isCorrect ? ' (Correct)' : ' (Erreur)') : (isAnswered ? ' (Répondu)' : ' (Non répondu)')}`;
         btn.onclick = () => jumpToQuestion(idx);
         container.appendChild(btn);
       });
@@ -3818,12 +4022,32 @@
       document.getElementById('res-correct-count').textContent = `${r.earned} / ${r.max} pts`;
       document.getElementById('res-missed-count').textContent = `${r.missedQuestions.length} épreuve${r.missedQuestions.length > 1 ? 's' : ''}`;
 
-      const btnRetry = document.getElementById('btn-retry-missed');
-      if (r.missedQuestions.length === 0) {
-        btnRetry.classList.add('hidden');
+      const missedCount = r.missedQuestions.length;
+      const heroRetryBtn = document.getElementById('hero-btn-retry-missed');
+      const heroRetryCount = document.getElementById('hero-retry-count');
+      const heroPerfectBadge = document.getElementById('res-hero-perfect-badge');
+      const bottomRetryBtn = document.getElementById('bottom-btn-retry-missed');
+      const bottomRetryCount = document.getElementById('bottom-retry-count');
+      const sidebarRetryBtn = document.getElementById('btn-retry-missed');
+
+      if (missedCount === 0) {
+        if (heroRetryBtn) heroRetryBtn.classList.add('hidden');
+        if (heroPerfectBadge) heroPerfectBadge.classList.remove('hidden');
+        if (bottomRetryBtn) bottomRetryBtn.classList.add('hidden');
+        if (sidebarRetryBtn) sidebarRetryBtn.classList.add('hidden');
       } else {
-        btnRetry.classList.remove('hidden');
-        btnRetry.querySelector('span').textContent = `🔄 Rejouer uniquement les ${r.missedQuestions.length} erreurs`;
+        if (heroRetryBtn) heroRetryBtn.classList.remove('hidden');
+        if (heroPerfectBadge) heroPerfectBadge.classList.add('hidden');
+        if (heroRetryCount) heroRetryCount.textContent = missedCount;
+
+        if (bottomRetryBtn) bottomRetryBtn.classList.remove('hidden');
+        if (bottomRetryCount) bottomRetryCount.textContent = missedCount;
+
+        if (sidebarRetryBtn) {
+          sidebarRetryBtn.classList.remove('hidden');
+          const span = sidebarRetryBtn.querySelector('span');
+          if (span) span.textContent = `🎯 Rejouer uniquement les ${missedCount} erreurs`;
+        }
       }
 
       // Theme breakdown
@@ -3903,6 +4127,11 @@
           });
           optionsHtml += '</div>';
 
+          const corrType = q.correction_source_type || (q.isAiGenerated ? 'ai' : 'syllabus');
+          const corrDetail = q.correction_source_detail || q.correction_source || '';
+          const corrBadgeText = corrType === 'official' ? '✅ Corrigé officiel' : (corrType === 'syllabus' ? '📖 PDF du cours' : '🤖 Corrigé IA');
+          const corrBadgeClass = corrType === 'official' ? 'bg-emerald-100 text-emerald-800 border-emerald-300' : (corrType === 'syllabus' ? 'bg-blue-100 text-blue-800 border-blue-300' : 'bg-purple-100 text-purple-800 border-purple-300');
+
           card.className = `p-4 sm:p-5 rounded-2xl border ${isOk ? 'border-emerald-200 bg-white' : 'border-rose-200 bg-white'} shadow-2xs space-y-3`;
           card.innerHTML = `
             <div class="flex items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
@@ -3912,6 +4141,7 @@
                 </span>
                 <span class="text-xs font-bold text-slate-800">Question ${i+1} • QCM</span>
                 ${q.document ? `<span class="px-2 py-0.5 rounded text-[11px] font-mono bg-slate-100 text-slate-600 border border-slate-200">📄 ${escapeHtml(q.document)}</span>` : ''}
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold border ${corrBadgeClass}" title="${escapeHtml(corrDetail)}">${corrBadgeText}</span>
               </div>
               <span class="px-2 py-0.5 rounded text-xs font-bold ${isOk ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'}">
                 ${isOk ? '1 / 1 pt' : '0 / 1 pt'}
@@ -3947,6 +4177,15 @@
               </div>
             </div>
 
+            <!-- Correction Source Box -->
+            <div class="p-2.5 rounded-xl ${corrType === 'official' ? 'bg-emerald-50/80 border-emerald-200 text-emerald-950' : (corrType === 'syllabus' ? 'bg-blue-50/80 border-blue-200 text-blue-950' : 'bg-purple-50/80 border-purple-200 text-purple-950')} border text-xs flex items-center justify-between gap-2 flex-wrap">
+              <span class="font-bold flex items-center gap-1.5">
+                <span>${corrType === 'official' ? '✅' : (corrType === 'syllabus' ? '📖' : '🤖')}</span>
+                <span>Origine de la correction :</span>
+              </span>
+              <span class="text-right font-medium">${escapeHtml(corrDetail || corrBadgeText)}</span>
+            </div>
+
             <div class="p-3 rounded-xl bg-indigo-50/60 border border-indigo-200 text-xs space-y-1 text-slate-800">
               <span class="font-bold text-indigo-900 flex items-center gap-1.5">
                 <span>💡</span> Explication théorique & Repères :
@@ -3964,6 +4203,10 @@
           // Open question
           const maxPts = parseInt(q.points) || 5;
           const ptsEarned = item.score;
+          const corrType = q.correction_source_type || (q.isAiGenerated ? 'ai' : 'syllabus');
+          const corrDetail = q.correction_source_detail || q.correction_source || '';
+          const corrBadgeText = corrType === 'official' ? '✅ Corrigé officiel' : (corrType === 'syllabus' ? '📖 PDF du cours' : '🤖 Corrigé IA');
+          const corrBadgeClass = corrType === 'official' ? 'bg-emerald-100 text-emerald-800 border-emerald-300' : (corrType === 'syllabus' ? 'bg-blue-100 text-blue-800 border-blue-300' : 'bg-purple-100 text-purple-800 border-purple-300');
 
           card.className = `p-4 sm:p-5 rounded-2xl border border-amber-300 bg-white shadow-2xs space-y-3`;
           card.innerHTML = `
@@ -3974,6 +4217,7 @@
                 </span>
                 <span class="text-xs font-bold text-slate-800">Question ${i+1} • ${escapeHtml(q.theme)}</span>
                 ${q.document ? `<span class="px-2 py-0.5 rounded text-[11px] font-mono bg-slate-100 text-slate-600 border border-slate-200">📄 ${escapeHtml(q.document)}</span>` : ''}
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold border ${corrBadgeClass}" title="${escapeHtml(corrDetail)}">${corrBadgeText}</span>
               </div>
               <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-200 text-amber-900 border border-amber-300">
                 ${ptsEarned} / ${maxPts} pts
@@ -3986,6 +4230,15 @@
                 <span>👤</span> Votre rédaction :
               </span>
               <p class="text-slate-800 italic whitespace-pre-wrap leading-relaxed">${escapeHtml(item.userOpenText || 'Aucun texte rédigé.')}</p>
+            </div>
+
+            <!-- Correction Source Box -->
+            <div class="p-2.5 rounded-xl ${corrType === 'official' ? 'bg-emerald-50/80 border-emerald-200 text-emerald-950' : (corrType === 'syllabus' ? 'bg-blue-50/80 border-blue-200 text-blue-950' : 'bg-purple-50/80 border-purple-200 text-purple-950')} border text-xs flex items-center justify-between gap-2 flex-wrap">
+              <span class="font-bold flex items-center gap-1.5">
+                <span>${corrType === 'official' ? '✅' : (corrType === 'syllabus' ? '📖' : '🤖')}</span>
+                <span>Origine de la correction :</span>
+              </span>
+              <span class="text-right font-medium">${escapeHtml(corrDetail || corrBadgeText)}</span>
             </div>
 
             <div class="p-3.5 rounded-xl bg-amber-50/70 border border-amber-200 text-xs space-y-1.5 text-slate-800">
@@ -4015,13 +4268,13 @@
     }
 
     function retryMissedQuestions() {
-      if (!lastResults || lastResults.missedQuestions.length === 0) return;
-      startQuiz(lastResults.missedQuestions);
+      if (!lastResults || !lastResults.missedQuestions || lastResults.missedQuestions.length === 0) return;
+      startQuiz(lastResults.missedQuestions, true);
     }
 
     function restartCurrentQuiz() {
-      if (!activeQuiz) return;
-      startQuiz(activeQuiz.questions);
+      if (!activeQuiz || !activeQuiz.questions || activeQuiz.questions.length === 0) return;
+      startQuiz(activeQuiz.questions, !!activeQuiz.isRetrySession);
     }
 
     // ==============================================================
@@ -4049,6 +4302,11 @@
       const elTopCount = document.getElementById('stats-kpi-top-count');
       if (elTopCount) elTopCount.textContent = `${topClusters.length}`;
 
+      const elConseil = document.getElementById('stats-conseil-text');
+      if (elConseil && topClusters.length > 0) {
+        elConseil.textContent = `Les ${topClusters.length} questions ayant une probabilité ≥ 75% représentent statistiquement une part majeure des points d'un sujet d'examen type !`;
+      }
+
       const elUniqueCount = document.getElementById('stats-kpi-unique-count');
       if (elUniqueCount) elUniqueCount.textContent = `${totalUnique}`;
 
@@ -4064,8 +4322,104 @@
         }
       });
       const elTopChap = document.getElementById('stats-kpi-top-chapter');
+      const elTopChapDesc = document.getElementById('stats-kpi-top-chapter-desc');
       if (elTopChap && maxCat) {
         elTopChap.textContent = maxCat.title.replace(/•.*/, '').trim();
+        if (elTopChapDesc) {
+          const pct = Math.round((maxCatOcc / (totalRaw || 1)) * 100);
+          elTopChapDesc.textContent = `Le plus représenté avec ${maxCatOcc} questions (${pct}% des annales).`;
+        }
+      }
+
+      // 2.5 Teacher Advice & Recommendations
+      const adviceContainer = document.getElementById('stats-teacher-advice-content');
+      if (adviceContainer) {
+        if ('{{UE_CODE}}' === '301') {
+          adviceContainer.innerHTML = `
+            <div class="p-3.5 rounded-xl bg-white/80 border border-amber-200/80 shadow-2xs space-y-1.5">
+              <div class="flex items-center gap-2 text-slate-900 font-bold flex-wrap">
+                <span class="px-2 py-0.5 rounded-md bg-rose-100 text-rose-800 text-[11px] font-extrabold">1. Le Chapitre Majeur (34% des annales)</span>
+                <span>La Petite Enfance de 3 à 6 ans : Pensée, Langage & Théorie de l'Esprit (Ch. 4)</span>
+              </div>
+              <p class="text-slate-600 text-xs pl-2 border-l-2 border-rose-300 leading-relaxed">
+                Avec 75 questions recensées dans les annales officielles, ce chapitre constitue le cœur des partiels de développement. Trois blocs incontournables reviennent systématiquement : la <strong>théorie de l'esprit</strong> (tâches de fausse croyance type Sally & Anne), les travaux de <strong>Bruner sur l'étayage et les formats d'interaction</strong>, et les <strong>stades du dessin enfantin selon Luquet</strong> (réalisme fortuit, manqué, intellectuel, visuel).
+              </p>
+            </div>
+
+            <div class="p-3.5 rounded-xl bg-white/80 border border-amber-200/80 shadow-2xs space-y-1.5">
+              <div class="flex items-center gap-2 text-slate-900 font-bold flex-wrap">
+                <span class="px-2 py-0.5 rounded-md bg-amber-100 text-amber-900 text-[11px] font-extrabold">2. Le Duel Théorique Central (60% des questions)</span>
+                <span>Piaget vs Vygotski vs Wallon (Ch. 1, Ch. 3 & Ch. 5)</span>
+              </div>
+              <p class="text-slate-600 text-xs pl-2 border-l-2 border-amber-300 leading-relaxed">
+                Les sujets comparent continuellement la genèse de la pensée et le rôle du <strong>langage</strong> : égocentrique chez Piaget vs d'abord social puis intériorisé ("pour soi") chez Vygotski. Maîtrisez également la <strong>Zone Proximale de Développement (ZPD)</strong>, la loi de double formation culturelle et les 4 niveaux d'explication de Willem Doise (notamment le <em>conflit sociocognitif</em> et le marquage social).
+              </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div class="p-3 rounded-xl bg-rose-50/70 border border-rose-200 space-y-1">
+                <div class="font-bold text-rose-900 flex items-center gap-1.5">
+                  <span>⚠️</span> Piège classique des copies
+                </div>
+                <p class="text-rose-800 text-[11px] leading-snug">
+                  Ne confondez pas <strong>l'erreur A-non-B</strong> de Piaget (recherche manuelle à l'emplacement A au sous-stade 4) et les découvertes de <strong>Renée Baillargeon</strong> sur la permanence de l'objet précoce (paradigme du temps de fixation et événement impossible dès 3 mois et demi).
+                </p>
+              </div>
+
+              <div class="p-3 rounded-xl bg-emerald-50/70 border border-emerald-200 space-y-1">
+                <div class="font-bold text-emerald-900 flex items-center gap-1.5">
+                  <span>🎯</span> Points assurés sur la Première Enfance (Ch. 3)
+                </div>
+                <p class="text-emerald-800 text-[11px] leading-snug">
+                  Les questions sur <strong>l'attachement selon Bowlby</strong> (modèles internes opérants, empreinte éthologique de Lorenz) et les <strong>sous-stades sensori-moteurs</strong> de Piaget (réactions circulaires, sous-stade 6 de la combinaison mentale) sont très régulières : les réviser garantit un gain de points immédiat.
+                </p>
+              </div>
+            </div>
+          `;
+        } else {
+          // UE 304 (Clinique)
+          adviceContainer.innerHTML = `
+            <div class="p-3.5 rounded-xl bg-white/80 border border-amber-200/80 shadow-2xs space-y-1.5">
+              <div class="flex items-center gap-2 text-slate-900 font-bold flex-wrap">
+                <span class="px-2 py-0.5 rounded-md bg-rose-100 text-rose-800 text-[11px] font-extrabold">1. Le Poids Lourd (38% à 40% des points)</span>
+                <span>Nosographie Psychanalytique : Schizophrénie, Névroses & Délires (Partie 1, Ch. 3)</span>
+              </div>
+              <p class="text-slate-600 text-xs pl-2 border-l-2 border-rose-300 leading-relaxed">
+                Dans toutes les annales analysées, plus d'un tiers de l'épreuve repose sur ce seul chapitre ! Les questions sur la <strong>schizophrénie</strong> (dissociation / discordance, délire paranoïde) et sur les <strong>délires chroniques systématisés</strong> (paranoïa, mécanisme interprétatif vs hallucinatoire) retombent quasiment à l'identique d'une année sur l'autre. Maîtrisez parfaitement la distinction structurale <em>névrose vs psychose</em>.
+              </p>
+            </div>
+
+            <div class="p-3.5 rounded-xl bg-white/80 border border-amber-200/80 shadow-2xs space-y-1.5">
+              <div class="flex items-center gap-2 text-slate-900 font-bold flex-wrap">
+                <span class="px-2 py-0.5 rounded-md bg-amber-100 text-amber-900 text-[11px] font-extrabold">2. Le Socle Métapsychologique (25% des points)</span>
+                <span>Topiques, Pulsions & Stades Libidinaux (Partie 1, Ch. 1)</span>
+              </div>
+              <p class="text-slate-600 text-xs pl-2 border-l-2 border-amber-300 leading-relaxed">
+                Aucune impasse possible sur la <strong>1re topique</strong> (Inconscient, Préconscient, Conscient) et les 4 composantes de la pulsion (<strong>poussée, but, source, objet</strong>). Le complexe d'Œdipe et les fixations aux stades oral, anal et phallique forment un vivier constant de questions récurrentes.
+              </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div class="p-3 rounded-xl bg-rose-50/70 border border-rose-200 space-y-1">
+                <div class="font-bold text-rose-900 flex items-center gap-1.5">
+                  <span>⚠️</span> Piège classique des copies
+                </div>
+                <p class="text-rose-800 text-[11px] leading-snug">
+                  La confusion fréquente entre les mécanismes de défense psychotiques (<strong>déni de la réalité, forclusion, clivage du Moi</strong>) et névrotiques (<strong>refoulement</strong>). L'examen sanctionne systématiquement les amalgames conceptuels.
+                </p>
+              </div>
+
+              <div class="p-3 rounded-xl bg-emerald-50/70 border border-emerald-200 space-y-1">
+                <div class="font-bold text-emerald-900 flex items-center gap-1.5">
+                  <span>🎯</span> Points rapides à capitaliser (Partie 2)
+                </div>
+                <p class="text-emerald-800 text-[11px] leading-snug">
+                  Les questions sur le <strong>DSM-5</strong> (approche catégorielle vs dimensionnelle) et sur la posture de <strong>l'entretien clinique non directif</strong> sont très constantes. Les réviser vous assure 3 à 4 points sans difficulté le jour du partiel.
+                </p>
+              </div>
+            </div>
+          `;
+        }
       }
 
       // 3. Render Chapter Breakdown Bars
@@ -4176,8 +4530,9 @@
       list.forEach(c => {
         const q = c.canonical;
         const isQ = c.type === 'qcm';
-        const docCount = c.allDocuments.length;
-        const totalExams = 7;
+        const docCount = c.allDocuments.filter(d => !d.includes('IA')).length || c.allDocuments.length;
+        const totalExams = (typeof OFFICIAL_DOCUMENTS !== 'undefined' ? OFFICIAL_DOCUMENTS.length : 0) || new Set([...QCM_DATASET, ...OPEN_DATASET].map(x => x.document).filter(Boolean)).size;
+        const typeExamsCount = isQ ? new Set(QCM_DATASET.map(x => x.document).filter(Boolean)).size : new Set(OPEN_DATASET.map(x => x.document).filter(Boolean)).size;
 
         // Format sessions badges
         const sessionPillsHtml = c.allDocuments.map(doc => {
@@ -4220,8 +4575,8 @@
           </td>
 
           <td class="py-3 px-3.5 align-top text-center whitespace-nowrap space-y-1">
-            <div class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-extrabold ${docCount >= 3 ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-slate-100 text-slate-700 border border-slate-200'}">
-              ${docCount} / 7 examen${docCount > 1 ? 's' : ''}
+            <div class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-extrabold ${docCount >= 3 ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-slate-100 text-slate-700 border border-slate-200'}" title="${docCount} apparition${docCount > 1 ? 's' : ''} sur ${totalExams} examens au total (${docCount} / ${typeExamsCount} sessions ${isQ ? 'QCM' : 'ouvertes'})">
+              ${docCount} / ${totalExams} examen${totalExams > 1 ? 's' : ''}
             </div>
             <div class="flex flex-wrap items-center justify-center gap-1 max-w-[140px] mx-auto">
               ${sessionPillsHtml}
@@ -4435,6 +4790,9 @@
         max_lines: item.max_lines || "15",
         guidelines: item.guidelines ? [...item.guidelines] : [],
         model_answer: item.model_answer || "",
+        correction_source_type: item.correction_source_type || 'ai',
+        correction_source: item.correction_source || 'Généré par IA',
+        correction_source_detail: item.correction_source_detail || 'Banque de questions IA embarquée',
         isAiGenerated: true,
         generatedAt: new Date().toISOString()
       }));
@@ -4442,7 +4800,7 @@
 
     // Gemini API Direct Fetch
     async function callGeminiApi(apiKey, type, theme, style, count) {
-      const promptText = `Tu es un enseignant universitaire en psychologie clinique et psychopathologie à l'Université Toulouse Jean Jaurès (UE {{UE_CODE}}, L2 S3).
+      const promptText = `Tu es un enseignant universitaire en {{AI_DISCIPLINE}} à l'Université Toulouse Jean Jaurès (UE {{UE_CODE}}, L2 S3).
 Génère exactement ${count} question(s) d'examen universitaire inédite(s) de type "${type === 'qcm' ? 'QCM avec propositions A-E' : 'Question ouverte rédactionnelle avec barème'}".
 Thématique : "${theme === 'all' ? 'Toutes thématiques UE{{UE_CODE}}' : theme}".
 Style : "${style}".
@@ -4496,6 +4854,9 @@ Réponds UNIQUEMENT avec un tableau JSON valide au format suivant :
         points: q.points || "5",
         max_lines: q.max_lines || "15",
         guidelines: q.guidelines || [],
+        correction_source_type: 'ai',
+        correction_source: 'Généré par IA',
+        correction_source_detail: 'Générateur Google Gemini API',
         isAiGenerated: true,
         generatedAt: new Date().toISOString()
       }));
@@ -4503,7 +4864,7 @@ Réponds UNIQUEMENT avec un tableau JSON valide au format suivant :
 
     // OpenAI API Direct Fetch
     async function callOpenAiApi(apiKey, type, theme, style, count) {
-      const promptText = `Tu es un enseignant universitaire en psychologie clinique (UE {{UE_CODE}}, UT2J).
+      const promptText = `Tu es un enseignant universitaire en {{AI_DISCIPLINE}} (UE {{UE_CODE}}, UT2J).
 Génère ${count} question(s) d'examen rigoureuse(s) au format "${type}".
 Thématique : ${theme}. Style : ${style}.
 Renvoie un objet JSON contenant une clé "questions" avec un tableau d'objets suivant le schéma requis.`;
@@ -4548,6 +4909,9 @@ Renvoie un objet JSON contenant une clé "questions" avec un tableau d'objets su
         points: q.points || "5",
         max_lines: q.max_lines || "15",
         guidelines: q.guidelines || [],
+        correction_source_type: 'ai',
+        correction_source: 'Généré par IA',
+        correction_source_detail: 'Générateur OpenAI API',
         isAiGenerated: true,
         generatedAt: new Date().toISOString()
       }));
@@ -4647,8 +5011,8 @@ Renvoie un objet JSON contenant une clé "questions" avec un tableau d'objets su
 
     // Prompt Copy & JSON Import
     function copyAiPromptTemplate() {
-      const prompt = `Tu es professeur de psychologie clinique et psychopathologie à l'Université Toulouse Jean Jaurès (UE {{UE_CODE}}, niveau L2 S3).
-Génère une série de questions d'examen universitaire inédites conformes au programme d'orientation psychanalytique.
+      const prompt = `Tu es professeur de {{AI_DISCIPLINE}} à l'Université Toulouse Jean Jaurès (UE {{UE_CODE}}, niveau L2 S3).
+{{AI_PROMPT_INSTRUCTIONS}}
 
 Réponds STRICTEMENT par un tableau JSON valide respectant cette structure exacte :
 [
@@ -4711,6 +5075,9 @@ Réponds STRICTEMENT par un tableau JSON valide respectant cette structure exact
           points: q.points || "5",
           max_lines: q.max_lines || "15",
           guidelines: q.guidelines || [],
+          correction_source_type: 'ai',
+          correction_source: 'Généré par IA',
+          correction_source_detail: 'Import JSON externe IA (ChatGPT / Claude)',
           isAiGenerated: true,
           generatedAt: new Date().toISOString()
         }));

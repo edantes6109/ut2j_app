@@ -1,0 +1,140 @@
+{
+  "parts": {
+    "part1": {
+      "icon": "🧠",
+      "title": "Partie 1 • Psychanalyse & Structures Psychopathologiques"
+    },
+    "part2": {
+      "icon": "📊",
+      "title": "Partie 2 • Approche Multidimensionnelle & DSM"
+    }
+  },
+  "categories": [
+    {
+      "id": "p1_ch1",
+      "partNum": 1,
+      "title": "Chapitre 1 • Repères Cliniques & Métapsychologie Freudienne",
+      "short_pill": "🧠 Ch.1 Métapsychologie",
+      "description": "Définition, éthique, 1re & 2e topiques, dynamique, économique, pulsions, stades & Œdipe",
+      "filter_js": "t.includes('Ch.1')"
+    },
+    {
+      "id": "p1_ch2",
+      "partNum": 1,
+      "title": "Chapitre 2 • Mécanismes de Défense, Symptôme & Trauma",
+      "short_pill": "🧠 Ch.2 Symptôme & Trauma",
+      "description": "Symptôme psychanalytique, causalité psychique, fixation et traumatisme, défenses (refoulement, clivage, projection...)",
+      "filter_js": "t.includes('Ch.2')"
+    },
+    {
+      "id": "p1_ch3",
+      "partNum": 1,
+      "title": "Chapitre 3 • Nosographie Psychanalytique : Structures de Personnalité & Psychopathologie",
+      "short_pill": "🧠 Ch.3 Psychopathologie",
+      "description": "Approche structurale, névroses (obsessionnelle), psychoses (schizophrénie, délires/paranoïa), perversion",
+      "filter_js": "t.includes('Ch.3')"
+    },
+    {
+      "id": "p2_ch1",
+      "partNum": 2,
+      "title": "Chapitre 1 • Démarche Clinique, Entretiens & Évaluation",
+      "short_pill": "📊 P2 : Méthodes",
+      "description": "Entretien clinique, examen psychologique, observation, relation patient-praticien",
+      "filter_js": "t.startsWith('P2') && (t.toLowerCase().includes('méthode') || t.toLowerCase().includes('entretien') || t.toLowerCase().includes('évaluation'))"
+    },
+    {
+      "id": "p2_ch2",
+      "partNum": 2,
+      "title": "Chapitre 2 • Classifications Diagnostiques & DSM-5",
+      "short_pill": "📊 P2 : DSM",
+      "description": "Histoire des classifications, DSM, approche catégorielle vs dimensionnelle, utilité et limites",
+      "filter_js": "t.startsWith('P2') && (t.toLowerCase().includes('dsm') || t.toLowerCase().includes('classification'))"
+    },
+    {
+      "id": "p2_ch3",
+      "partNum": 2,
+      "title": "Chapitre 3 • Modèles Multidimensionnels & Psychopathologie Développementale",
+      "short_pill": "📊 P2 : Modèles",
+      "description": "Facteurs biopsychosociaux, facteurs de risque et de protection, trajectoires développementales",
+      "filter_js": "t.startsWith('P2') && (t.toLowerCase().includes('modèle') || t.toLowerCase().includes('risque') || t.toLowerCase().includes('développement'))"
+    },
+    {
+      "id": "p2_ch4",
+      "partNum": 2,
+      "title": "Chapitre 4 • Annonce Diagnostique & Psychoéducation",
+      "short_pill": "📊 P2 : Annonce",
+      "description": "Éthique de l'annonce, alliance thérapeutique, psychoéducation et accompagnement",
+      "filter_js": "t.startsWith('P2') && t.toLowerCase().includes('annonce')"
+    }
+  ],
+  "official_documents": [
+    {
+      "id": "doc-2024-2025-s1",
+      "name": "2024-2025 – Session 1",
+      "filename": "304_Annale_-_202452025_Session_1.docx",
+      "format": "40 QCM",
+      "year": "2024-2025",
+      "session": "Session 1",
+      "description": "Dernière annale officielle en date (40 QCMs complets couvrant l'ensemble du semestre)."
+    },
+    {
+      "id": "doc-2023-2024-s1",
+      "name": "2023-2024 – Session 1",
+      "filename": "304_Annale_-_2023_2024_-_Session_1.pdf",
+      "format": "20 QCM • 2 Questions ouvertes",
+      "year": "2023-2024",
+      "session": "Session 1",
+      "description": "Épreuve complète : 20 QCMs + 2 questions rédactionnelles d'examen (P1 et P2)."
+    },
+    {
+      "id": "doc-2023-2024-s2",
+      "name": "2023-2024 – Session 2",
+      "filename": "304_Annale_-_2023-2024_Session_2.pdf",
+      "format": "3 Questions ouvertes",
+      "year": "2023-2024",
+      "session": "Session 2 (Rattrapage)",
+      "description": "Épreuve rédactionnelle approfondie avec barèmes officiels (4 à 8 points)."
+    },
+    {
+      "id": "doc-2022-2023-s1",
+      "name": "2022-2023 – Session 1",
+      "filename": "304_Annale_-_Examen_2022-2023_session_1.docx",
+      "format": "20 QCM",
+      "year": "2022-2023",
+      "session": "Session 1",
+      "description": "20 QCMs centrés sur la métapsychologie, les névroses, le délire et les structures psychopathologiques."
+    },
+    {
+      "id": "doc-2021-2022-s1",
+      "name": "2021-2022 – Session 1",
+      "filename": "304_Annale_-_2021-2022_session1.pdf",
+      "format": "20 QCM • 2 Questions ouvertes",
+      "year": "2021-2022",
+      "session": "Session 1",
+      "description": "Sujet officiel avec correction détaillée des questions ouvertes (symptôme, trauma, organisation psychique)."
+    },
+    {
+      "id": "doc-2020-2021-s1",
+      "name": "2020-2021 – Session 1",
+      "filename": "304_Annale_-_2020-2021_Session_1.pdf",
+      "format": "3 Questions ouvertes",
+      "year": "2020-2021",
+      "session": "Session 1",
+      "description": "3 questions rédactionnelles majeures (Éthique et principes cliniques, Pulsions de mort, DSM vs psychanalyse)."
+    },
+    {
+      "id": "doc-2018-2019-s1",
+      "name": "2018-2019 – Session 1",
+      "filename": "304_Annale_-_2018-2019_Session_1.pdf",
+      "format": "20 QCM",
+      "year": "2018-2019",
+      "session": "Session 1",
+      "description": "20 QCMs avec corrigé officiel certifié (niveaux descriptif/explicatif, Schreber, perversion, etc.)."
+    }
+  ],
+  "ai": {
+    "discipline": "psychologie clinique et psychopathologie",
+    "prompt_instructions": "Génère une série de questions d'examen universitaire inédites conformes au programme d'orientation psychanalytique (Partie 1) et approche multidimensionnelle/DSM (Partie 2)."
+  }
+}
+

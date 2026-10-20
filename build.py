@@ -8,7 +8,7 @@ Usage:
 Each UE folder (e.g. 304/) holds only its own content:
     ue.json                  identity: code, title, short_title, level
     data/questions_database.json, data/open_questions.json, data/embedded_ai_bank.json
-    allowed_emails.json      access list (see allowed_emails.example.json) - never committed
+    allowed_emails.json      access list (local only, never committed)
 The shared HTML/JS lives in template/app.html. The output is <UE>/index.html, and a landing
 page linking to all UEs is written to ./index.html (served by GitHub Pages).
 """
@@ -19,6 +19,7 @@ import os
 import subprocess
 import sys
 import tempfile
+import re
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 TEMPLATE_PATH = os.path.join(ROOT, "template", "app.html")
@@ -176,6 +177,7 @@ def read_allowed_users(ue_dir):
 def build_ue(code):
     ue_dir = os.path.join(ROOT, code)
     cfg = load_json(os.path.join(ue_dir, "ue.json"))
+    course_cfg = load_json(os.path.join(ue_dir, "config.json"), default={})
     data_dir = os.path.join(ue_dir, "data")
 
     qcm = load_json(os.path.join(data_dir, "questions_database.json"))
@@ -192,8 +194,74 @@ def build_ue(code):
     users = read_allowed_users(ue_dir)
     hashes = [hashlib.sha256(f"{u['email']}:{u['pin']}".encode("utf-8")).hexdigest() for u in users]
 
+    parts_cfg = course_cfg.get("parts", {})
+    categories = course_cfg.get("categories", [])
+    official_docs = course_cfg.get("official_documents", [])
+    ai_cfg = course_cfg.get("ai", {})
+
+    part1_title = parts_cfg.get("part1", {}).get("title", "Partie 1")
+    part1_icon = parts_cfg.get("part1", {}).get("icon", "🧠")
+    part2_title = parts_cfg.get("part2", {}).get("title", "Partie 2")
+    part2_icon = parts_cfg.get("part2", {}).get("icon", "📊")
+
+    # Format CHAPTER_CATEGORIES JavaScript code
+    cat_js_entries = []
+    for c in categories:
+        filter_js = c.get("filter_js")
+        if not filter_js and "filter_contains" in c:
+            conds = " || ".join([f"t.includes({json.dumps(x)})" for x in c["filter_contains"]])
+            filter_js = f"(t) => {conds}"
+        elif filter_js and not filter_js.startswith("("):
+            filter_js = f"(t) => {filter_js}"
+        entry = (
+            f"      {{\n"
+            f"        id: {json.dumps(c['id'])},\n"
+            f"        partNum: {c.get('partNum', 1)},\n"
+            f"        title: {json.dumps(c.get('title', ''))},\n"
+            f"        description: {json.dumps(c.get('description', ''))},\n"
+            f"        filterFn: {filter_js}\n"
+            f"      }}"
+        )
+        cat_js_entries.append(entry)
+    categories_js = "[\n" + ",\n".join(cat_js_entries) + "\n    ]"
+
+    # Format dynamic category pills HTML
+    pills = []
+    current_part = None
+    for cat in categories:
+        if current_part is not None and cat.get("partNum") != current_part:
+            pills.append('<span class="text-slate-300 font-light px-0.5">|</span>')
+        current_part = cat.get("partNum")
+        cid = cat['id']
+        pill_label = cat.get("short_pill", cat.get("title", ""))
+        pills.append(
+            f'<button type="button" onclick="filterCategoryPill(\'{cid}\')" data-cat-id="{cid}" '
+            f'class="cat-pill px-2.5 py-1 rounded-lg font-semibold bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 transition whitespace-nowrap">\n'
+            f'                  {html_lib.escape(pill_label)}\n'
+            f'                </button>'
+        )
+    dynamic_pills_html = '\n                '.join(pills)
+    if dynamic_pills_html:
+        dynamic_pills_html = '<span class="text-slate-300 font-light px-0.5">|</span>\n                ' + dynamic_pills_html
+
+    total_qcm_count = len(qcm)
+    total_open_count = len(open_q)
+    total_questions_count = total_qcm_count + total_open_count
+    total_sessions_count = len(official_docs)
+    total_qcm_sessions = len(set(q.get("document") for q in qcm if q.get("document")))
+    total_open_sessions = len(set(q.get("document") for q in open_q if q.get("document")))
+
+    years = []
+    for d in official_docs:
+        years.extend([int(y) for y in re.findall(r'\b(20\d\d)\b', d.get("name", ""))])
+    years_range = f"{min(years)} - {max(years)}" if years else "2018 - 2025"
+
+    ai_discipline = ai_cfg.get("discipline", cfg.get("title", f"UE {code}"))
+    ai_instructions = ai_cfg.get("prompt_instructions", "")
+
     print(f"\n=== UE {code} ===")
     print(f"   Loaded {len(qcm)} QCM, {len(open_q)} Open, {len(ai_bank)} AI bank items, {len(users)} authorized user(s).")
+    print(f"   Structure: {len(categories)} categories, {total_sessions_count} official documents ({total_qcm_sessions} QCM, {total_open_sessions} Open).")
 
     with open(TEMPLATE_PATH, "r", encoding="utf-8") as f:
         page = f.read()
@@ -203,7 +271,7 @@ def build_ue(code):
 
     def js_json(value):
         # json.dumps output is embedded in <script>: neutralise "</" so it can't close the tag.
-        return json.dumps(value).replace("</", "<\\/")
+        return json.dumps(value, ensure_ascii=False).replace("</", "<\\/")
 
     substitutions = {
         "{{QCM_DATA}}": js_json(qcm),
@@ -214,6 +282,22 @@ def build_ue(code):
         "{{UE_CODE}}": esc(code),
         "{{UE_TITLE}}": esc(cfg.get("title", f"UE {code}")),
         "{{UE_SHORT_TITLE}}": esc(cfg.get("short_title", cfg.get("title", ""))),
+        "{{PART1_TITLE}}": esc(part1_title),
+        "{{PART1_ICON}}": esc(part1_icon),
+        "{{PART2_TITLE}}": esc(part2_title),
+        "{{PART2_ICON}}": esc(part2_icon),
+        "{{CHAPTER_CATEGORIES_JS}}": categories_js,
+        "{{OFFICIAL_DOCUMENTS_JS}}": js_json(official_docs),
+        "{{DYNAMIC_PILLS_HTML}}": dynamic_pills_html,
+        "{{TOTAL_QUESTIONS}}": str(total_questions_count),
+        "{{TOTAL_QCM}}": str(total_qcm_count),
+        "{{TOTAL_OPEN}}": str(total_open_count),
+        "{{TOTAL_SESSIONS}}": str(total_sessions_count),
+        "{{TOTAL_QCM_SESSIONS}}": str(total_qcm_sessions),
+        "{{TOTAL_OPEN_SESSIONS}}": str(total_open_sessions),
+        "{{ANNALES_YEARS_RANGE}}": years_range,
+        "{{AI_DISCIPLINE}}": esc(ai_discipline),
+        "{{AI_PROMPT_INSTRUCTIONS}}": esc(ai_instructions),
     }
     for token, value in substitutions.items():
         page = page.replace(token, value)
@@ -244,7 +328,7 @@ def build_landing(ues):
         title = html_lib.escape(cfg.get("title", f"UE {code}"))
         level = html_lib.escape(cfg.get("level", ""))
         cards.append(
-            f'<a class="card" href="./{html_lib.escape(code)}/">'
+            f'<a class="card" href="./{html_lib.escape(code)}/index.html">'
             f'<span class="badge">UE {html_lib.escape(code)}</span>'
             f'<span class="title">{title}</span>'
             f'<span class="level">{level}</span></a>'
@@ -258,7 +342,7 @@ def build_landing(ues):
   <title>Révisions QCM • UT2J</title>
   <script>
     // Backward compatibility: old magic links pointed at the site root.
-    if (/[?&]email=/.test(location.search)) location.replace('./{html_lib.escape(ues[0])}/' + location.search);
+    if (/[?&]email=/.test(location.search)) location.replace('./{html_lib.escape(ues[0])}/index.html' + location.search);
   </script>
   <style>
     :root {{ color-scheme: light dark; --bg:#f8fafc; --fg:#0f172a; --muted:#64748b; --card:#ffffff; --border:#e2e8f0; --accent:#4f46e5; }}
@@ -303,7 +387,7 @@ def main():
             sys.exit(f"❌ Unknown UE '{code}'. Available: {', '.join(available)}")
     for code in (requested or available):
         build_ue(code)
-    build_landing(available)
+    build_landing(requested or available)
 
 
 if __name__ == "__main__":

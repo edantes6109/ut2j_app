@@ -1,6 +1,6 @@
 # Security & Privacy: keep personal data, course documents and raw databases local only
 # (applies to every UE folder: 304/, 301/, ...)
-*/allowed_emails.json
+*/allowed_emails*.json
 */docs/
 */data/
 
