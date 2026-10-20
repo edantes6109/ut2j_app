@@ -325,53 +325,250 @@ def build_landing(ues):
     cards = []
     for code in ues:
         cfg = load_json(os.path.join(ROOT, code, "ue.json"))
+        course_cfg = load_json(os.path.join(ROOT, code, "config.json"), default={})
+        data_dir = os.path.join(ROOT, code, "data")
+        qcm = load_json(os.path.join(data_dir, "questions_database.json"), default=[])
+        open_q = load_json(os.path.join(data_dir, "open_questions.json"), default=[])
+        total_q = len(qcm) + len(open_q)
+        official_docs = course_cfg.get("official_documents", [])
+        total_sessions = len(official_docs) or len(set(q.get("document") for q in qcm + open_q if q.get("document")))
+
         title = html_lib.escape(cfg.get("title", f"UE {code}"))
-        level = html_lib.escape(cfg.get("level", ""))
-        cards.append(
-            f'<a class="card" href="./{html_lib.escape(code)}/index.html">'
-            f'<span class="badge">UE {html_lib.escape(code)}</span>'
-            f'<span class="title">{title}</span>'
-            f'<span class="level">{level}</span></a>'
-        )
-    page = f"""<!DOCTYPE html>
+        level = html_lib.escape(cfg.get("level", "L2 Psychologie"))
+        icon = "👶" if code == "301" else ("🧠" if code == "304" else "📚")
+
+        cards.append(f"""
+      <a class="card" href="./{html_lib.escape(code)}/index.html">
+        <div class="card-header">
+          <span class="badge">UE {html_lib.escape(code)}</span>
+          <span class="icon">{icon}</span>
+        </div>
+        <div class="title">{title}</div>
+        <div class="meta">
+          <span>{level}</span> • <span>{total_q} questions</span> • <span>{total_sessions} sessions d'annales</span>
+        </div>
+        <div class="action">
+          <span>Accéder aux révisions</span>
+          <span>→</span>
+        </div>
+      </a>
+        """.strip())
+
+    cards_html = "\n".join("      " + c for c in cards).strip()
+    page = """<!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow, noarchive">
   <title>Révisions QCM • UT2J</title>
-  <script>
-    // Backward compatibility: old magic links pointed at the site root.
-    if (/[?&]email=/.test(location.search)) location.replace('./{html_lib.escape(ues[0])}/index.html' + location.search);
-  </script>
   <style>
-    :root {{ color-scheme: light dark; --bg:#f8fafc; --fg:#0f172a; --muted:#64748b; --card:#ffffff; --border:#e2e8f0; --accent:#4f46e5; }}
-    @media (prefers-color-scheme: dark) {{ :root {{ --bg:#0b1220; --fg:#e2e8f0; --muted:#94a3b8; --card:#1e293b; --border:#334155; --accent:#a5b4fc; }} }}
-    * {{ box-sizing: border-box; }}
-    body {{ margin:0; min-height:100vh; background:var(--bg); color:var(--fg); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; padding:2rem 1rem; }}
-    main {{ max-width: 42rem; margin: 0 auto; }}
-    h1 {{ font-size:1.6rem; margin:0 0 .25rem; }}
-    p.sub {{ color:var(--muted); margin:0 0 1.5rem; }}
-    .grid {{ display:grid; gap:.9rem; }}
-    .card {{ display:flex; flex-direction:column; gap:.3rem; padding:1.1rem 1.25rem; background:var(--card); border:1px solid var(--border); border-radius:1rem; text-decoration:none; color:inherit; transition:transform .12s, border-color .12s; }}
-    .card:hover, .card:focus-visible {{ transform:translateY(-2px); border-color:var(--accent); outline:none; }}
-    .badge {{ align-self:flex-start; font-size:.72rem; font-weight:700; padding:.15rem .6rem; border-radius:999px; background:var(--accent); color:#fff; }}
-    @media (prefers-color-scheme: dark) {{ .badge {{ color:#0b1220; }} }}
-    .title {{ font-weight:700; font-size:1.05rem; }}
-    .level {{ color:var(--muted); font-size:.85rem; }}
+    :root {
+      color-scheme: light dark;
+      --bg: #f8fafc;
+      --fg: #0f172a;
+      --muted: #64748b;
+      --card: #ffffff;
+      --card-hover: #f8fafc;
+      --border: #e2e8f0;
+      --border-hover: #6366f1;
+      --accent: #4f46e5;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0b1220;
+        --fg: #e2e8f0;
+        --muted: #94a3b8;
+        --card: #1e293b;
+        --card-hover: #243247;
+        --border: #334155;
+        --border-hover: #818cf8;
+        --accent: #818cf8;
+      }
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      padding: 2.5rem 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    main {
+      width: 100%;
+      max-width: 44rem;
+    }
+    header {
+      margin-bottom: 2rem;
+      text-align: left;
+    }
+    h1 {
+      font-size: 1.85rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.35rem;
+    }
+    p.sub {
+      color: var(--muted);
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+    .user-pill {
+      display: none;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+      padding: 0.35rem 0.85rem;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      background: rgba(99, 102, 241, 0.1);
+      color: var(--accent);
+      border: 1px solid rgba(99, 102, 241, 0.25);
+      width: fit-content;
+    }
+    .grid {
+      display: grid;
+      gap: 1.25rem;
+    }
+    .card {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      padding: 1.35rem 1.6rem;
+      background: var(--card);
+      border: 1.5px solid var(--border);
+      border-radius: 1.25rem;
+      text-decoration: none;
+      color: inherit;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    }
+    .card:hover, .card:focus-visible {
+      transform: translateY(-2px);
+      border-color: var(--border-hover);
+      box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.15);
+      background: var(--card-hover);
+      outline: none;
+    }
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .badge {
+      font-size: 0.75rem;
+      font-weight: 800;
+      padding: 0.2rem 0.7rem;
+      border-radius: 999px;
+      background: var(--accent);
+      color: #fff;
+      letter-spacing: 0.03em;
+    }
+    .icon {
+      font-size: 1.6rem;
+    }
+    .title {
+      font-weight: 800;
+      font-size: 1.15rem;
+      line-height: 1.35;
+    }
+    .meta {
+      color: var(--muted);
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+    .action {
+      margin-top: 0.4rem;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+    footer {
+      margin-top: 3rem;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.75rem;
+    }
   </style>
 </head>
 <body>
   <main>
-    <h1>📚 Révisions QCM</h1>
-    <p class="sub">Choisissez votre unité d'enseignement.</p>
+    <header>
+      <h1>📚 Révisions QCM • UT2J</h1>
+      <p class="sub">Choisissez votre unité d'enseignement pour commencer l'entraînement.</p>
+      <div id="user-session-badge" class="user-pill">
+        <span>👤</span>
+        <span>Connecté : <strong id="user-email-text" style="font-family: monospace;"></strong></span>
+        <button onclick="clearSession(event)" style="margin-left: 0.4rem; background: none; border: none; color: inherit; text-decoration: underline; cursor: pointer; font-size: inherit;">(Déconnexion)</button>
+      </div>
+    </header>
+
     <div class="grid">
-      {chr(10).join('      ' + c for c in cards).strip()}
+      {{CARDS}}
     </div>
+
+    <footer>
+      Université Toulouse Jean Jaurès • Psychologie L2 S3
+    </footer>
   </main>
+
+  <script>
+    function clearSession(e) {
+      if (e) e.preventDefault();
+      try {
+        localStorage.removeItem('ut2j_auth_email');
+        localStorage.removeItem('ut2j_auth_pin');
+        localStorage.removeItem('ue301_auth_email');
+        localStorage.removeItem('ue301_auth_pin');
+        localStorage.removeItem('ue304_auth_email');
+        localStorage.removeItem('ue304_auth_pin');
+      } catch (err) {}
+      window.location.href = window.location.pathname;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      let email = urlParams.get('email') || 
+                  localStorage.getItem('ut2j_auth_email') || 
+                  localStorage.getItem('ue304_auth_email') || 
+                  localStorage.getItem('ue301_auth_email') || '';
+      let pin = urlParams.get('pin') || 
+                localStorage.getItem('ut2j_auth_pin') || 
+                localStorage.getItem('ue304_auth_pin') || 
+                localStorage.getItem('ue301_auth_pin') || '';
+
+      if (email && pin) {
+        try {
+          localStorage.setItem('ut2j_auth_email', email);
+          localStorage.setItem('ut2j_auth_pin', pin);
+        } catch (e) {}
+
+        // Forward credentials to cards
+        document.querySelectorAll('a.card').forEach(a => {
+          const href = a.getAttribute('href');
+          const cleanHref = href.split('?')[0];
+          a.href = cleanHref + '?email=' + encodeURIComponent(email) + '&pin=' + encodeURIComponent(pin);
+        });
+
+        const badge = document.getElementById('user-session-badge');
+        const userSpan = document.getElementById('user-email-text');
+        if (badge && userSpan) {
+          userSpan.textContent = email;
+          badge.style.display = 'inline-flex';
+        }
+      }
+    });
+  </script>
 </body>
 </html>
-"""
+""".replace("{{CARDS}}", cards_html)
     with open(os.path.join(ROOT, "index.html"), "w", encoding="utf-8") as f:
         f.write(page)
     print(f"\nGenerated landing page index.html listing: {', '.join(ues)}")

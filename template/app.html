@@ -236,7 +236,7 @@
       </form>
 
       <div class="pt-3 border-t border-slate-100 flex flex-col items-center gap-2 text-[11px] text-slate-500">
-        <a href="../index.html" class="inline-flex items-center gap-1.5 font-bold text-indigo-600 hover:text-indigo-800 hover:underline transition">
+        <a href="../index.html" onclick="goToHub(event)" class="inline-flex items-center gap-1.5 font-bold text-indigo-600 hover:text-indigo-800 hover:underline transition">
           <span>←</span>
           <span>Choisir une autre UE (Page d'accueil)</span>
         </a>
@@ -256,7 +256,7 @@
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-4 border-b border-slate-200">
       <div>
         <div class="flex items-center gap-2 flex-wrap">
-          <a href="../index.html" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-white hover:bg-slate-50 text-slate-700 hover:text-indigo-600 border border-slate-300 hover:border-indigo-300 shadow-2xs transition group" title="Retourner à la page d'accueil pour choisir votre unité d'enseignement">
+          <a href="../index.html" onclick="goToHub(event)" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-white hover:bg-slate-50 text-slate-700 hover:text-indigo-600 border border-slate-300 hover:border-indigo-300 shadow-2xs transition group" title="Retourner à la page d'accueil pour choisir votre unité d'enseignement">
             <span class="group-hover:-translate-x-0.5 transition-transform">←</span>
             <span>Changer d'UE</span>
           </a>
@@ -966,7 +966,7 @@
             <button onclick="navigateTab('themes')" class="w-full py-2.5 px-4 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-xs sm:text-sm font-semibold text-slate-800 transition flex items-center justify-center gap-2">
               <span>← Choisir d'autres questions</span>
             </button>
-            <a href="../index.html" class="w-full py-2.5 px-4 rounded-xl border border-slate-300 bg-slate-50 hover:bg-slate-100 text-xs sm:text-sm font-semibold text-slate-700 transition flex items-center justify-center gap-2">
+            <a href="../index.html" onclick="goToHub(event)" class="w-full py-2.5 px-4 rounded-xl border border-slate-300 bg-slate-50 hover:bg-slate-100 text-xs sm:text-sm font-semibold text-slate-700 transition flex items-center justify-center gap-2">
               <span>🏛️</span>
               <span>Changer d'UE (Retour à l'accueil)</span>
             </a>
@@ -1883,6 +1883,17 @@
       }
     }
 
+    function goToHub(e) {
+      if (e) e.preventDefault();
+      const email = currentUserEmail || localStorage.getItem('ue{{UE_CODE}}_auth_email') || localStorage.getItem('ut2j_auth_email') || '';
+      const pin = localStorage.getItem('ue{{UE_CODE}}_auth_pin') || localStorage.getItem('ut2j_auth_pin') || '';
+      let target = '../index.html';
+      if (email && pin) {
+        target += '?email=' + encodeURIComponent(email) + '&pin=' + encodeURIComponent(pin);
+      }
+      window.location.href = target;
+    }
+
     function handleAuthSubmit(e) {
       e.preventDefault();
       const emailInput = document.getElementById('auth-email-input');
@@ -1896,6 +1907,8 @@
         try {
           localStorage.setItem('ue{{UE_CODE}}_auth_email', email);
           localStorage.setItem('ue{{UE_CODE}}_auth_pin', pin);
+          localStorage.setItem('ut2j_auth_email', email);
+          localStorage.setItem('ut2j_auth_pin', pin);
         } catch (err) {}
         if (errorMsg) errorMsg.classList.add('hidden');
         unlockAppInterface(email);
@@ -1912,6 +1925,8 @@
         try {
           localStorage.removeItem('ue{{UE_CODE}}_auth_email');
           localStorage.removeItem('ue{{UE_CODE}}_auth_pin');
+          localStorage.removeItem('ut2j_auth_email');
+          localStorage.removeItem('ut2j_auth_pin');
         } catch (e) {}
         window.location.href = window.location.pathname;
       }
@@ -1926,6 +1941,8 @@
         if (urlEmail && urlPin && isCredentialsAuthorized(urlEmail, urlPin)) {
           localStorage.setItem('ue{{UE_CODE}}_auth_email', urlEmail);
           localStorage.setItem('ue{{UE_CODE}}_auth_pin', urlPin);
+          localStorage.setItem('ut2j_auth_email', urlEmail);
+          localStorage.setItem('ut2j_auth_pin', urlPin);
           try {
             window.history.replaceState({}, document.title, window.location.pathname);
           } catch (e) {}
@@ -1936,8 +1953,8 @@
 
       // 2. Mémorisation locale (LocalStorage)
       try {
-        const savedEmail = normalizeAuthEmail(localStorage.getItem('ue{{UE_CODE}}_auth_email'));
-        const savedPin = normalizeAuthPin(localStorage.getItem('ue{{UE_CODE}}_auth_pin'));
+        const savedEmail = normalizeAuthEmail(localStorage.getItem('ue{{UE_CODE}}_auth_email') || localStorage.getItem('ut2j_auth_email'));
+        const savedPin = normalizeAuthPin(localStorage.getItem('ue{{UE_CODE}}_auth_pin') || localStorage.getItem('ut2j_auth_pin'));
         if (savedEmail && savedPin && isCredentialsAuthorized(savedEmail, savedPin)) {
           unlockAppInterface(savedEmail);
           return;
