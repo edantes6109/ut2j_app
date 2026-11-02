@@ -1,0 +1,169 @@
+{
+  "parts": {
+    "part1": {
+      "icon": "👶",
+      "title": "Partie 1 • Fondements & Première Enfance (0 à 3 ans)"
+    },
+    "part2": {
+      "icon": "🧠",
+      "title": "Partie 2 • Petite Enfance, Enfance & Adolescence (3 à 12 ans)"
+    }
+  },
+  "categories": [
+    {
+      "id": "ch1",
+      "partNum": 1,
+      "title": "Chapitre 1 • Introduction Historique, Épistémologique & Méthodologique",
+      "short_pill": "👶 Ch.1 : Épistémologie",
+      "description": "Définitions, débats endogène/social, Vygotski, Wallon, Piaget, Bruner, Bronfenbrenner, Doise, méthodes de recueil",
+      "filter_js": "t.includes('Ch. 1') || t.includes('Ch.1')"
+    },
+    {
+      "id": "ch2",
+      "partNum": 1,
+      "title": "Chapitre 2 • La Vie Prénatale & le Nouveau-Né",
+      "short_pill": "🍼 Ch.2 : Prénatal & Nouveau-né",
+      "description": "Période fœtale, motricité, compétences sensorielles (vision, audition, goût/odorat), réflexes archaïques",
+      "filter_js": "t.includes('Ch. 2') || t.includes('Ch.2')"
+    },
+    {
+      "id": "ch3",
+      "partNum": 1,
+      "title": "Chapitre 3 • La Première Enfance (0 à 3 ans)",
+      "short_pill": "🧸 Ch.3 : 0-3 ans (Sensori-moteur)",
+      "description": "Développement perceptif, moteur, intelligence sensori-motrice (Piaget), attachement (Bowlby), construction de la personne",
+      "filter_js": "t.includes('Ch. 3') || t.includes('Ch.3')"
+    },
+    {
+      "id": "ch4",
+      "partNum": 2,
+      "title": "Chapitre 4 • La Petite Enfance (3 à 6 ans)",
+      "short_pill": "🎨 Ch.4 : 3-6 ans (Langage & Esprit)",
+      "description": "Stade du personnalisme (Wallon), pensée préopératoire, théorie de l'esprit, acquisition du langage, dessin enfantin (Luquet)",
+      "filter_js": "t.includes('Ch. 4') || t.includes('Ch.4')"
+    },
+    {
+      "id": "ch5",
+      "partNum": 2,
+      "title": "Chapitre 5 • L'Enfance (6 à 12 ans) & l'Adolescence",
+      "short_pill": "🧩 Ch.5 : 6-12 ans (Opératoire & Social)",
+      "description": "Pensée opératoire concrète, épreuves de conservation, Vygotski (ZPD, concepts), conflit sociocognitif, jugement moral, relations d'amitié",
+      "filter_js": "t.includes('Ch. 5') || t.includes('Ch.5')"
+    }
+  ],
+  "official_documents": [
+    {
+      "id": "doc-2025-2026-cc2",
+      "name": "2025-2026 – CC2 et CT SED",
+      "filename": "Examen_CC2_CT_SED_PY00301T_2025-2026.docx (+ annale_301_2025_2026_session1.csv)",
+      "format": "20 QCM",
+      "year": "2025-2026",
+      "session": "Session 1 (CC2 / CT SED)",
+      "description": "Dernière annale officielle avec clé de correction certifiée (20 QCMs : Doise, Vygotski, réflexes, Wallon...)."
+    },
+    {
+      "id": "doc-2024-2025-2nd",
+      "name": "2024-2025 – Seconde chance SED",
+      "filename": "Examen_Seconde_Chance_PY00301T_2025-2026.docx (+ correction 2nd chance dev 2025.docx.pdf)",
+      "format": "20 QCM",
+      "year": "2024-2025",
+      "session": "Session 2 (Seconde chance SED)",
+      "description": "Épreuve officielle de seconde chance avec corrigé officiel (20 QCMs : concepts, Piaget, Luquet, Doise)."
+    },
+    {
+      "id": "doc-2024-2025-cc2",
+      "name": "2024-2025 – CC2 et CT SED",
+      "filename": "Examen PY0301T - Psychologie du Développement (2024-2025).pdf (+ Annal dev L2 2025-1/2/3.jpg)",
+      "format": "20 QCM",
+      "year": "2024-2025",
+      "session": "Session 1 (CC2 / CT SED)",
+      "description": "Épreuve complète CC2 et CT SED (20 QCMs : sous-stade 6 Piaget, théorie de l'esprit, conflit sociocognitif)."
+    },
+    {
+      "id": "doc-2023-2024-s2",
+      "name": "2023-2024 – Session 2",
+      "filename": "Examen PY00301T - Psychologie du développement (2023-2024).pdf (+ IMG-20250109-WA0004/5/6.jpg)",
+      "format": "20 QCM",
+      "year": "2023-2024",
+      "session": "Session 2 (Rattrapage)",
+      "description": "Épreuve officielle de rattrapage Session 2 (20 QCMs complets)."
+    },
+    {
+      "id": "doc-2023-2024-s1",
+      "name": "2023-2024 – Session 1",
+      "filename": "Annale 301 - 2023_2024 - Session 1.pdf (+ _CORRECTION.pdf)",
+      "format": "20 QCM",
+      "year": "2023-2024",
+      "session": "Session 1",
+      "description": "Épreuve officielle avec document de correction officiel (20 QCMs)."
+    },
+    {
+      "id": "doc-2021-2022-s1",
+      "name": "2021-2022 – Session 1",
+      "filename": "Annale 301 - 2021-2022_Session_1.pdf",
+      "format": "20 QCM",
+      "year": "2021-2022",
+      "session": "Session 1",
+      "description": "Annale officielle UT2J (20 QCMs : Wallon, stades piagétiens, Bruner, Vygotski)."
+    },
+    {
+      "id": "doc-2020-2021",
+      "name": "2020-2021",
+      "filename": "Annale 301_2020-2021.pdf",
+      "format": "22 QCM",
+      "year": "2020-2021",
+      "session": "Session 1 & 2",
+      "description": "Annale officielle complète (22 QCMs couvrant l'ensemble du programme)."
+    },
+    {
+      "id": "doc-2018-2019-s2",
+      "name": "2018-2019 – Session 2",
+      "filename": "Annale 301 - 2018-2019 Session 2.pdf",
+      "format": "9 QCM",
+      "year": "2018-2019",
+      "session": "Session 2",
+      "description": "Sujet officiel de rattrapage (9 QCMs ciblés)."
+    },
+    {
+      "id": "doc-2016-2017-s2",
+      "name": "2016-2017 – Session 2",
+      "filename": "Annale 301 - 2016-2017.pdf",
+      "format": "20 QCM",
+      "year": "2016-2017",
+      "session": "Session 2",
+      "description": "Annale historique d'examen (20 QCMs fondamentaux)."
+    },
+    {
+      "id": "doc-2016-2017-s1",
+      "name": "2016-2017 – Session 1",
+      "filename": "Annale 301 - 2016-2017 Session 1.pdf",
+      "format": "20 QCM",
+      "year": "2016-2017",
+      "session": "Session 1",
+      "description": "Annale historique d'examen (20 QCMs avec corrigé)."
+    },
+    {
+      "id": "doc-exemple-sorsana",
+      "name": "Exemple de sujet d'examen (C. Sorsana)",
+      "filename": "Exemple_sujet_examen_QCM.docx (+ .pdf, UE301_Corrige_Sujet_Examen.docx)",
+      "format": "20 QCM",
+      "year": "Modèle",
+      "session": "Sujet d'entraînement",
+      "description": "Sujet modèle fourni par la responsable pédagogique C. Sorsana avec corrigé explicatif officiel."
+    },
+    {
+      "id": "doc-questions-ouvertes",
+      "name": "Questions Ouvertes Types – UE301",
+      "filename": "PY00301T_SI-26-27.pdf (Syllabus officiel)",
+      "format": "10 Questions ouvertes",
+      "year": "Entraînement",
+      "session": "Questions rédactionnelles",
+      "description": "10 questions ouvertes types basées sur le syllabus avec critères d'évaluation et corrigés modèles."
+    }
+  ],
+  "ai": {
+    "discipline": "psychologie du développement",
+    "prompt_instructions": "Questions conformes aux exigences du cours de Psychologie du Développement de la période fœtale à l'adolescence (Piaget, Wallon, Vygotski, Bruner, Bowlby, Luquet, Doise, méthodes de recherche, réflexes archaïques, théorie de l'esprit, acquisition du langage, conflit sociocognitif)."
+  }
+}
+

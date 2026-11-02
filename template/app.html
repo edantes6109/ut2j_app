@@ -539,24 +539,45 @@
               </div>
             </div>
 
-            <!-- Custom AI Questions Theme Category -->
-            <div class="card-white rounded-2xl p-4 sm:p-5 shadow-sm space-y-3 hidden border-t-4 border-t-purple-600" id="card-themes-ai">
-              <div class="flex items-center justify-between border-b border-slate-200 pb-2">
-                <div class="flex items-center gap-2.5">
+            <!-- AI Generated Questions Section (by Parts & Chapters) -->
+            <div class="card-white rounded-2xl p-4 sm:p-5 shadow-sm space-y-4 border-t-4 border-t-purple-600" id="card-themes-ai">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-3">
+                <div class="flex items-start sm:items-center gap-2.5 flex-wrap">
                   <div class="w-8 h-8 rounded-xl bg-purple-100 text-purple-700 font-bold text-base flex items-center justify-center shrink-0">
                     ✨
                   </div>
                   <div>
-                    <span class="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-purple-800">
-                      Questions Générées par IA (Banque Personnalisée)
-                    </span>
-                    <div class="text-[11px] text-slate-500 font-medium">Questions inédites stockées en local</div>
+                    <div class="flex items-center gap-2 flex-wrap">
+                      <span class="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-purple-800">
+                        Questions Générées par IA • Par Partie &amp; Chapitre
+                      </span>
+                      <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-purple-50 text-purple-700 border border-purple-200" id="count-badge-ai">0 question IA</span>
+                    </div>
+                    <div class="text-[11px] text-slate-500 font-medium mt-0.5" id="selection-status-ai">
+                      Toutes les questions IA sélectionnées
+                    </div>
                   </div>
                 </div>
-                <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-purple-50 text-purple-700 border border-purple-200" id="count-badge-ai">0 question</span>
+                <div class="flex items-center gap-1.5 self-start sm:self-center flex-wrap">
+                  <button type="button" onclick="toggleAllAiQuestions(true)" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 transition">
+                    Tout cocher IA
+                  </button>
+                  <button type="button" onclick="toggleAllAiQuestions(false)" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-white hover:bg-slate-50 text-slate-600 border border-slate-200 transition">
+                    Décocher
+                  </button>
+                  <button type="button" onclick="launchAllAiQuestions()" id="btn-launch-ai" class="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-purple-600 hover:bg-purple-700 text-white transition shadow-2xs flex items-center gap-1.5">
+                    <span>🎯</span> <span>Lancer IA</span>
+                  </button>
+                </div>
               </div>
-              <div class="space-y-1.5" id="themes-list-ai">
-                <!-- Dynamically populated -->
+              <div id="ai-disabled-banner" class="hidden bg-amber-50 border border-amber-200 rounded-xl px-3.5 py-2.5 flex items-center justify-between gap-2 text-xs text-amber-900">
+                <span class="font-medium">⚠️ Les questions IA sont exclues du quiz dans les <strong>Paramètres du Quiz</strong>.</span>
+                <button type="button" onclick="toggleIncludeAiQuestions(true)" class="px-2.5 py-1 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-bold text-[11px] whitespace-nowrap transition cursor-pointer">
+                  Réactiver les questions IA
+                </button>
+              </div>
+              <div class="space-y-4" id="themes-list-ai">
+                <!-- Dynamically populated by Parts & Chapters -->
               </div>
             </div>
           </div>
@@ -677,6 +698,14 @@
               <label class="flex items-center justify-between text-xs cursor-pointer text-slate-800 font-medium px-1">
                 <span>Mélanger les choix (A-E)</span>
                 <input type="checkbox" id="opt-shuffle-opts" class="rounded border-slate-300 text-indigo-600 h-4 w-4">
+              </label>
+              <label class="flex items-center justify-between gap-2 px-2 py-1.5 rounded-lg bg-purple-50/70 border border-purple-200 hover:bg-purple-100/60 text-xs cursor-pointer text-slate-800 font-medium transition" title="Inclure ou exclure du quiz les questions générées par IA sélectionnées">
+                <span class="flex items-center gap-1.5 font-bold text-purple-900 min-w-0">
+                  <span aria-hidden="true">✨</span>
+                  <span class="truncate">Inclure les questions IA</span>
+                  <span class="text-[10px] font-extrabold px-1.5 py-0.5 rounded-full bg-purple-100 text-purple-800 border border-purple-200" id="opt-include-ai-count-badge">0</span>
+                </span>
+                <input type="checkbox" id="opt-include-ai" checked onchange="toggleIncludeAiQuestions(this.checked)" class="rounded border-slate-300 text-purple-600 h-4 w-4 focus:ring-purple-500 cursor-pointer">
               </label>
             </div>
 
@@ -1746,6 +1775,7 @@
     // State
     let selectionMode = 'theme'; // 'theme' | 'source'
     let selectedThemes = new Set();
+    let selectedAiThemes = new Set();
     let selectedSources = new Set();
     let includeQCM = true;
     let includeOpen = true;
@@ -1755,12 +1785,46 @@
       mode: 'revision',
       shuffleQ: true,
       shuffleOpts: false,
-      uniqueQ: true
+      uniqueQ: true,
+      includeAi: true
     };
 
     function toggleUniqueQuestions() {
       const cb = document.getElementById('opt-unique-q');
       currentQuizSettings.uniqueQ = cb ? cb.checked : true;
+      updateSelectedSummary();
+    }
+
+    function toggleIncludeAiQuestions(forceVal) {
+      const cb = document.getElementById('opt-include-ai');
+      if (typeof forceVal === 'boolean') {
+        currentQuizSettings.includeAi = forceVal;
+        if (cb) cb.checked = forceVal;
+      } else {
+        currentQuizSettings.includeAi = cb ? cb.checked : true;
+      }
+
+      if (currentQuizSettings.includeAi) {
+        if (selectedAiThemes.size === 0) {
+          const allAiThemes = new Set(getAllAiQuestions().map(q => q.theme));
+          selectedAiThemes = new Set(allAiThemes);
+          document.querySelectorAll('#themes-list-ai input[type="checkbox"]').forEach(input => {
+            if (!input.disabled) {
+              input.checked = true;
+              input.indeterminate = false;
+              const card = input.closest('.ai-theme-card');
+              if (card) card.classList.toggle('theme-card-active', true);
+            }
+          });
+        }
+        selectedSources.add("Questions Générées par IA");
+      } else {
+        selectedSources.delete("Questions Générées par IA");
+      }
+
+      syncAiSectionState();
+      renderSourcesList();
+      updateAiBadgeCounts();
       updateSelectedSummary();
     }
 
@@ -2033,16 +2097,20 @@
       initAiThemeSelect();
       initDynamicBadges();
 
-      // Initialize themes
-      const allUniqueThemes = new Set([...QCM_DATASET, ...OPEN_DATASET, ...getAiQuestions()].map(q => q.theme));
+      // Initialize official themes
+      const allUniqueThemes = new Set([...QCM_DATASET, ...OPEN_DATASET].map(q => q.theme));
       selectedThemes = new Set(allUniqueThemes);
+
+      // Initialize AI themes
+      const allUniqueAiThemes = new Set(getAllAiQuestions().map(q => q.theme));
+      selectedAiThemes = new Set(allUniqueAiThemes);
 
       // Initialize sources
       const allUniqueSources = new Set([...OFFICIAL_DOCUMENTS.map(d => d.name), "Questions Générées par IA"]);
       selectedSources = new Set(allUniqueSources);
     }
 
-    // AI Questions Storage in LocalStorage
+    // AI Questions Storage in LocalStorage (custom user-generated questions)
     function getAiQuestions() {
       try {
         const stored = localStorage.getItem('ue{{UE_CODE}}_ai_questions');
@@ -2051,11 +2119,49 @@
           if (!q.type) {
             q.type = (q.options && q.options.length > 0) ? 'qcm' : 'open';
           }
+          q.document = q.document || "Questions Générées par IA";
+          q.isAiGenerated = true;
           return q;
         });
       } catch (e) {
         return [];
       }
+    }
+
+    // Combined AI Bank (Embedded AI Bank + Custom LocalStorage AI Questions, deduplicated)
+    function getAllAiQuestions() {
+      const builtin = (BUILTIN_AI_BANK || []).map((item, idx) => ({
+        id: item.id || ('BUILTIN-AI-' + (idx + 1)),
+        type: item.type || ((item.options && item.options.length > 0) ? 'qcm' : 'open'),
+        document: "Questions Générées par IA",
+        source: item.source || "Banque IA embarquée (UE {{UE_CODE}})",
+        q_num: item.q_num || ('IA-' + (idx + 1)),
+        theme: item.theme,
+        question: item.question,
+        options: item.options ? item.options.map(o => ({ ...o })) : [],
+        correct: item.correct ? [...item.correct] : [],
+        explanation: item.explanation || "",
+        points: item.points || "5",
+        max_lines: item.max_lines || "15",
+        guidelines: item.guidelines ? [...item.guidelines] : [],
+        model_answer: item.model_answer || "",
+        correction_source_type: item.correction_source_type || 'ai',
+        correction_source: item.correction_source || 'Généré par IA',
+        correction_source_detail: item.correction_source_detail || 'Banque de questions IA embarquée',
+        isAiGenerated: true
+      }));
+
+      const custom = getAiQuestions();
+      const seenNorms = new Set(builtin.map(q => normalizeQuestionText(q.question)));
+      const merged = [...builtin];
+      custom.forEach(q => {
+        const norm = normalizeQuestionText(q.question);
+        if (!seenNorms.has(norm)) {
+          seenNorms.add(norm);
+          merged.push(q);
+        }
+      });
+      return merged;
     }
 
     function saveAiQuestions(list) {
@@ -2064,6 +2170,10 @@
       } catch (e) {
         console.error("Error saving AI questions", e);
       }
+      // Automatically select any newly added AI themes
+      list.forEach(q => {
+        if (q && q.theme) selectedAiThemes.add(q.theme);
+      });
       updateAiBadgeCounts();
       renderThemesLists();
       renderSourcesList();
@@ -2071,23 +2181,32 @@
     }
 
     function updateAiBadgeCounts() {
-      const aiList = getAiQuestions();
-      const count = aiList.length;
+      const customAiList = getAiQuestions();
       const countEl = document.getElementById('modal-saved-ai-count');
-      if (countEl) countEl.textContent = count;
+      if (countEl) countEl.textContent = customAiList.length;
 
+      const allAiList = currentQuizSettings.includeAi ? getAllAiQuestions() : [];
       const baseQcm = QCM_DATASET.filter(isQcm).length;
       const baseOpen = OPEN_DATASET.filter(isOpen).length;
-      const qcmTotal = baseQcm + aiList.filter(isQcm).length;
-      const openTotal = baseOpen + aiList.filter(isOpen).length;
+      const qcmTotal = baseQcm + allAiList.filter(isQcm).length;
+      const openTotal = baseOpen + allAiList.filter(isOpen).length;
       const headerTotal = qcmTotal + openTotal;
 
       const headerTotalEl = document.getElementById('header-total-badge');
-      if (headerTotalEl) headerTotalEl.textContent = `${headerTotal} questions (${qcmTotal} QCM • ${openTotal} Questions ouvertes)`;
+      if (headerTotalEl) {
+        headerTotalEl.textContent = `${baseQcm + baseOpen} questions officielles (${baseQcm} QCM • ${baseOpen} Questions ouvertes)` +
+          (allAiList.length > 0 ? ` + ${allAiList.length} IA` : '');
+      }
       const qcmBadgeEl = document.getElementById('badge-count-qcm-total');
       if (qcmBadgeEl) qcmBadgeEl.textContent = `${qcmTotal} QCM`;
       const openBadgeEl = document.getElementById('badge-count-open-total');
       if (openBadgeEl) openBadgeEl.textContent = `${openTotal} épreuves`;
+
+      const optAiBadge = document.getElementById('opt-include-ai-count-badge');
+      if (optAiBadge) {
+        const totalAvailableAi = getAllAiQuestions().filter(q => isQcm(q) ? includeQCM : (isOpen(q) ? includeOpen : false)).length;
+        optAiBadge.textContent = `${totalAvailableAi} IA`;
+      }
     }
 
     // Tab Navigation
@@ -2146,23 +2265,29 @@
 
     // Active Pool Resolver - Returns ALL questions matching current filters and selections
     function getActivePool() {
-      const allAi = getAiQuestions();
-      let allQuestions = [
+      const officialQuestions = [
         ...(includeQCM ? QCM_DATASET.filter(isQcm) : []),
-        ...(includeOpen ? OPEN_DATASET.filter(isOpen) : []),
-        ...allAi.filter(q => isQcm(q) ? includeQCM : (isOpen(q) ? includeOpen : false))
-      ];
-
-      // Strict enforcement of question type filter
-      allQuestions = allQuestions.filter(q => {
+        ...(includeOpen ? OPEN_DATASET.filter(isOpen) : [])
+      ].filter(q => {
         if (!includeQCM && isQcm(q)) return false;
         if (!includeOpen && isOpen(q)) return false;
         return true;
       });
 
+      const aiQuestions = currentQuizSettings.includeAi
+        ? getAllAiQuestions().filter(q => {
+            if (!includeQCM && isQcm(q)) return false;
+            if (!includeOpen && isOpen(q)) return false;
+            return true;
+          })
+        : [];
+
       if (selectionMode === 'theme') {
-        return allQuestions.filter(q => selectedThemes.has(q.theme));
+        const filteredOfficial = officialQuestions.filter(q => selectedThemes.has(q.theme));
+        const filteredAi = aiQuestions.filter(q => selectedAiThemes.has(q.theme));
+        return [...filteredOfficial, ...filteredAi];
       } else {
+        const allQuestions = [...officialQuestions, ...aiQuestions];
         return allQuestions.filter(q => selectedSources.has(q.document));
       }
     }
@@ -2177,6 +2302,7 @@
         includeQCM = true;
       }
 
+      updateAiBadgeCounts();
       renderThemesLists();
       renderSourcesList();
       updateSelectedSummary();
@@ -2189,6 +2315,7 @@
 
     // Set to keep track of collapsed categories
     const collapsedCategories = new Set();
+    const collapsedAiCategories = new Set();
     let currentCategoryPillFilter = 'all';
 
     function parseTheme(theme) {
@@ -2216,35 +2343,31 @@
     function renderThemesLists() {
       const listP1 = document.getElementById('themes-list-p1');
       const listP2 = document.getElementById('themes-list-p2');
-      const listAi = document.getElementById('themes-list-ai');
-      const cardAi = document.getElementById('card-themes-ai');
 
       if (!listP1 || !listP2) return;
 
       listP1.innerHTML = '';
       listP2.innerHTML = '';
-      if (listAi) listAi.innerHTML = '';
 
-      const pool = [
+      const officialPool = [
         ...(includeQCM ? QCM_DATASET.filter(isQcm) : []),
-        ...(includeOpen ? OPEN_DATASET.filter(isOpen) : []),
-        ...getAiQuestions().filter(q => isQcm(q) ? includeQCM : (isOpen(q) ? includeOpen : false))
+        ...(includeOpen ? OPEN_DATASET.filter(isOpen) : [])
       ];
 
       const counts = {};
-      pool.forEach(q => {
+      officialPool.forEach(q => {
         if (!counts[q.theme]) counts[q.theme] = { total: 0, qcm: 0, open: 0 };
         counts[q.theme].total++;
         if (isQcm(q)) counts[q.theme].qcm++;
         else counts[q.theme].open++;
       });
 
-      const allThemes = Array.from(new Set([...QCM_DATASET, ...OPEN_DATASET, ...getAiQuestions()].map(q => q.theme))).sort();
+      const allOfficialThemes = Array.from(new Set([...QCM_DATASET, ...OPEN_DATASET].map(q => q.theme))).sort();
 
-      // Render Categories for Part 1
+      // Render Categories for Part 1 (Official Questions)
       let totalP1 = 0;
       CHAPTER_CATEGORIES.filter(c => c.partNum === 1).forEach(cat => {
-        const catThemes = allThemes.filter(cat.filterFn);
+        const catThemes = allOfficialThemes.filter(cat.filterFn);
         if (catThemes.length === 0) return;
 
         let catTotal = 0;
@@ -2262,10 +2385,10 @@
         listP1.appendChild(catBlock);
       });
 
-      // Render Categories for Part 2
+      // Render Categories for Part 2 (Official Questions)
       let totalP2 = 0;
       CHAPTER_CATEGORIES.filter(c => c.partNum === 2).forEach(cat => {
-        const catThemes = allThemes.filter(cat.filterFn);
+        const catThemes = allOfficialThemes.filter(cat.filterFn);
         if (catThemes.length === 0) return;
 
         let catTotal = 0;
@@ -2283,18 +2406,6 @@
         listP2.appendChild(catBlock);
       });
 
-      // AI questions
-      let totalAi = 0;
-      const aiThemes = allThemes.filter(t => !CHAPTER_CATEGORIES.some(cat => cat.filterFn(t)));
-      if (listAi) {
-        aiThemes.forEach(theme => {
-          const c = counts[theme] || { total: 0, qcm: 0, open: 0 };
-          totalAi += c.total;
-          const card = createThemeCard(theme, c, 'ai');
-          listAi.appendChild(card);
-        });
-      }
-
       const badgeP1 = document.getElementById('count-badge-p1');
       if (badgeP1) badgeP1.textContent = `${totalP1} question${totalP1 > 1 ? 's' : ''}`;
       const badgeP2 = document.getElementById('count-badge-p2');
@@ -2309,18 +2420,560 @@
         btnLaunchP2.innerHTML = `<span>🎯</span> <span>Lancer P2 (${totalP2})</span>`;
       }
 
-      if (cardAi) {
-        if (totalAi > 0) {
-          cardAi.classList.remove('hidden');
-          const badgeAi = document.getElementById('count-badge-ai');
-          if (badgeAi) badgeAi.textContent = `${totalAi} question${totalAi > 1 ? 's' : ''}`;
-        } else {
-          cardAi.classList.add('hidden');
-        }
-      }
+      // Render AI Section (Grouped by Parts & Chapters)
+      renderAiSection();
 
       syncAllState();
       updateAccordionToggleBtn();
+    }
+
+    function renderAiSection() {
+      const listAi = document.getElementById('themes-list-ai');
+      const cardAi = document.getElementById('card-themes-ai');
+      if (!listAi || !cardAi) return;
+
+      listAi.innerHTML = '';
+
+      const allAiRaw = getAllAiQuestions();
+      const filteredAiPool = allAiRaw.filter(q => isQcm(q) ? includeQCM : (isOpen(q) ? includeOpen : false));
+
+      const aiCounts = {};
+      filteredAiPool.forEach(q => {
+        if (!aiCounts[q.theme]) aiCounts[q.theme] = { total: 0, qcm: 0, open: 0 };
+        aiCounts[q.theme].total++;
+        if (isQcm(q)) aiCounts[q.theme].qcm++;
+        else aiCounts[q.theme].open++;
+      });
+
+      const allAiThemes = Array.from(new Set(allAiRaw.map(q => q.theme))).sort();
+      const totalAiFiltered = filteredAiPool.length;
+      const totalAiQcm = filteredAiPool.filter(isQcm).length;
+      const totalAiOpen = filteredAiPool.filter(isOpen).length;
+
+      const badgeAi = document.getElementById('count-badge-ai');
+      if (badgeAi) {
+        let comp = [];
+        if (totalAiQcm > 0) comp.push(`${totalAiQcm} QCM`);
+        if (totalAiOpen > 0) comp.push(`${totalAiOpen} Ouv.`);
+        badgeAi.textContent = `${totalAiFiltered} question${totalAiFiltered > 1 ? 's' : ''} IA` + (comp.length ? ` (${comp.join(' • ')})` : '');
+      }
+
+      const btnLaunchAi = document.getElementById('btn-launch-ai');
+      if (btnLaunchAi) {
+        btnLaunchAi.innerHTML = `<span>🎯</span> <span>Lancer IA (${totalAiFiltered})</span>`;
+        btnLaunchAi.disabled = totalAiFiltered === 0;
+        btnLaunchAi.classList.toggle('opacity-50', totalAiFiltered === 0);
+      }
+
+      // Group by Part 1 and Part 2
+      const partConfigs = [
+        { partNum: 1, icon: `{{PART1_ICON}}`, title: `{{PART1_TITLE}}` },
+        { partNum: 2, icon: `{{PART2_ICON}}`, title: `{{PART2_TITLE}}` }
+      ];
+
+      partConfigs.forEach(pCfg => {
+        const partCats = CHAPTER_CATEGORIES.filter(c => c.partNum === pCfg.partNum);
+        if (partCats.length === 0) return;
+
+        let partTotal = 0;
+        let partQcm = 0;
+        let partOpen = 0;
+        partCats.forEach(cat => {
+          const catThemes = allAiThemes.filter(cat.filterFn);
+          catThemes.forEach(t => {
+            const c = aiCounts[t] || { total: 0, qcm: 0, open: 0 };
+            partTotal += c.total;
+            partQcm += c.qcm;
+            partOpen += c.open;
+          });
+        });
+
+        let partBadges = '';
+        if (partQcm > 0 && includeQCM) {
+          partBadges += `<span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-purple-100 text-purple-800 border border-purple-200 whitespace-nowrap">${partQcm} QCM IA</span>`;
+        }
+        if (partOpen > 0 && includeOpen) {
+          partBadges += `<span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-200 whitespace-nowrap">✍️ ${partOpen} Ouv. IA</span>`;
+        }
+        if (partTotal === 0) {
+          partBadges = `<span class="px-2 py-0.5 rounded-full text-[11px] font-medium bg-slate-100 text-slate-500 border border-slate-200 whitespace-nowrap">0 question IA</span>`;
+        }
+
+        const partBlock = document.createElement('div');
+        partBlock.className = 'rounded-2xl border border-purple-200/80 bg-purple-50/20 p-3 sm:p-4 space-y-3';
+        partBlock.id = `ai-part-container-${pCfg.partNum}`;
+
+        partBlock.innerHTML = `
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-2.5 border-b border-purple-200/60">
+            <label class="flex items-center gap-2.5 cursor-pointer flex-1 min-w-0">
+              <input type="checkbox" id="ai-part-cb-${pCfg.partNum}" ${partTotal === 0 ? 'disabled' : ''}
+                onchange="toggleAiPart(${pCfg.partNum}, this.checked)"
+                class="h-4 w-4 rounded border-slate-300 text-purple-600 focus:ring-purple-500 cursor-pointer disabled:opacity-40">
+              <span class="text-sm shrink-0">${pCfg.icon}</span>
+              <span class="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-purple-900 truncate">${escapeHtml(pCfg.title)}</span>
+              <span class="px-2 py-0.5 rounded-full text-xs font-bold ${partTotal > 0 ? 'bg-purple-100 text-purple-800 border border-purple-300' : 'bg-slate-100 text-slate-500 border border-slate-200'} whitespace-nowrap">
+                ${partTotal} question${partTotal > 1 ? 's' : ''} IA
+              </span>
+              <div class="flex items-center gap-1 hidden sm:flex">${partBadges}</div>
+            </label>
+            <div class="flex items-center gap-1.5 self-end sm:self-center shrink-0">
+              ${partTotal > 0 ? `
+                <button type="button" onclick="toggleAiPart(${pCfg.partNum}, true)" class="px-2 py-1 rounded-lg text-[11px] font-semibold bg-white hover:bg-purple-50 text-purple-700 border border-purple-200 transition">
+                  Tout cocher P${pCfg.partNum}
+                </button>
+                <button type="button" onclick="toggleAiPart(${pCfg.partNum}, false)" class="px-2 py-1 rounded-lg text-[11px] font-semibold bg-white hover:bg-slate-50 text-slate-600 border border-slate-200 transition">
+                  Décocher
+                </button>
+                <button type="button" onclick="launchAiPart(${pCfg.partNum})" class="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-purple-600 hover:bg-purple-700 text-white transition shadow-2xs flex items-center gap-1">
+                  <span>🎯</span> <span>Lancer P${pCfg.partNum} IA (${partTotal})</span>
+                </button>
+              ` : ''}
+            </div>
+          </div>
+          <div class="space-y-2" id="ai-part-cats-${pCfg.partNum}"></div>
+        `;
+
+        const catsContainer = partBlock.querySelector(`#ai-part-cats-${pCfg.partNum}`);
+        partCats.forEach(cat => {
+          const catThemes = allAiThemes.filter(cat.filterFn);
+          let catTotal = 0;
+          let catQcm = 0;
+          let catOpen = 0;
+          catThemes.forEach(t => {
+            const c = aiCounts[t] || { total: 0, qcm: 0, open: 0 };
+            catTotal += c.total;
+            catQcm += c.qcm;
+            catOpen += c.open;
+          });
+          const catBlock = createAiCategoryBlock(cat, catThemes, aiCounts, catTotal, catQcm, catOpen);
+          catsContainer.appendChild(catBlock);
+        });
+
+        listAi.appendChild(partBlock);
+      });
+
+      // Fallback for custom user-imported AI themes that don't match standard chapter filters
+      const unmatchedAiThemes = allAiThemes.filter(t => !CHAPTER_CATEGORIES.some(cat => cat.filterFn(t)));
+      if (unmatchedAiThemes.length > 0) {
+        let extraTotal = 0, extraQcm = 0, extraOpen = 0;
+        unmatchedAiThemes.forEach(t => {
+          const c = aiCounts[t] || { total: 0, qcm: 0, open: 0 };
+          extraTotal += c.total;
+          extraQcm += c.qcm;
+          extraOpen += c.open;
+        });
+        const extraCat = {
+          id: 'ai_custom_extra',
+          partNum: 0,
+          title: 'Autres thématiques IA personnalisées',
+          description: 'Questions générées ou importées sur des thématiques libres'
+        };
+        const extraBlock = createAiCategoryBlock(extraCat, unmatchedAiThemes, aiCounts, extraTotal, extraQcm, extraOpen);
+        listAi.appendChild(extraBlock);
+      }
+    }
+
+    function createAiCategoryBlock(cat, catThemes, aiCounts, catTotal, catQcm, catOpen) {
+      const block = document.createElement('div');
+      block.className = `ai-category-block border border-slate-200/90 rounded-xl bg-white overflow-hidden shadow-2xs transition ${catTotal === 0 ? 'opacity-60' : ''}`;
+      block.dataset.aiCatId = cat.id;
+
+      const numMatch = cat.id.match(/ch([0-9]+)/i) || cat.title.match(/Chapitre\s*([0-9]+)/i);
+      const catNum = numMatch ? numMatch[1] : '';
+
+      let catBadges = '';
+      if (catQcm > 0 && includeQCM) {
+        catBadges += `<span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-purple-50 text-purple-700 border border-purple-200 whitespace-nowrap">${catQcm} QCM IA</span>`;
+      }
+      if (catOpen > 0 && includeOpen) {
+        catBadges += `<span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-200 whitespace-nowrap">✍️ ${catOpen} Ouv. IA</span>`;
+      }
+      if (catTotal === 0) {
+        catBadges = `<span class="px-2 py-0.5 rounded-full text-[11px] font-medium bg-slate-100 text-slate-400 border border-slate-200 whitespace-nowrap">0 question IA</span>`;
+      }
+
+      const isCollapsed = collapsedAiCategories.has(cat.id);
+
+      block.innerHTML = `
+        <div class="ai-category-header ${catThemes.length > 0 ? 'cursor-pointer hover:bg-purple-50/40' : ''} select-none bg-white p-3 transition border-b border-transparent ${!isCollapsed && catThemes.length > 0 ? 'border-slate-200/70' : ''}"
+             onclick="${catThemes.length > 0 ? `toggleAiCategoryAccordion('${cat.id}')` : ''}">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div class="flex items-start gap-2.5 flex-1 min-w-0">
+              <div class="flex items-center gap-2 pt-0.5 sm:pt-0">
+                <input type="checkbox" id="ai-cat-cb-${cat.id}" ${catThemes.length === 0 ? 'disabled' : ''}
+                  class="ai-cat-master-checkbox h-4 w-4 rounded border-slate-300 text-purple-600 focus:ring-purple-500 cursor-pointer disabled:opacity-40"
+                  onclick="event.stopPropagation(); toggleAiCategory('${cat.id}', this.checked)"
+                  title="Sélectionner / désélectionner les questions IA de ce chapitre">
+                ${catThemes.length > 0 ? `
+                  <span class="cat-chevron inline-flex items-center justify-center text-slate-400 ${isCollapsed ? 'is-collapsed' : ''}" id="ai-chevron-${cat.id}">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
+                  </span>
+                ` : '<span class="w-4 h-4 inline-block"></span>'}
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2 flex-wrap">
+                  ${catNum ? `<span class="px-2 py-0.5 rounded-md text-[11px] font-extrabold bg-purple-600 text-white whitespace-nowrap shadow-2xs">Ch.${catNum}</span>` : ''}
+                  <span class="text-xs sm:text-sm font-bold text-slate-900 truncate">${escapeHtml(cat.title.replace(/^Chapitre\s*[0-9]+\s*[•-]\s*/i, ''))}</span>
+                  <div class="flex items-center gap-1.5">${catBadges}</div>
+                  ${catThemes.length > 0 ? `<span id="ai-cat-badge-sel-${cat.id}" class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-purple-50 text-purple-700 border border-purple-200 whitespace-nowrap">${catThemes.length} / ${catThemes.length} thèmes</span>` : ''}
+                </div>
+                <p class="text-[11px] text-slate-500 mt-0.5 leading-snug truncate">${escapeHtml(cat.description)}</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-2 self-end sm:self-center shrink-0" onclick="event.stopPropagation()">
+              ${catTotal > 0 ? `
+                <button type="button" onclick="launchAiSingleCategory('${cat.id}')"
+                  title="Lancer uniquement les questions IA de ce chapitre (${catTotal} Q)"
+                  class="px-2.5 py-1 rounded-lg text-xs font-bold bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 transition shadow-2xs whitespace-nowrap flex items-center gap-1">
+                  <span>🎯</span> <span>Lancer (${catTotal})</span>
+                </button>
+              ` : ''}
+            </div>
+          </div>
+        </div>
+        ${catThemes.length > 0 ? `
+          <div id="ai-cat-body-${cat.id}" class="ai-category-themes-container p-2.5 sm:p-3 bg-slate-50/50 space-y-1.5 ${isCollapsed ? 'hidden' : ''}">
+          </div>
+        ` : ''}
+      `;
+
+      if (catThemes.length > 0) {
+        const container = block.querySelector('.ai-category-themes-container');
+        catThemes.forEach(theme => {
+          const c = aiCounts[theme] || { total: 0, qcm: 0, open: 0 };
+          const card = createAiThemeCard(theme, c, cat.id);
+          container.appendChild(card);
+        });
+      }
+
+      return block;
+    }
+
+    function createAiThemeCard(theme, c, catId) {
+      const isChecked = currentQuizSettings.includeAi && selectedAiThemes.has(theme);
+      const parsed = parseTheme(theme);
+      const card = document.createElement('div');
+      card.className = `ai-theme-card flex items-center justify-between gap-2 p-2 rounded-xl border border-slate-200/90 transition select-none ${isChecked ? 'theme-card-active' : 'bg-white hover:bg-slate-50/80'} ${c.total === 0 ? 'opacity-40' : ''}`;
+      card.dataset.themeName = theme.toLowerCase();
+      card.dataset.fullTheme = theme;
+      if (catId) card.dataset.aiCatId = catId;
+
+      let badgesHtml = '';
+      if (c.qcm > 0 && includeQCM) {
+        badgesHtml += `<span class="px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200 whitespace-nowrap">${c.qcm} QCM IA</span>`;
+      }
+      if (c.open > 0 && includeOpen) {
+        badgesHtml += `<span class="px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200 whitespace-nowrap">✍️ ${c.open} IA</span>`;
+      }
+      if (c.total === 0) {
+        badgesHtml += `<span class="px-1.5 py-0.5 rounded-md text-[10px] text-slate-400 border border-slate-200">0</span>`;
+      }
+
+      let sectionBadge = '';
+      if (parsed.section) {
+        sectionBadge = `<span class="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-purple-50 text-purple-700 border border-purple-200/80 shrink-0">§ ${escapeHtml(parsed.section)}</span>`;
+      }
+
+      card.innerHTML = `
+        <label class="flex items-center gap-2.5 cursor-pointer flex-1 min-w-0">
+          <input type="checkbox" value="${escapeHtml(theme)}" ${isChecked ? 'checked' : ''}
+            onclick="handleAiThemeCheckboxClick(this)"
+            class="rounded border-slate-300 text-purple-600 focus:ring-purple-500 h-4 w-4 shrink-0 cursor-pointer">
+          ${sectionBadge}
+          <span class="text-xs sm:text-sm font-medium text-slate-800 leading-snug flex-1 break-words" title="${escapeHtml(theme)}">${escapeHtml(parsed.clean)}</span>
+          <div class="flex items-center gap-1 shrink-0 whitespace-nowrap">${badgesHtml}</div>
+        </label>
+        <div class="flex items-center shrink-0 pl-1">
+          ${c.total > 0 ? `
+            <button type="button" onclick="event.stopPropagation(); launchAiSingleTheme('${escapeHtml(theme)}')"
+              title="Passer immédiatement ce sous-thème IA (${c.total} question${c.total > 1 ? 's' : ''})"
+              class="px-2 py-0.5 rounded-md text-[11px] font-semibold text-purple-700 bg-white hover:bg-purple-50 border border-purple-200 transition shadow-2xs whitespace-nowrap flex items-center gap-1">
+              <span>🎯</span> <span class="hidden sm:inline">Passer</span> <span>(${c.total})</span>
+            </button>
+          ` : ''}
+        </div>
+      `;
+      return card;
+    }
+
+    function toggleAiCategoryAccordion(catId) {
+      const body = document.getElementById(`ai-cat-body-${catId}`);
+      const chevron = document.getElementById(`ai-chevron-${catId}`);
+      if (!body) return;
+      const isCurrentlyExpanded = !body.classList.contains('hidden');
+      const header = body.previousElementSibling;
+      if (isCurrentlyExpanded) {
+        body.classList.add('hidden');
+        collapsedAiCategories.add(catId);
+        if (chevron) chevron.classList.add('is-collapsed');
+        if (header) header.classList.remove('border-slate-200/70');
+      } else {
+        body.classList.remove('hidden');
+        collapsedAiCategories.delete(catId);
+        if (chevron) chevron.classList.remove('is-collapsed');
+        if (header) header.classList.add('border-slate-200/70');
+      }
+    }
+
+    function handleAiThemeCheckboxClick(cb) {
+      const isChecked = cb.checked;
+      const theme = cb.value;
+      if (isChecked) {
+        selectedAiThemes.add(theme);
+        if (!currentQuizSettings.includeAi) {
+          currentQuizSettings.includeAi = true;
+          const optCb = document.getElementById('opt-include-ai');
+          if (optCb) optCb.checked = true;
+        }
+      } else {
+        selectedAiThemes.delete(theme);
+      }
+      const card = cb.closest('.ai-theme-card');
+      if (card) card.classList.toggle('theme-card-active', isChecked);
+      syncAiSectionState();
+      updateAiBadgeCounts();
+      updateSelectedSummary();
+    }
+
+    function toggleAiCategory(catId, isChecked) {
+      if (isChecked && !currentQuizSettings.includeAi) {
+        currentQuizSettings.includeAi = true;
+        const optCb = document.getElementById('opt-include-ai');
+        if (optCb) optCb.checked = true;
+      }
+      const block = document.querySelector(`.ai-category-block[data-ai-cat-id="${catId}"]`);
+      if (block) {
+        block.querySelectorAll('.ai-theme-card input[type="checkbox"]').forEach(cb => {
+          cb.checked = isChecked;
+          if (isChecked) selectedAiThemes.add(cb.value);
+          else selectedAiThemes.delete(cb.value);
+          const card = cb.closest('.ai-theme-card');
+          if (card) card.classList.toggle('theme-card-active', isChecked);
+        });
+      }
+      syncAiSectionState();
+      updateAiBadgeCounts();
+      updateSelectedSummary();
+    }
+
+    function toggleAiPart(partNum, isChecked) {
+      if (isChecked && !currentQuizSettings.includeAi) {
+        currentQuizSettings.includeAi = true;
+        const optCb = document.getElementById('opt-include-ai');
+        if (optCb) optCb.checked = true;
+      }
+      const container = document.getElementById(`ai-part-container-${partNum}`);
+      if (container) {
+        container.querySelectorAll('.ai-theme-card input[type="checkbox"]').forEach(cb => {
+          cb.checked = isChecked;
+          if (isChecked) selectedAiThemes.add(cb.value);
+          else selectedAiThemes.delete(cb.value);
+          const card = cb.closest('.ai-theme-card');
+          if (card) card.classList.toggle('theme-card-active', isChecked);
+        });
+      }
+      syncAiSectionState();
+      updateAiBadgeCounts();
+      updateSelectedSummary();
+    }
+
+    function toggleAllAiQuestions(isChecked) {
+      if (isChecked) {
+        currentQuizSettings.includeAi = true;
+        const optCb = document.getElementById('opt-include-ai');
+        if (optCb) optCb.checked = true;
+      }
+      document.querySelectorAll('#themes-list-ai .ai-theme-card input[type="checkbox"]').forEach(cb => {
+        cb.checked = isChecked;
+        if (isChecked) selectedAiThemes.add(cb.value);
+        else selectedAiThemes.delete(cb.value);
+        const card = cb.closest('.ai-theme-card');
+        if (card) card.classList.toggle('theme-card-active', isChecked);
+      });
+      syncAiSectionState();
+      updateAiBadgeCounts();
+      updateSelectedSummary();
+    }
+
+    function syncAiSectionState() {
+      const includeAi = currentQuizSettings.includeAi;
+      const optCb = document.getElementById('opt-include-ai');
+      if (optCb) optCb.checked = includeAi;
+
+      const disabledBanner = document.getElementById('ai-disabled-banner');
+      if (disabledBanner) {
+        disabledBanner.classList.toggle('hidden', includeAi);
+      }
+
+      const listAi = document.getElementById('themes-list-ai');
+      if (listAi) {
+        listAi.classList.toggle('opacity-50', !includeAi);
+      }
+
+      // Sync each AI theme checkbox state
+      document.querySelectorAll('#themes-list-ai .ai-theme-card input[type="checkbox"]').forEach(cb => {
+        const active = includeAi && selectedAiThemes.has(cb.value);
+        cb.checked = active;
+        const card = cb.closest('.ai-theme-card');
+        if (card) card.classList.toggle('theme-card-active', active);
+      });
+
+      // Sync each AI Category master checkbox & badge
+      document.querySelectorAll('.ai-category-block').forEach(block => {
+        const catId = block.dataset.aiCatId;
+        const cb = document.getElementById(`ai-cat-cb-${catId}`);
+        const badge = document.getElementById(`ai-cat-badge-sel-${catId}`);
+        const themeCbs = block.querySelectorAll('.ai-theme-card input[type="checkbox"]');
+        const checkedCbs = block.querySelectorAll('.ai-theme-card input[type="checkbox"]:checked');
+
+        if (cb && !cb.disabled) {
+          if (themeCbs.length > 0 && checkedCbs.length === themeCbs.length) {
+            cb.checked = true;
+            cb.indeterminate = false;
+          } else if (checkedCbs.length === 0) {
+            cb.checked = false;
+            cb.indeterminate = false;
+          } else {
+            cb.checked = false;
+            cb.indeterminate = true;
+          }
+        }
+
+        if (badge) {
+          badge.textContent = `${checkedCbs.length} / ${themeCbs.length} thèmes`;
+          if (themeCbs.length > 0 && checkedCbs.length === themeCbs.length) {
+            badge.className = 'px-2 py-0.5 rounded-full text-[11px] font-bold bg-purple-100 text-purple-800 border border-purple-200 whitespace-nowrap';
+          } else if (checkedCbs.length === 0) {
+            badge.className = 'px-2 py-0.5 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-500 border border-slate-200 whitespace-nowrap';
+          } else {
+            badge.className = 'px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-200 whitespace-nowrap';
+          }
+        }
+      });
+
+      // Sync AI Part 1 and Part 2 checkboxes
+      [1, 2].forEach(partNum => {
+        const partCb = document.getElementById(`ai-part-cb-${partNum}`);
+        const container = document.getElementById(`ai-part-container-${partNum}`);
+        if (partCb && container && !partCb.disabled) {
+          const themeCbs = container.querySelectorAll('.ai-theme-card input[type="checkbox"]');
+          const checkedCbs = container.querySelectorAll('.ai-theme-card input[type="checkbox"]:checked');
+          if (themeCbs.length > 0 && checkedCbs.length === themeCbs.length) {
+            partCb.checked = true;
+            partCb.indeterminate = false;
+          } else if (checkedCbs.length === 0) {
+            partCb.checked = false;
+            partCb.indeterminate = false;
+          } else {
+            partCb.checked = false;
+            partCb.indeterminate = true;
+          }
+        }
+      });
+
+      // Sync AI section status text
+      const allAiThemeCbs = document.querySelectorAll('#themes-list-ai .ai-theme-card input[type="checkbox"]');
+      const checkedAiThemeCbs = document.querySelectorAll('#themes-list-ai .ai-theme-card input[type="checkbox"]:checked');
+      const statusAi = document.getElementById('selection-status-ai');
+      if (statusAi) {
+        if (!includeAi) {
+          statusAi.textContent = 'Questions IA désactivées dans les Paramètres du Quiz';
+        } else if (allAiThemeCbs.length > 0 && checkedAiThemeCbs.length === allAiThemeCbs.length) {
+          statusAi.textContent = 'Toutes les questions IA cochées (100%)';
+        } else if (checkedAiThemeCbs.length === 0) {
+          statusAi.textContent = 'Aucune question IA cochée';
+        } else {
+          statusAi.textContent = `${checkedAiThemeCbs.length} / ${allAiThemeCbs.length} sous-thèmes IA cochés`;
+        }
+      }
+    }
+
+    function launchAllAiQuestions() {
+      selectionMode = 'theme';
+      currentQuizSettings.includeAi = true;
+      const optCb = document.getElementById('opt-include-ai');
+      if (optCb) optCb.checked = true;
+
+      // Uncheck official themes so the quiz focuses on AI questions
+      document.querySelectorAll('#themes-list-p1 .theme-card input[type="checkbox"], #themes-list-p2 .theme-card input[type="checkbox"]').forEach(cb => {
+        cb.checked = false;
+        const card = cb.closest('.theme-card');
+        if (card) card.classList.remove('theme-card-active');
+      });
+
+      // If no AI themes were checked, check all AI themes
+      if (selectedAiThemes.size === 0) {
+        getAllAiQuestions().forEach(q => selectedAiThemes.add(q.theme));
+      }
+      syncAllState();
+      setQuizCount('all');
+      startQuiz();
+    }
+
+    function launchAiPart(partNum) {
+      selectionMode = 'theme';
+      currentQuizSettings.includeAi = true;
+      const optCb = document.getElementById('opt-include-ai');
+      if (optCb) optCb.checked = true;
+
+      document.querySelectorAll('#themes-list-p1 .theme-card input[type="checkbox"], #themes-list-p2 .theme-card input[type="checkbox"]').forEach(cb => {
+        cb.checked = false;
+        const card = cb.closest('.theme-card');
+        if (card) card.classList.remove('theme-card-active');
+      });
+
+      selectedAiThemes.clear();
+      const container = document.getElementById(`ai-part-container-${partNum}`);
+      if (container) {
+        container.querySelectorAll('.ai-theme-card input[type="checkbox"]').forEach(cb => {
+          selectedAiThemes.add(cb.value);
+        });
+      }
+      syncAllState();
+      setQuizCount('all');
+      startQuiz();
+    }
+
+    function launchAiSingleCategory(catId) {
+      selectionMode = 'theme';
+      currentQuizSettings.includeAi = true;
+      const optCb = document.getElementById('opt-include-ai');
+      if (optCb) optCb.checked = true;
+
+      document.querySelectorAll('#themes-list-p1 .theme-card input[type="checkbox"], #themes-list-p2 .theme-card input[type="checkbox"]').forEach(cb => {
+        cb.checked = false;
+        const card = cb.closest('.theme-card');
+        if (card) card.classList.remove('theme-card-active');
+      });
+
+      selectedAiThemes.clear();
+      const block = document.querySelector(`.ai-category-block[data-ai-cat-id="${catId}"]`);
+      if (block) {
+        block.querySelectorAll('.ai-theme-card input[type="checkbox"]').forEach(cb => {
+          selectedAiThemes.add(cb.value);
+        });
+      }
+      syncAllState();
+      setQuizCount('all');
+      startQuiz();
+    }
+
+    function launchAiSingleTheme(themeName) {
+      selectionMode = 'theme';
+      currentQuizSettings.includeAi = true;
+      const optCb = document.getElementById('opt-include-ai');
+      if (optCb) optCb.checked = true;
+
+      document.querySelectorAll('#themes-list-p1 .theme-card input[type="checkbox"], #themes-list-p2 .theme-card input[type="checkbox"]').forEach(cb => {
+        cb.checked = false;
+        const card = cb.closest('.theme-card');
+        if (card) card.classList.remove('theme-card-active');
+      });
+
+      selectedAiThemes = new Set([themeName]);
+      syncAllState();
+      setQuizCount('all');
+      startQuiz();
     }
 
     function createCategoryBlock(cat, catThemes, counts, catTotal, catQcm, catOpen) {
@@ -2556,13 +3209,20 @@
         }
       }
 
-      // 5. Sync Selected Pill Count
+      // 5. Sync AI Section state
+      syncAiSectionState();
+
+      // 6. Sync Selected Pill Count
       const pillSelCount = document.getElementById('pill-selected-count');
       if (pillSelCount) {
-        pillSelCount.textContent = selectedThemes.size;
+        const unionThemes = new Set([
+          ...selectedThemes,
+          ...(currentQuizSettings.includeAi ? selectedAiThemes : [])
+        ]);
+        pillSelCount.textContent = unionThemes.size;
       }
 
-      // 6. Update right panel and sticky bar summary
+      // 7. Update right panel and sticky bar summary
       updateSelectedSummary();
     }
 
@@ -2628,6 +3288,12 @@
         if (card) card.classList.toggle('theme-card-active', inThisCat);
       });
 
+      document.querySelectorAll('#themes-list-ai .ai-theme-card input[type="checkbox"]').forEach(cb => {
+        cb.checked = false;
+        const card = cb.closest('.ai-theme-card');
+        if (card) card.classList.remove('theme-card-active');
+      });
+
       syncAllState();
       setQuizCount('all');
       startQuiz();
@@ -2640,6 +3306,12 @@
         cb.checked = isSel;
         const card = cb.closest('.theme-card');
         if (card) card.classList.toggle('theme-card-active', isSel);
+      });
+
+      document.querySelectorAll('#themes-list-ai .ai-theme-card input[type="checkbox"]').forEach(cb => {
+        cb.checked = false;
+        const card = cb.closest('.ai-theme-card');
+        if (card) card.classList.remove('theme-card-active');
       });
 
       syncAllState();
@@ -2672,6 +3344,12 @@
         cb.checked = inThisPart;
         const card = cb.closest('.theme-card');
         if (card) card.classList.toggle('theme-card-active', inThisPart);
+      });
+
+      document.querySelectorAll('#themes-list-ai .ai-theme-card input[type="checkbox"]').forEach(cb => {
+        cb.checked = false;
+        const card = cb.closest('.ai-theme-card');
+        if (card) card.classList.remove('theme-card-active');
       });
 
       syncAllState();
@@ -2905,7 +3583,7 @@
       document.querySelectorAll('#selection-view-theme input[type="checkbox"]').forEach(cb => {
         cb.checked = check;
         cb.indeterminate = false;
-        const card = cb.closest('.theme-card');
+        const card = cb.closest('.theme-card') || cb.closest('.ai-theme-card');
         if (card) card.classList.toggle('theme-card-active', check);
       });
       syncAllState();
@@ -2918,7 +3596,7 @@
       const container = document.getElementById('sources-list-container');
       container.innerHTML = '';
 
-      const allAi = getAiQuestions();
+      const allAi = getAllAiQuestions();
       const allDocs = [...OFFICIAL_DOCUMENTS];
 
       // If AI questions exist, add a special source card for them
@@ -2926,11 +3604,11 @@
         allDocs.push({
           id: "doc-ai-generated",
           name: "Questions Générées par IA",
-          filename: "Banque Locale IA (localStorage)",
+          filename: "Banque IA intégrée + locale",
           format: `${allAi.filter(isQcm).length} QCM • ${allAi.filter(isOpen).length} Ouvertes`,
           year: "Création IA",
           session: "Personnalisée",
-          description: "Questions d'entraînement inédites synthétisées par le générateur IA.",
+          description: "Questions d'entraînement inédites générées par IA (par chapitre).",
           isAi: true
         });
       }
@@ -3009,6 +3687,11 @@
     function toggleSource(sourceName, isChecked) {
       if (isChecked) selectedSources.add(sourceName);
       else selectedSources.delete(sourceName);
+      if (sourceName === 'Questions Générées par IA') {
+        currentQuizSettings.includeAi = isChecked;
+        const aiCb = document.getElementById('opt-include-ai');
+        if (aiCb) aiCb.checked = isChecked;
+      }
       updateSelectedSummary();
     }
 
@@ -3091,9 +3774,27 @@
       
       const qcmCount = effectivePool.filter(isQcm).length;
       const openCount = effectivePool.filter(isOpen).length;
+      const aiInPoolCount = effectivePool.filter(q => q.isAiGenerated || q.document === 'Questions Générées par IA').length;
+
+      // Update badge on "Inclure les questions IA" checkbox in Paramètres du Quiz
+      const optAiBadge = document.getElementById('opt-include-ai-count-badge');
+      if (optAiBadge) {
+        const allTypeFilteredAi = getAllAiQuestions().filter(q => isQcm(q) ? includeQCM : (isOpen(q) ? includeOpen : false));
+        const selectedAiCount = selectionMode === 'theme'
+          ? allTypeFilteredAi.filter(q => selectedAiThemes.has(q.theme)).length
+          : (selectedSources.has('Questions Générées par IA') ? allTypeFilteredAi.length : 0);
+        if (currentQuizSettings.includeAi) {
+          optAiBadge.textContent = `${selectedAiCount} / ${allTypeFilteredAi.length} IA`;
+          optAiBadge.className = 'px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 text-purple-800 border border-purple-200 whitespace-nowrap';
+        } else {
+          optAiBadge.textContent = `Désactivé (${allTypeFilteredAi.length} IA)`;
+          optAiBadge.className = 'px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-500 border border-slate-200 whitespace-nowrap';
+        }
+      }
 
       if (selectionMode === 'theme') {
-        document.getElementById('summary-items-count').textContent = `${selectedThemes.size} sous-thèmes`;
+        const aiThemesPart = currentQuizSettings.includeAi && selectedAiThemes.size > 0 ? ` + ${selectedAiThemes.size} IA` : '';
+        document.getElementById('summary-items-count').textContent = `${selectedThemes.size} sous-thèmes${aiThemesPart}`;
       } else {
         document.getElementById('summary-items-count').textContent = `${selectedSources.size} annales`;
       }
@@ -3104,7 +3805,8 @@
         document.getElementById('summary-pool-count').textContent = `${pool.length} question${pool.length > 1 ? 's' : ''} (${uniquePool.length} uniques)`;
       }
 
-      document.getElementById('summary-composition').textContent = `${qcmCount} QCM • ${openCount} Question${openCount > 1 ? 's' : ''} ouverte${openCount > 1 ? 's' : ''}`;
+      const aiCompTag = aiInPoolCount > 0 ? ` • ✨ ${aiInPoolCount} IA` : '';
+      document.getElementById('summary-composition').textContent = `${qcmCount} QCM • ${openCount} Question${openCount > 1 ? 's' : ''} ouverte${openCount > 1 ? 's' : ''}${aiCompTag}`;
 
       // Keep counter controls in sync with effective pool size
       updateCountSelectorUI(currentQuizSettings.count, effectivePool.length);
