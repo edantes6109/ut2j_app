@@ -338,20 +338,35 @@ def build_landing(ues):
         icon = "👶" if code == "301" else ("🧠" if code == "304" else "📚")
 
         cards.append(f"""
-      <a class="card" href="./{html_lib.escape(code)}/index.html">
-        <div class="card-header">
-          <span class="badge">UE {html_lib.escape(code)}</span>
-          <span class="icon">{icon}</span>
-        </div>
-        <div class="title">{title}</div>
-        <div class="meta">
-          <span>{level}</span> • <span>{total_q} questions</span> • <span>{total_sessions} sessions d'annales</span>
-        </div>
-        <div class="action">
-          <span>Accéder aux révisions</span>
-          <span>→</span>
-        </div>
-      </a>
+      <div class="card-wrapper" data-ue-code="{html_lib.escape(code)}" data-total-q="{total_q}">
+        <a class="card" href="./{html_lib.escape(code)}/index.html">
+          <div class="card-header">
+            <span class="badge">UE {html_lib.escape(code)}</span>
+            <span class="icon">{icon}</span>
+          </div>
+          <div class="title">{title}</div>
+          <div class="meta">
+            <span>{level}</span> • <span>{total_q} questions</span> • <span>{total_sessions} sessions d'annales</span>
+          </div>
+          <div class="ue-progress-strip" id="ue-progress-{html_lib.escape(code)}">
+            <div class="ue-progress-top">
+              <span id="ue-cov-text-{html_lib.escape(code)}">Votre avancement : 0% (0/{total_q})</span>
+              <span class="ue-avg" id="ue-avg-text-{html_lib.escape(code)}">Aucun test</span>
+            </div>
+            <div class="ue-bar-bg">
+              <div class="ue-bar-fill" id="ue-bar-{html_lib.escape(code)}" style="width: 0%"></div>
+            </div>
+            <div class="ue-progress-bottom">
+              <span class="ue-err-label" id="ue-err-text-{html_lib.escape(code)}">✨ Prêt à démarrer vos révisions</span>
+              <span class="ue-profile-link" onclick="openUeProfile(event, '{html_lib.escape(code)}')">Mon Profil →</span>
+            </div>
+          </div>
+          <div class="action">
+            <span>Accéder aux révisions</span>
+            <span>→</span>
+          </div>
+        </a>
+      </div>
         """.strip())
 
     cards_html = "\n".join("      " + c for c in cards).strip()
@@ -373,9 +388,12 @@ def build_landing(ues):
       --muted: #64748b;
       --card: #ffffff;
       --card-hover: #f8fafc;
+      --subcard: #f1f5f9;
       --border: #e2e8f0;
       --border-hover: #6366f1;
       --accent: #4f46e5;
+      --emerald: #059669;
+      --rose: #e11d48;
     }
     @media (prefers-color-scheme: dark) {
       :root {
@@ -384,9 +402,12 @@ def build_landing(ues):
         --muted: #94a3b8;
         --card: #1e293b;
         --card-hover: #243247;
+        --subcard: #0f172a;
         --border: #334155;
         --border-hover: #818cf8;
         --accent: #818cf8;
+        --emerald: #34d399;
+        --rose: #fb7185;
       }
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -405,7 +426,7 @@ def build_landing(ues):
       max-width: 44rem;
     }
     header {
-      margin-bottom: 2rem;
+      margin-bottom: 1.5rem;
       text-align: left;
     }
     h1 {
@@ -432,6 +453,83 @@ def build_landing(ues):
       color: var(--accent);
       border: 1px solid rgba(99, 102, 241, 0.25);
       width: fit-content;
+    }
+    .profile-widget {
+      display: none;
+      flex-direction: column;
+      gap: 0.9rem;
+      padding: 1.15rem 1.35rem;
+      margin-bottom: 1.5rem;
+      background: var(--card);
+      border: 1.5px solid rgba(99, 102, 241, 0.35);
+      border-radius: 1.25rem;
+      box-shadow: 0 2px 8px rgba(99, 102, 241, 0.06);
+    }
+    .profile-widget-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .profile-id {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+    }
+    .profile-avatar {
+      width: 2.35rem;
+      height: 2.35rem;
+      border-radius: 0.7rem;
+      background: var(--accent);
+      color: #fff;
+      font-weight: 800;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .profile-label {
+      font-size: 0.68rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--accent);
+    }
+    .profile-email {
+      font-size: 0.85rem;
+      font-weight: 700;
+      font-family: monospace;
+    }
+    .profile-sessions-pill {
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.25rem 0.65rem;
+      border-radius: 999px;
+      background: rgba(16, 185, 129, 0.12);
+      color: var(--emerald);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    .profile-kpis {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.65rem;
+    }
+    .profile-kpi-box {
+      padding: 0.65rem 0.8rem;
+      border-radius: 0.8rem;
+      background: var(--subcard);
+      border: 1px solid var(--border);
+    }
+    .profile-kpi-title {
+      font-size: 0.72rem;
+      color: var(--muted);
+      font-weight: 600;
+    }
+    .profile-kpi-val {
+      font-size: 1.05rem;
+      font-weight: 800;
+      margin-top: 0.15rem;
     }
     .grid {
       display: grid;
@@ -484,8 +582,54 @@ def build_landing(ues):
       font-size: 0.85rem;
       font-weight: 500;
     }
+    .ue-progress-strip {
+      margin-top: 0.25rem;
+      padding: 0.7rem 0.85rem;
+      border-radius: 0.85rem;
+      background: var(--subcard);
+      border: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+    .ue-progress-top, .ue-progress-bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.76rem;
+      font-weight: 700;
+      gap: 0.5rem;
+    }
+    .ue-avg {
+      color: var(--accent);
+    }
+    .ue-bar-bg {
+      width: 100%;
+      height: 0.38rem;
+      border-radius: 999px;
+      background: var(--card);
+      overflow: hidden;
+    }
+    .ue-bar-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: var(--accent);
+      transition: width 0.3s ease;
+    }
+    .ue-err-label {
+      font-weight: 600;
+      color: var(--muted);
+    }
+    .ue-profile-link {
+      color: var(--accent);
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .ue-profile-link:hover {
+      text-decoration: underline;
+    }
     .action {
-      margin-top: 0.4rem;
+      margin-top: 0.2rem;
       display: flex;
       align-items: center;
       gap: 0.35rem;
@@ -513,6 +657,34 @@ def build_landing(ues):
       </div>
     </header>
 
+    <!-- Global Member Summary Widget -->
+    <section id="global-member-profile-widget" class="profile-widget">
+      <div class="profile-widget-top">
+        <div class="profile-id">
+          <div id="hub-profile-initials" class="profile-avatar">👤</div>
+          <div>
+            <div class="profile-label">Profil Étudiant • Synthèse Globale</div>
+            <div id="hub-profile-email" class="profile-email"></div>
+          </div>
+        </div>
+        <span id="hub-profile-sessions-badge" class="profile-sessions-pill">0 session terminée</span>
+      </div>
+      <div class="profile-kpis">
+        <div class="profile-kpi-box">
+          <div class="profile-kpi-title">Moyenne générale</div>
+          <div id="hub-profile-avg" class="profile-kpi-val" style="color: var(--accent);">—</div>
+        </div>
+        <div class="profile-kpi-box">
+          <div class="profile-kpi-title">Temps d'étude</div>
+          <div id="hub-profile-time" class="profile-kpi-val">0m</div>
+        </div>
+        <div class="profile-kpi-box">
+          <div class="profile-kpi-title">Erreurs à revoir</div>
+          <div id="hub-profile-errors" class="profile-kpi-val" style="color: var(--rose);">0 question</div>
+        </div>
+      </div>
+    </section>
+
     <div class="grid">
       {{CARDS}}
     </div>
@@ -523,6 +695,9 @@ def build_landing(ues):
   </main>
 
   <script>
+    let activeHubEmail = '';
+    let activeHubPin = '';
+
     function clearSession(e) {
       if (e) e.preventDefault();
       try {
@@ -536,6 +711,115 @@ def build_landing(ues):
       window.location.href = window.location.pathname;
     }
 
+    function openUeProfile(e, ueCode) {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      let url = './' + ueCode + '/index.html?tab=profile';
+      if (activeHubEmail && activeHubPin) {
+        url += '&email=' + encodeURIComponent(activeHubEmail) + '&pin=' + encodeURIComponent(activeHubPin);
+      }
+      window.location.href = url;
+    }
+
+    function renderHubMemberDashboard(email) {
+      const normEmail = (email || '').trim().toLowerCase() || 'invite.local';
+      let totalSessions = 0;
+      let weightedPctSum = 0;
+      let totalSeconds = 0;
+      let totalActiveErrors = 0;
+
+      document.querySelectorAll('.card-wrapper').forEach(wrap => {
+        const code = wrap.getAttribute('data-ue-code');
+        const totalQ = parseInt(wrap.getAttribute('data-total-q') || '0', 10) || 1;
+        const storageKey = `ut2j_profile_v1_${code}_${normEmail}`;
+        let profile = null;
+        try {
+          const raw = localStorage.getItem(storageKey);
+          if (raw) profile = JSON.parse(raw);
+        } catch (err) {}
+
+        const covEl = document.getElementById('ue-cov-text-' + code);
+        const avgEl = document.getElementById('ue-avg-text-' + code);
+        const barEl = document.getElementById('ue-bar-' + code);
+        const errEl = document.getElementById('ue-err-text-' + code);
+
+        if (profile && typeof profile === 'object') {
+          const sessions = Array.isArray(profile.sessions) ? profile.sessions : [];
+          const stats = Object.values(profile.questionStats || {});
+          const seenOfficial = stats.filter(s => s && !s.isAiGenerated).length;
+          const activeErr = stats.filter(s => s && s.activeError).length;
+          const covPct = Math.min(100, Math.round((seenOfficial / totalQ) * 100));
+
+          totalSessions += sessions.length;
+          totalActiveErrors += activeErr;
+          sessions.forEach(s => {
+            weightedPctSum += (s.pct || 0);
+            totalSeconds += (s.elapsedSeconds || 0);
+          });
+
+          if (covEl) covEl.textContent = `Votre avancement : ${covPct}% (${seenOfficial}/${totalQ})`;
+          if (barEl) barEl.style.width = `${covPct}%`;
+
+          if (sessions.length > 0) {
+            const ueAvg = Math.round(sessions.reduce((a, b) => a + (b.pct || 0), 0) / sessions.length);
+            if (avgEl) avgEl.textContent = `Score moyen : ${ueAvg}%`;
+          } else {
+            if (avgEl) avgEl.textContent = 'Aucun test';
+          }
+
+          if (errEl) {
+            if (activeErr > 0) {
+              errEl.textContent = `🎯 ${activeErr} erreur${activeErr > 1 ? 's' : ''} à retravailler`;
+              errEl.style.color = 'var(--rose)';
+            } else if (sessions.length > 0) {
+              errEl.textContent = `✓ Aucune erreur en attente (${sessions.length} session${sessions.length > 1 ? 's' : ''})`;
+              errEl.style.color = 'var(--emerald)';
+            }
+          }
+        }
+      });
+
+      const widget = document.getElementById('global-member-profile-widget');
+      if (widget && (email || totalSessions > 0)) {
+        widget.style.display = 'flex';
+        const emailEl = document.getElementById('hub-profile-email');
+        if (emailEl) emailEl.textContent = email || 'Session locale';
+
+        const initEl = document.getElementById('hub-profile-initials');
+        if (initEl && email) {
+          const namePart = email.split('@')[0] || 'UT';
+          const segs = namePart.split(/[._-]/).filter(Boolean);
+          initEl.textContent = segs.length >= 2
+            ? (segs[0][0] + segs[1][0]).toUpperCase()
+            : namePart.slice(0, 2).toUpperCase();
+        }
+
+        const sessBadge = document.getElementById('hub-profile-sessions-badge');
+        if (sessBadge) {
+          sessBadge.textContent = `🔥 ${totalSessions} session${totalSessions > 1 ? 's' : ''} complétée${totalSessions > 1 ? 's' : ''}`;
+        }
+
+        const avgGlobalEl = document.getElementById('hub-profile-avg');
+        if (avgGlobalEl) {
+          avgGlobalEl.textContent = totalSessions > 0 ? `${Math.round(weightedPctSum / totalSessions)}%` : '—';
+        }
+
+        const timeGlobalEl = document.getElementById('hub-profile-time');
+        if (timeGlobalEl) {
+          const hrs = Math.floor(totalSeconds / 3600);
+          const mins = Math.floor((totalSeconds % 3600) / 60);
+          timeGlobalEl.textContent = hrs > 0 ? `${hrs}h ${String(mins).padStart(2, '0')}m` : `${mins}m`;
+        }
+
+        const errGlobalEl = document.getElementById('hub-profile-errors');
+        if (errGlobalEl) {
+          errGlobalEl.textContent = `${totalActiveErrors} question${totalActiveErrors > 1 ? 's' : ''}`;
+        }
+      }
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
       const urlParams = new URLSearchParams(window.location.search);
       let email = urlParams.get('email') || 
@@ -546,6 +830,9 @@ def build_landing(ues):
                 localStorage.getItem('ut2j_auth_pin') || 
                 localStorage.getItem('ue304_auth_pin') || 
                 localStorage.getItem('ue301_auth_pin') || '';
+
+      activeHubEmail = email;
+      activeHubPin = pin;
 
       if (email && pin) {
         try {
@@ -567,6 +854,8 @@ def build_landing(ues):
           badge.style.display = 'inline-flex';
         }
       }
+
+      renderHubMemberDashboard(email);
     });
   </script>
 </body>

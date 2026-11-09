@@ -310,6 +310,11 @@
             <span>📊</span>
             <span>4. Statistiques</span>
           </button>
+          <button onclick="navigateTab('profile')" id="nav-profile" class="px-3.5 py-2 rounded-lg text-xs font-bold transition-all text-slate-600 hover:text-slate-900 hover:bg-slate-100 flex items-center gap-1.5 whitespace-nowrap">
+            <span>👤</span>
+            <span>5. Mon Profil</span>
+            <span id="nav-profile-error-badge" class="hidden px-1.5 py-0.5 rounded-full text-[10px] bg-rose-600 text-white font-extrabold leading-none">0</span>
+          </button>
         </nav>
 
         <button onclick="openAiGeneratorModal()" class="px-3.5 py-2 rounded-xl text-xs font-bold transition-all bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white shadow-sm flex items-center gap-1.5 whitespace-nowrap">
@@ -1301,6 +1306,222 @@
 
     </section>
 
+    <!-- ============================================================== -->
+    <!-- TAB 5: MEMBER PROFILE, ERROR BANK & SESSION HISTORY -->
+    <!-- ============================================================== -->
+    <section id="tab-content-profile" class="hidden space-y-6 pb-20">
+
+      <!-- Member Identity & Backup Banner -->
+      <div class="card-white rounded-2xl p-5 sm:p-6 shadow-sm border border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div class="flex items-center gap-4">
+          <div id="profile-avatar-initials" class="w-14 h-14 rounded-2xl bg-indigo-50 border border-indigo-200 text-indigo-700 flex items-center justify-center text-xl font-extrabold shrink-0">
+            👤
+          </div>
+          <div>
+            <div class="flex items-center gap-2 flex-wrap">
+              <h2 class="text-lg sm:text-xl font-extrabold text-slate-900">
+                Tableau de Bord Personnel • UE {{UE_CODE}}
+              </h2>
+              <span id="profile-streak-badge" class="hidden px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                🔥 Série active
+              </span>
+            </div>
+            <p class="text-xs text-slate-600 mt-0.5">
+              Membre : <span id="profile-member-email" class="font-mono font-semibold text-slate-900">Invité local</span>
+              <span id="profile-last-activity" class="text-slate-500"> • Aucune session enregistrée</span>
+            </p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2 flex-wrap">
+          <button type="button" onclick="exportMemberProfileJson()" class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-2xs" title="Télécharger une sauvegarde JSON de votre profil et historique">
+            <span>⬇️</span>
+            <span>Exporter mes données</span>
+          </button>
+          <label class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-2xs" title="Restaurer un fichier JSON de profil">
+            <span>⬆️</span>
+            <span>Importer</span>
+            <input type="file" id="profile-import-input" accept=".json,application/json" onchange="importMemberProfileJson(event)" class="hidden" />
+          </label>
+          <button type="button" onclick="resetMemberProfileData()" class="px-2.5 py-2 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-semibold transition cursor-pointer" title="Réinitialiser les statistiques de ce profil sur cette UE">
+            <span>🗑️</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Review Mode Notice Banner (Shown when reviewing a past session) -->
+      <div id="profile-review-banner" class="hidden bg-indigo-50 border border-indigo-200 rounded-2xl p-4 flex items-center justify-between gap-3">
+        <div class="flex items-center gap-2.5 text-xs text-indigo-900">
+          <span class="text-base">🔍</span>
+          <span id="profile-review-banner-text" class="font-semibold">Consultation d'une session archivée</span>
+        </div>
+        <button onclick="navigateTab('results')" class="px-3 py-1.5 rounded-lg bg-indigo-600 text-white text-xs font-bold">
+          Voir le détail →
+        </button>
+      </div>
+
+      <!-- 1. GLOBAL KPIs (4 Metric Cards) -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- KPI 1: Sessions Completed -->
+        <div class="card-white rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-200 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Sessions terminées</span>
+            <span class="text-base">📝</span>
+          </div>
+          <div class="flex items-baseline gap-2">
+            <span id="profile-kpi-sessions" class="text-2xl sm:text-3xl font-extrabold text-slate-900">0</span>
+            <span id="profile-kpi-sessions-week" class="text-xs font-semibold text-emerald-600"></span>
+          </div>
+          <p id="profile-kpi-sessions-split" class="text-xs text-slate-500">
+            0 entraînement • 0 examen blanc
+          </p>
+        </div>
+
+        <!-- KPI 2: Average Score & Trend -->
+        <div class="card-white rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-200 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Score moyen</span>
+            <span class="text-base">📈</span>
+          </div>
+          <div class="flex items-baseline gap-2 flex-wrap">
+            <span id="profile-kpi-avg-score" class="text-2xl sm:text-3xl font-extrabold text-indigo-600">—</span>
+            <span id="profile-kpi-trend-badge" class="hidden text-xs font-bold px-2 py-0.5 rounded-full"></span>
+          </div>
+          <p id="profile-kpi-recent-avg" class="text-xs text-slate-500">
+            Complétez un quiz pour calculer votre tendance
+          </p>
+        </div>
+
+        <!-- KPI 3: Official Bank Coverage -->
+        <div class="card-white rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-200 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Couverture Annales</span>
+            <span class="text-base">🎯</span>
+          </div>
+          <div class="flex items-baseline gap-2">
+            <span id="profile-kpi-coverage-count" class="text-2xl sm:text-3xl font-extrabold text-slate-900">0 <span class="text-sm font-normal text-slate-500">/ {{TOTAL_QUESTIONS}}</span></span>
+            <span id="profile-kpi-coverage-pct" class="text-xs font-bold text-indigo-600">(0%)</span>
+          </div>
+          <div class="w-full h-2 rounded-full bg-slate-100 overflow-hidden flex border border-slate-200">
+            <div id="profile-kpi-bar-mastered" class="bg-emerald-500 h-full transition-all" style="width: 0%"></div>
+            <div id="profile-kpi-bar-errors" class="bg-rose-500 h-full transition-all" style="width: 0%"></div>
+          </div>
+          <p id="profile-kpi-coverage-detail" class="text-xs text-slate-500">
+            0 validée • 0 à retravailler • {{TOTAL_QUESTIONS}} inédites
+          </p>
+        </div>
+
+        <!-- KPI 4: Active Study Time -->
+        <div class="card-white rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-200 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Temps d'étude actif</span>
+            <span class="text-base">⏱️</span>
+          </div>
+          <div class="flex items-baseline gap-2">
+            <span id="profile-kpi-study-time" class="text-2xl sm:text-3xl font-extrabold text-slate-900">0m</span>
+          </div>
+          <p id="profile-kpi-pace" class="text-xs text-slate-500">
+            Rythme moyen : — / question
+          </p>
+        </div>
+      </div>
+
+      <!-- 2. WEAK POINTS SPOTLIGHT + CHAPTER MASTERY GRID -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        <!-- Left: Priority Weak Points ("Points à travailler en priorité") -->
+        <div class="lg:col-span-5 card-white rounded-2xl p-5 shadow-sm border border-slate-200 flex flex-col justify-between space-y-4">
+          <div class="space-y-3">
+            <div class="flex items-center justify-between border-b border-slate-200 pb-3">
+              <div class="flex items-center gap-2">
+                <span class="text-base">🎯</span>
+                <h3 class="text-xs font-extrabold uppercase tracking-wider text-rose-700">
+                  Points à travailler en priorité
+                </h3>
+              </div>
+              <span id="profile-weak-count-badge" class="px-2 py-0.5 rounded-full text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                0 point fragile
+              </span>
+            </div>
+
+            <p class="text-xs text-slate-600 leading-relaxed">
+              Sous-thèmes et notions identifiés automatiquement selon votre taux d'erreur et vos erreurs récurrentes :
+            </p>
+
+            <!-- Dynamic Weak Sub-themes Container -->
+            <div id="profile-weak-points-list" class="space-y-2.5">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+
+          <!-- One-Click Smart Remediation Actions -->
+          <div class="pt-2 space-y-2 border-t border-slate-100">
+            <button type="button" onclick="startProfileRemediationQuiz('all')" id="profile-btn-launch-remediation" class="w-full py-3 px-4 rounded-xl bg-rose-600 hover:bg-rose-700 disabled:opacity-50 text-white text-xs sm:text-sm font-extrabold shadow-xs transition flex items-center justify-center gap-2 cursor-pointer">
+              <span>🚀</span>
+              <span id="profile-btn-remediation-label">Lancer un Quiz de Remédiation (0 erreur)</span>
+            </button>
+            <button type="button" onclick="trainOnFragileThemes()" id="profile-btn-train-fragile" class="w-full py-2.5 px-4 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 disabled:opacity-50 text-slate-800 text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer">
+              <span>📚</span>
+              <span>S'entraîner sur mes sous-thèmes fragiles</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Right: Mastery by Chapter -->
+        <div class="lg:col-span-7 card-white rounded-2xl p-5 shadow-sm border border-slate-200 space-y-4">
+          <div class="flex items-center justify-between border-b border-slate-200 pb-3 flex-wrap gap-2">
+            <div class="flex items-center gap-2">
+              <span class="text-base">📊</span>
+              <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-900">
+                Maîtrise par Chapitre du Cours
+              </h3>
+            </div>
+            <span class="text-xs text-slate-500">Cliquez sur un chapitre pour filtrer votre carnet d'erreurs</span>
+          </div>
+
+          <div id="profile-chapters-mastery-list" class="space-y-3">
+            <!-- Populated by JS from CHAPTER_CATEGORIES -->
+          </div>
+        </div>
+
+      </div>
+
+      <!-- 3. PERSISTENT ERROR BANK ("CARNET D'ERREURS") & 4. TEST HISTORY LOG -->
+      <div class="card-white rounded-2xl p-5 shadow-sm border border-slate-200 space-y-4">
+
+        <!-- Sub-navigation inside bottom card -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-3">
+          <div class="flex items-center gap-2 flex-wrap">
+            <button type="button" onclick="switchProfileSubtab('errors')" id="profile-subtab-btn-errors" class="px-3.5 py-2 rounded-xl text-xs font-extrabold bg-rose-600 text-white transition flex items-center gap-2 cursor-pointer shadow-2xs">
+              <span>📕 Carnet d'erreurs à retravailler</span>
+              <span id="profile-subtab-errors-count" class="px-1.5 py-0.5 rounded-full bg-white/20 text-white text-xs">0</span>
+            </button>
+            <button type="button" onclick="switchProfileSubtab('history')" id="profile-subtab-btn-history" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200 transition flex items-center gap-2 cursor-pointer">
+              <span>🕒 Historique des sessions</span>
+              <span id="profile-subtab-history-count" class="px-1.5 py-0.5 rounded-full bg-white text-slate-800 text-xs border border-slate-200">0</span>
+            </button>
+          </div>
+
+          <!-- Filter pills for Error Bank -->
+          <div id="profile-error-filter-bar" class="flex items-center gap-1.5 flex-wrap">
+            <!-- Dynamically populated chapter/recurrence filter pills -->
+          </div>
+        </div>
+
+        <!-- SUBTAB 1: ERROR BANK LIST -->
+        <div id="profile-subtab-content-errors" class="space-y-3">
+          <!-- Dynamically populated error cards -->
+        </div>
+
+        <!-- SUBTAB 2: TEST HISTORY LOG -->
+        <div id="profile-subtab-content-history" class="hidden space-y-3">
+          <!-- Dynamically populated session history cards -->
+        </div>
+
+      </div>
+
+    </section>
+
   </main>
 
   <!-- ============================================================== -->
@@ -1948,6 +2169,14 @@
         updateSelectedSummary();
         updateAiBadgeCounts();
       }
+
+      if (typeof updateProfileNavBadge === 'function') {
+        updateProfileNavBadge();
+      }
+      if (window.__initialRequestedTab === 'profile') {
+        window.__initialRequestedTab = null;
+        navigateTab('profile');
+      }
     }
 
     function goToHub(e) {
@@ -2003,6 +2232,10 @@
       // 1. Priorité: Paramètres URL ?email=...&pin=... (lien magique 1 clic)
       try {
         const urlParams = new URLSearchParams(window.location.search);
+        const reqTab = urlParams.get('tab');
+        if (reqTab) {
+          window.__initialRequestedTab = reqTab;
+        }
         const urlEmail = normalizeAuthEmail(urlParams.get('email'));
         const urlPin = normalizeAuthPin(urlParams.get('pin'));
         if (urlEmail && urlPin && isCredentialsAuthorized(urlEmail, urlPin)) {
@@ -2211,7 +2444,7 @@
 
     // Tab Navigation
     function navigateTab(tabName) {
-      const tabs = ['themes', 'quiz', 'results', 'stats'];
+      const tabs = ['themes', 'quiz', 'results', 'stats', 'profile'];
       tabs.forEach(t => {
         const content = document.getElementById(`tab-content-${t}`);
         const navBtn = document.getElementById(`nav-${t}`);
@@ -2233,6 +2466,8 @@
 
       if (tabName === 'stats') {
         renderStatsTab();
+      } else if (tabName === 'profile') {
+        renderMemberProfile();
       }
 
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -2685,14 +2920,25 @@
         </label>
         <div class="flex items-center shrink-0 pl-1">
           ${c.total > 0 ? `
-            <button type="button" onclick="event.stopPropagation(); launchAiSingleTheme('${escapeHtml(theme)}')"
+            <button type="button"
               title="Passer immédiatement ce sous-thème IA (${c.total} question${c.total > 1 ? 's' : ''})"
-              class="px-2 py-0.5 rounded-md text-[11px] font-semibold text-purple-700 bg-white hover:bg-purple-50 border border-purple-200 transition shadow-2xs whitespace-nowrap flex items-center gap-1">
+              class="btn-launch-ai-theme px-2 py-0.5 rounded-md text-[11px] font-semibold text-purple-700 bg-white hover:bg-purple-50 border border-purple-200 transition shadow-2xs whitespace-nowrap flex items-center gap-1">
               <span>🎯</span> <span class="hidden sm:inline">Passer</span> <span>(${c.total})</span>
             </button>
           ` : ''}
         </div>
       `;
+
+      if (c.total > 0) {
+        const btn = card.querySelector('.btn-launch-ai-theme');
+        if (btn) {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            launchAiSingleTheme(theme);
+          });
+        }
+      }
+
       return card;
     }
 
@@ -3081,14 +3327,25 @@
         </label>
         <div class="flex items-center shrink-0 pl-1">
           ${c.total > 0 ? `
-            <button type="button" onclick="event.stopPropagation(); launchSingleTheme('${escapeHtml(theme)}')" 
+            <button type="button" 
               title="Passer immédiatement ce sous-thème (${c.total} questions)" 
-              class="px-2 py-0.5 rounded-md text-[11px] font-semibold text-indigo-700 bg-white hover:bg-indigo-50 border border-indigo-200 transition shadow-2xs whitespace-nowrap flex items-center gap-1">
+              class="btn-launch-theme px-2 py-0.5 rounded-md text-[11px] font-semibold text-indigo-700 bg-white hover:bg-indigo-50 border border-indigo-200 transition shadow-2xs whitespace-nowrap flex items-center gap-1">
               <span>🎯</span> <span class="hidden sm:inline">Passer</span> <span>(${c.total})</span>
             </button>
           ` : ''}
         </div>
       `;
+
+      if (c.total > 0) {
+        const btn = card.querySelector('.btn-launch-theme');
+        if (btn) {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            launchSingleTheme(theme);
+          });
+        }
+      }
+
       return card;
     }
 
@@ -3278,6 +3535,7 @@
 
     function launchSingleCategory(catId) {
       selectionMode = 'theme';
+      selectedAiThemes.clear();
       const block = document.querySelector(`.category-block[data-cat-id="${catId}"]`);
       if (!block) return;
 
@@ -3301,6 +3559,8 @@
 
     function launchSingleTheme(themeName) {
       selectionMode = 'theme';
+      selectedThemes = new Set([themeName]);
+      selectedAiThemes.clear();
       document.querySelectorAll('#selection-view-theme .theme-card input[type="checkbox"]').forEach(cb => {
         const isSel = cb.value === themeName;
         cb.checked = isSel;
@@ -3336,6 +3596,7 @@
 
     function launchPart(partNum) {
       selectionMode = 'theme';
+      selectedAiThemes.clear();
       const container = document.getElementById(`themes-list-p${partNum}`);
       if (!container) return;
 
@@ -3663,13 +3924,23 @@
             <div class="flex items-center gap-2 self-start sm:self-center pl-7 sm:pl-0">
               <div class="flex items-center gap-1.5">${badges}</div>
               ${c.total > 0 ? `
-                <button onclick="launchSingleSource('${escapeHtml(doc.name)}')" class="px-3 py-1.5 rounded-lg border border-indigo-200 bg-indigo-50 hover:bg-indigo-100 text-indigo-800 text-xs font-bold transition whitespace-nowrap shadow-xs">
+                <button type="button" class="btn-launch-source px-3 py-1.5 rounded-lg border border-indigo-200 bg-indigo-50 hover:bg-indigo-100 text-indigo-800 text-xs font-bold transition whitespace-nowrap shadow-xs">
                   🎯 Passer cette annale (${c.total})
                 </button>
               ` : ''}
             </div>
           </div>
         `;
+
+        if (c.total > 0) {
+          const btn = card.querySelector('.btn-launch-source');
+          if (btn) {
+            btn.addEventListener('click', (e) => {
+              e.stopPropagation();
+              launchSingleSource(doc.name);
+            });
+          }
+        }
 
         container.appendChild(card);
       });
@@ -4927,6 +5198,7 @@
         }))
       };
 
+      recordQuizToMemberProfile(lastResults);
       renderResults();
       navigateTab('results');
     }
@@ -5251,6 +5523,981 @@
     function restartCurrentQuiz() {
       if (!activeQuiz || !activeQuiz.questions || activeQuiz.questions.length === 0) return;
       startQuiz(activeQuiz.questions, !!activeQuiz.isRetrySession);
+    }
+
+    // ==============================================================
+    // MEMBER PROFILE, ERROR BANK & SESSION HISTORY ENGINE
+    // ==============================================================
+    let currentProfileSubtab = 'errors';
+    let currentProfileErrorFilter = 'all';
+
+    function getActiveMemberEmail() {
+      const raw = currentUserEmail ||
+        localStorage.getItem('ue{{UE_CODE}}_auth_email') ||
+        localStorage.getItem('ut2j_auth_email') ||
+        '';
+      return normalizeAuthEmail(raw) || 'invite.local';
+    }
+
+    function getMemberProfileStorageKey(emailOverride) {
+      const email = emailOverride ? normalizeAuthEmail(emailOverride) : getActiveMemberEmail();
+      return `ut2j_profile_v1_{{UE_CODE}}_${email || 'invite.local'}`;
+    }
+
+    function createEmptyMemberProfile(email) {
+      return {
+        version: 1,
+        ueCode: '{{UE_CODE}}',
+        ueTitle: '{{UE_TITLE}}',
+        email: email || getActiveMemberEmail(),
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+        sessions: [],
+        questionStats: {}
+      };
+    }
+
+    function loadMemberProfile() {
+      const email = getActiveMemberEmail();
+      const key = getMemberProfileStorageKey(email);
+      try {
+        const raw = localStorage.getItem(key);
+        if (!raw) return createEmptyMemberProfile(email);
+        const parsed = JSON.parse(raw);
+        if (!parsed || typeof parsed !== 'object') return createEmptyMemberProfile(email);
+        parsed.sessions = Array.isArray(parsed.sessions) ? parsed.sessions : [];
+        parsed.questionStats = (parsed.questionStats && typeof parsed.questionStats === 'object') ? parsed.questionStats : {};
+        parsed.email = email;
+        parsed.ueCode = '{{UE_CODE}}';
+        return parsed;
+      } catch (e) {
+        return createEmptyMemberProfile(email);
+      }
+    }
+
+    function saveMemberProfile(profile) {
+      if (!profile) return;
+      profile.updatedAt = Date.now();
+      const key = getMemberProfileStorageKey(profile.email);
+      try {
+        localStorage.setItem(key, JSON.stringify(profile));
+      } catch (e) {
+        console.error('Failed to save member profile:', e);
+      }
+      updateProfileNavBadge(profile);
+    }
+
+    function getProfileQuestionKey(q) {
+      if (!q) return 'unknown_0';
+      const prefix = isQcm(q) ? 'qcm' : 'open';
+      return `${prefix}_${q.id}`;
+    }
+
+    function buildQuestionLookupMap() {
+      const map = new Map();
+      [...QCM_DATASET, ...OPEN_DATASET, ...getAllAiQuestions()].forEach(q => {
+        map.set(getProfileQuestionKey(q), q);
+      });
+      return map;
+    }
+
+    function getChapterForTheme(theme) {
+      const t = String(theme || '');
+      for (const cat of CHAPTER_CATEGORIES) {
+        try {
+          if (cat.filterFn && cat.filterFn(t)) return cat;
+        } catch (e) {}
+      }
+      return CHAPTER_CATEGORIES[0] || { id: 'other', title: 'Autres thématiques', partNum: 1 };
+    }
+
+    function summarizeSessionTitle() {
+      if (!activeQuiz || !activeQuiz.questions || activeQuiz.questions.length === 0) {
+        return 'Session QCM';
+      }
+      if (activeQuiz.isProfileRemediation) {
+        return activeQuiz.remediationLabel || "Quiz de Remédiation (Carnet d'erreurs)";
+      }
+      if (activeQuiz.isRetrySession) {
+        return 'Session ciblée : Rejeu des erreurs';
+      }
+      const docs = Array.from(new Set(activeQuiz.questions.map(q => q.document).filter(Boolean)));
+      if (selectionMode === 'source' && docs.length === 1) {
+        return docs[0];
+      }
+      const chaps = Array.from(new Set(activeQuiz.questions.map(q => {
+        const cat = getChapterForTheme(q.theme);
+        return cat ? cat.title.split('•')[0].trim() : '';
+      }).filter(Boolean)));
+      if (chaps.length > 0 && chaps.length <= 2) {
+        return `Entraînement : ${chaps.join(' & ')}`;
+      }
+      return `Sélection multi-chapitres (${activeQuiz.questions.length} questions)`;
+    }
+
+    function recordQuizToMemberProfile(results) {
+      if (!results || !activeQuiz) return;
+      const profile = loadMemberProfile();
+      const now = Date.now();
+
+      const sessionItems = [];
+      results.allSessionQuestions.forEach(item => {
+        const q = item.question;
+        const qKey = getProfileQuestionKey(q);
+        const activeOpts = q.activeOptions || q.options || [];
+        const origUserSel = (item.userQcmSel || []).map(letter => {
+          const found = activeOpts.find(o => o.letter === letter);
+          return found ? (found.origLetter || found.letter) : letter;
+        }).sort();
+
+        sessionItems.push({
+          qKey,
+          origUserSel,
+          userOpenText: item.userOpenText || '',
+          score: item.score,
+          isMissed: !!item.isMissed
+        });
+
+        const existing = profile.questionStats[qKey] || {
+          qKey,
+          type: isQcm(q) ? 'qcm' : 'open',
+          id: q.id,
+          theme: q.theme || '',
+          document: q.document || '',
+          isAiGenerated: !!q.isAiGenerated,
+          attempts: 0,
+          correctCount: 0,
+          missedCount: 0,
+          consecutiveCorrect: 0,
+          activeError: false,
+          lastAttemptAt: 0,
+          lastUserSel: [],
+          lastUserOpenText: '',
+          lastScore: 0
+        };
+
+        existing.attempts = (existing.attempts || 0) + 1;
+        existing.lastAttemptAt = now;
+        existing.lastUserSel = origUserSel;
+        existing.lastUserOpenText = item.userOpenText || '';
+        existing.lastScore = item.score;
+        existing.theme = q.theme || existing.theme;
+        existing.document = q.document || existing.document;
+
+        if (item.isMissed) {
+          existing.missedCount = (existing.missedCount || 0) + 1;
+          existing.consecutiveCorrect = 0;
+          existing.activeError = true;
+        } else {
+          existing.correctCount = (existing.correctCount || 0) + 1;
+          existing.consecutiveCorrect = (existing.consecutiveCorrect || 0) + 1;
+          existing.activeError = false;
+        }
+
+        if (q.isAiGenerated) {
+          existing.questionSnapshot = {
+            id: q.id,
+            type: q.type,
+            theme: q.theme,
+            document: q.document,
+            question: q.question,
+            options: q.rawOptions || q.options || [],
+            correct: q.rawCorrect || q.correct || [],
+            explanation: q.explanation || '',
+            points: q.points || 5,
+            guidelines: q.guidelines || [],
+            model_answer: q.model_answer || '',
+            isAiGenerated: true
+          };
+        }
+
+        profile.questionStats[qKey] = existing;
+      });
+
+      const sessionRecord = {
+        id: 'sess_' + now + '_' + Math.random().toString(36).slice(2, 7),
+        timestamp: now,
+        mode: activeQuiz.isProfileRemediation ? 'remediation' : (activeQuiz.isRetrySession ? 'retry' : (activeQuiz.mode || 'revision')),
+        title: summarizeSessionTitle(),
+        earned: results.earned,
+        max: results.max,
+        pct: results.pct,
+        elapsedSeconds: results.elapsedSeconds || 0,
+        questionCount: results.allSessionQuestions.length,
+        missedCount: results.missedQuestions.length,
+        items: sessionItems
+      };
+
+      profile.sessions.unshift(sessionRecord);
+      if (profile.sessions.length > 100) {
+        profile.sessions = profile.sessions.slice(0, 100);
+      }
+
+      saveMemberProfile(profile);
+    }
+
+    function updateProfileNavBadge(profileOpt) {
+      const profile = profileOpt || loadMemberProfile();
+      const activeErrors = Object.values(profile.questionStats || {}).filter(s => s && s.activeError).length;
+      const badge = document.getElementById('nav-profile-error-badge');
+      if (!badge) return;
+      if (activeErrors > 0) {
+        badge.textContent = String(activeErrors);
+        badge.classList.remove('hidden');
+      } else {
+        badge.classList.add('hidden');
+      }
+    }
+
+    function computeStudyStreakDays(sessions) {
+      if (!sessions || sessions.length === 0) return 0;
+      const daySet = new Set(sessions.map(s => {
+        const d = new Date(s.timestamp);
+        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      }));
+      const uniqueDays = Array.from(daySet).sort().reverse();
+      let streak = 0;
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      for (let i = 0; i < uniqueDays.length; i++) {
+        const parts = uniqueDays[i].split('-').map(Number);
+        const dt = new Date(parts[0], parts[1] - 1, parts[2]);
+        const diffDays = Math.round((today - dt) / 86400000);
+        if (i === 0 && diffDays > 1) return 0;
+        if (i === 0 || diffDays <= streak + 1) {
+          streak++;
+        } else {
+          break;
+        }
+      }
+      return streak;
+    }
+
+    function formatRelativeSessionDate(ts) {
+      if (!ts) return '';
+      const d = new Date(ts);
+      const now = new Date();
+      const sameDay = d.toDateString() === now.toDateString();
+      const yesterday = new Date(now);
+      yesterday.setDate(now.getDate() - 1);
+      const isYesterday = d.toDateString() === yesterday.toDateString();
+      const timeStr = d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+      if (sameDay) return `Aujourd'hui à ${timeStr}`;
+      if (isYesterday) return `Hier à ${timeStr}`;
+      return d.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' }) + ` à ${timeStr}`;
+    }
+
+    function renderMemberProfile() {
+      const profile = loadMemberProfile();
+      updateProfileNavBadge(profile);
+
+      const qMap = buildQuestionLookupMap();
+      const officialTotal = QCM_DATASET.length + OPEN_DATASET.length;
+
+      // Identity banner
+      const email = profile.email || getActiveMemberEmail();
+      const emailEl = document.getElementById('profile-member-email');
+      if (emailEl) emailEl.textContent = email;
+
+      const initialsEl = document.getElementById('profile-avatar-initials');
+      if (initialsEl) {
+        const namePart = email.split('@')[0] || 'UT';
+        const segs = namePart.split(/[._-]/).filter(Boolean);
+        const initials = segs.length >= 2
+          ? (segs[0][0] + segs[1][0]).toUpperCase()
+          : namePart.slice(0, 2).toUpperCase();
+        initialsEl.textContent = initials || '👤';
+      }
+
+      const lastActEl = document.getElementById('profile-last-activity');
+      if (lastActEl) {
+        if (profile.sessions.length > 0) {
+          lastActEl.textContent = ` • Dernière session : ${formatRelativeSessionDate(profile.sessions[0].timestamp)}`;
+        } else {
+          lastActEl.textContent = ' • Aucune session enregistrée pour le moment';
+        }
+      }
+
+      const streak = computeStudyStreakDays(profile.sessions);
+      const streakBadge = document.getElementById('profile-streak-badge');
+      if (streakBadge) {
+        if (streak > 0) {
+          streakBadge.textContent = `🔥 Série active : ${streak} jour${streak > 1 ? 's' : ''}`;
+          streakBadge.classList.remove('hidden');
+        } else {
+          streakBadge.classList.add('hidden');
+        }
+      }
+
+      // 1. Global KPIs
+      const sessions = profile.sessions || [];
+      const totalSessions = sessions.length;
+      const oneWeekAgo = Date.now() - 7 * 86400000;
+      const weekSessions = sessions.filter(s => s.timestamp >= oneWeekAgo).length;
+      const examSessions = sessions.filter(s => s.mode === 'exam').length;
+      const trainingSessions = totalSessions - examSessions;
+
+      const kpiSessionsEl = document.getElementById('profile-kpi-sessions');
+      if (kpiSessionsEl) kpiSessionsEl.textContent = String(totalSessions);
+      const kpiWeekEl = document.getElementById('profile-kpi-sessions-week');
+      if (kpiWeekEl) kpiWeekEl.textContent = weekSessions > 0 ? `+${weekSessions} cette semaine` : '';
+      const kpiSplitEl = document.getElementById('profile-kpi-sessions-split');
+      if (kpiSplitEl) {
+        kpiSplitEl.textContent = `${trainingSessions} entraînement${trainingSessions > 1 ? 's' : ''} • ${examSessions} examen${examSessions > 1 ? 's' : ''} blanc${examSessions > 1 ? 's' : ''}`;
+      }
+
+      // Average score & trend
+      const kpiAvgEl = document.getElementById('profile-kpi-avg-score');
+      const kpiTrendBadge = document.getElementById('profile-kpi-trend-badge');
+      const kpiRecentEl = document.getElementById('profile-kpi-recent-avg');
+
+      if (totalSessions > 0) {
+        const avgPct = Math.round(sessions.reduce((acc, s) => acc + (s.pct || 0), 0) / totalSessions);
+        if (kpiAvgEl) kpiAvgEl.textContent = `${avgPct}%`;
+
+        const recentSlice = sessions.slice(0, Math.min(5, totalSessions));
+        const recentAvg = Math.round(recentSlice.reduce((acc, s) => acc + (s.pct || 0), 0) / recentSlice.length);
+
+        if (totalSessions >= 2 && kpiTrendBadge) {
+          const olderSlice = sessions.slice(-Math.min(5, totalSessions));
+          const olderAvg = Math.round(olderSlice.reduce((acc, s) => acc + (s.pct || 0), 0) / olderSlice.length);
+          const diff = recentAvg - olderAvg;
+          kpiTrendBadge.classList.remove('hidden');
+          if (diff > 0) {
+            kpiTrendBadge.textContent = `↗ +${diff}%`;
+            kpiTrendBadge.className = 'text-xs font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200';
+          } else if (diff < 0) {
+            kpiTrendBadge.textContent = `↘ ${diff}%`;
+            kpiTrendBadge.className = 'text-xs font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200';
+          } else {
+            kpiTrendBadge.textContent = `→ Stable`;
+            kpiTrendBadge.className = 'text-xs font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200';
+          }
+        } else if (kpiTrendBadge) {
+          kpiTrendBadge.classList.add('hidden');
+        }
+
+        if (kpiRecentEl) {
+          kpiRecentEl.innerHTML = `Moyenne des ${recentSlice.length} dernier${recentSlice.length > 1 ? 's' : ''} test${recentSlice.length > 1 ? 's' : ''} : <strong class="text-slate-900">${recentAvg}%</strong>`;
+        }
+      } else {
+        if (kpiAvgEl) kpiAvgEl.textContent = '—';
+        if (kpiTrendBadge) kpiTrendBadge.classList.add('hidden');
+        if (kpiRecentEl) kpiRecentEl.textContent = 'Complétez un quiz pour suivre votre progression';
+      }
+
+      // Coverage KPI
+      const allStats = Object.values(profile.questionStats || {});
+      const officialStats = allStats.filter(s => !s.isAiGenerated && qMap.has(s.qKey));
+      const seenOfficialCount = officialStats.length;
+      const activeErrorsAll = allStats.filter(s => s.activeError);
+      const activeOfficialErrors = officialStats.filter(s => s.activeError).length;
+      const masteredOfficialCount = Math.max(0, seenOfficialCount - activeOfficialErrors);
+      const unseenOfficialCount = Math.max(0, officialTotal - seenOfficialCount);
+      const coveragePct = officialTotal > 0 ? Math.round((seenOfficialCount / officialTotal) * 100) : 0;
+      const masteredBarPct = officialTotal > 0 ? Math.round((masteredOfficialCount / officialTotal) * 100) : 0;
+      const errorBarPct = officialTotal > 0 ? Math.round((activeOfficialErrors / officialTotal) * 100) : 0;
+
+      const covCountEl = document.getElementById('profile-kpi-coverage-count');
+      if (covCountEl) covCountEl.innerHTML = `${seenOfficialCount} <span class="text-sm font-normal text-slate-500">/ ${officialTotal}</span>`;
+      const covPctEl = document.getElementById('profile-kpi-coverage-pct');
+      if (covPctEl) covPctEl.textContent = `(${coveragePct}%)`;
+      const barMastered = document.getElementById('profile-kpi-bar-mastered');
+      if (barMastered) barMastered.style.width = `${masteredBarPct}%`;
+      const barErrors = document.getElementById('profile-kpi-bar-errors');
+      if (barErrors) barErrors.style.width = `${errorBarPct}%`;
+      const covDetailEl = document.getElementById('profile-kpi-coverage-detail');
+      if (covDetailEl) {
+        covDetailEl.innerHTML = `${masteredOfficialCount} validée${masteredOfficialCount > 1 ? 's' : ''} • <span class="text-rose-600 font-semibold">${activeOfficialErrors} à retravailler</span> • ${unseenOfficialCount} inédite${unseenOfficialCount > 1 ? 's' : ''}`;
+      }
+
+      // Study time KPI
+      const totalSeconds = sessions.reduce((acc, s) => acc + (s.elapsedSeconds || 0), 0);
+      const totalAnsweredQuestions = sessions.reduce((acc, s) => acc + (s.questionCount || 0), 0);
+      const studyTimeEl = document.getElementById('profile-kpi-study-time');
+      if (studyTimeEl) {
+        const hrs = Math.floor(totalSeconds / 3600);
+        const mins = Math.floor((totalSeconds % 3600) / 60);
+        studyTimeEl.textContent = hrs > 0 ? `${hrs}h ${String(mins).padStart(2, '0')}m` : `${mins}m`;
+      }
+      const paceEl = document.getElementById('profile-kpi-pace');
+      if (paceEl) {
+        if (totalAnsweredQuestions > 0 && totalSeconds > 0) {
+          const avgSec = Math.round(totalSeconds / totalAnsweredQuestions);
+          paceEl.innerHTML = `Rythme moyen : <strong class="text-slate-900">${avgSec} sec</strong> / question`;
+        } else {
+          paceEl.textContent = 'Rythme moyen : — / question';
+        }
+      }
+
+      // 2. Weak Sub-themes Spotlight ("Points à travailler en priorité")
+      const themeAgg = {};
+      allStats.forEach(st => {
+        const t = st.theme || 'Autre';
+        if (!themeAgg[t]) {
+          themeAgg[t] = { theme: t, attempts: 0, missed: 0, correct: 0, activeErrors: 0 };
+        }
+        themeAgg[t].attempts += (st.attempts || 0);
+        themeAgg[t].missed += (st.missedCount || 0);
+        themeAgg[t].correct += (st.correctCount || 0);
+        if (st.activeError) themeAgg[t].activeErrors++;
+      });
+
+      const weakThemes = Object.values(themeAgg)
+        .filter(item => item.missed > 0 && (item.activeErrors > 0 || (item.correct / Math.max(1, item.attempts)) < 0.7))
+        .sort((a, b) => {
+          if (b.activeErrors !== a.activeErrors) return b.activeErrors - a.activeErrors;
+          const rateA = a.correct / Math.max(1, a.attempts);
+          const rateB = b.correct / Math.max(1, b.attempts);
+          return rateA - rateB;
+        })
+        .slice(0, 4);
+
+      window.__currentWeakThemesList = weakThemes.map(w => w.theme);
+
+      const weakBadge = document.getElementById('profile-weak-count-badge');
+      if (weakBadge) {
+        weakBadge.textContent = `${weakThemes.length} sous-thème${weakThemes.length > 1 ? 's' : ''} fragile${weakThemes.length > 1 ? 's' : ''}`;
+      }
+
+      const weakListEl = document.getElementById('profile-weak-points-list');
+      if (weakListEl) {
+        weakListEl.innerHTML = '';
+        if (weakThemes.length === 0) {
+          weakListEl.innerHTML = `
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 text-center space-y-1">
+              <div class="text-base">✨</div>
+              <div class="text-xs font-bold text-slate-800">Aucun point fragile détecté pour le moment</div>
+              <p class="text-xs text-slate-500">Complétez des sessions d'entraînement pour identifier automatiquement les notions à consolider.</p>
+            </div>
+          `;
+        } else {
+          weakThemes.forEach((wt, idx) => {
+            const successPct = Math.round((wt.correct / Math.max(1, wt.attempts)) * 100);
+            const isCritical = successPct < 50 || wt.activeErrors >= 2;
+            const badgeCls = isCritical
+              ? 'bg-rose-50 text-rose-700 border-rose-200'
+              : 'bg-amber-50 text-amber-700 border-amber-200';
+            const titleCls = isCritical ? 'text-rose-700' : 'text-amber-800';
+
+            const card = document.createElement('div');
+            card.className = 'p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-1';
+            card.innerHTML = `
+              <div class="flex items-start justify-between gap-2">
+                <span class="text-xs font-bold ${titleCls} leading-snug">${idx + 1}. ${escapeHtml(wt.theme)}</span>
+                <span class="text-xs font-extrabold px-2 py-0.5 rounded border ${badgeCls} shrink-0">${successPct}% réussite</span>
+              </div>
+              <p class="text-xs text-slate-500">
+                ${wt.missed} erreur${wt.missed > 1 ? 's' : ''} sur ${wt.attempts} essai${wt.attempts > 1 ? 's' : ''} • <strong>${wt.activeErrors} question${wt.activeErrors > 1 ? 's' : ''}</strong> dans le carnet d'erreurs
+              </p>
+            `;
+            weakListEl.appendChild(card);
+          });
+        }
+      }
+
+      const btnRem = document.getElementById('profile-btn-launch-remediation');
+      const btnRemLabel = document.getElementById('profile-btn-remediation-label');
+      if (btnRem && btnRemLabel) {
+        btnRemLabel.textContent = `Lancer un Quiz de Remédiation (${activeErrorsAll.length} erreur${activeErrorsAll.length > 1 ? 's' : ''})`;
+        btnRem.disabled = activeErrorsAll.length === 0;
+      }
+
+      const btnFragile = document.getElementById('profile-btn-train-fragile');
+      if (btnFragile) {
+        btnFragile.disabled = weakThemes.length === 0;
+      }
+
+      // 3. Chapter Mastery Breakdown
+      const chapListEl = document.getElementById('profile-chapters-mastery-list');
+      const allOfficialQuestions = [...QCM_DATASET, ...OPEN_DATASET];
+      if (chapListEl) {
+        chapListEl.innerHTML = '';
+        CHAPTER_CATEGORIES.forEach(cat => {
+          const catOfficialQs = allOfficialQuestions.filter(q => cat.filterFn(q.theme || ''));
+          const catStats = allStats.filter(s => cat.filterFn(s.theme || ''));
+          const catAttempts = catStats.reduce((sum, s) => sum + (s.attempts || 0), 0);
+          const catCorrect = catStats.reduce((sum, s) => sum + (s.correctCount || 0), 0);
+          const catActiveErrors = catStats.filter(s => s.activeError).length;
+          const catSeenOfficial = catStats.filter(s => !s.isAiGenerated).length;
+          const masteryPct = catAttempts > 0 ? Math.round((catCorrect / catAttempts) * 100) : null;
+
+          let barColor = 'bg-slate-300';
+          let textColor = 'text-slate-500';
+          let statusLabel = 'Non testé';
+          let borderClass = 'border-slate-200';
+
+          if (masteryPct !== null) {
+            if (masteryPct >= 75) {
+              barColor = 'bg-emerald-500';
+              textColor = 'text-emerald-700';
+              statusLabel = `✓ Solide (${catActiveErrors} erreur${catActiveErrors > 1 ? 's' : ''} active${catActiveErrors > 1 ? 's' : ''})`;
+            } else if (masteryPct >= 50) {
+              barColor = 'bg-amber-500';
+              textColor = 'text-amber-700';
+              statusLabel = `⚠️ À consolider (${catActiveErrors} erreur${catActiveErrors > 1 ? 's' : ''} active${catActiveErrors > 1 ? 's' : ''})`;
+            } else {
+              barColor = 'bg-rose-500';
+              textColor = 'text-rose-700';
+              borderClass = 'border-rose-300';
+              statusLabel = `🚨 Prioritaire (${catActiveErrors} erreur${catActiveErrors > 1 ? 's' : ''} active${catActiveErrors > 1 ? 's' : ''})`;
+            }
+          }
+
+          const row = document.createElement('div');
+          row.className = `p-3 rounded-xl bg-slate-50 border ${borderClass} hover:border-indigo-400 transition cursor-pointer space-y-1.5`;
+          row.onclick = () => filterProfileErrors(cat.id);
+          row.innerHTML = `
+            <div class="flex items-center justify-between text-xs font-bold gap-2">
+              <span class="text-slate-900 truncate">${escapeHtml(cat.title)}</span>
+              <span class="${textColor} shrink-0">${masteryPct !== null ? `${masteryPct}% (${catCorrect}/${catAttempts})` : '0 essai'}</span>
+            </div>
+            <div class="w-full h-2 rounded-full bg-white border border-slate-200 overflow-hidden">
+              <div class="${barColor} h-full rounded-full transition-all" style="width: ${masteryPct !== null ? masteryPct : 0}%"></div>
+            </div>
+            <div class="flex items-center justify-between text-xs text-slate-500">
+              <span>Couverture : ${catSeenOfficial} / ${catOfficialQs.length} questions vues</span>
+              <span class="${textColor} font-semibold">${statusLabel}</span>
+            </div>
+          `;
+          chapListEl.appendChild(row);
+        });
+      }
+
+      // 4. Error Bank & Session History Subtabs
+      const errCountBadge = document.getElementById('profile-subtab-errors-count');
+      if (errCountBadge) errCountBadge.textContent = String(activeErrorsAll.length);
+      const histCountBadge = document.getElementById('profile-subtab-history-count');
+      if (histCountBadge) histCountBadge.textContent = String(totalSessions);
+
+      renderProfileErrorBank(profile, qMap);
+      renderProfileSessionHistory(profile);
+    }
+
+    function switchProfileSubtab(subtab) {
+      currentProfileSubtab = subtab;
+      const errContainer = document.getElementById('profile-subtab-content-errors');
+      const histContainer = document.getElementById('profile-subtab-content-history');
+      const filterBar = document.getElementById('profile-error-filter-bar');
+      const btnErr = document.getElementById('profile-subtab-btn-errors');
+      const btnHist = document.getElementById('profile-subtab-btn-history');
+
+      if (subtab === 'errors') {
+        if (errContainer) errContainer.classList.remove('hidden');
+        if (histContainer) histContainer.classList.add('hidden');
+        if (filterBar) filterBar.classList.remove('hidden');
+        if (btnErr) btnErr.className = 'px-3.5 py-2 rounded-xl text-xs font-extrabold bg-rose-600 text-white transition flex items-center gap-2 cursor-pointer shadow-2xs';
+        if (btnHist) btnHist.className = 'px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200 transition flex items-center gap-2 cursor-pointer';
+      } else {
+        if (errContainer) errContainer.classList.add('hidden');
+        if (histContainer) histContainer.classList.remove('hidden');
+        if (filterBar) filterBar.classList.add('hidden');
+        if (btnHist) btnHist.className = 'px-3.5 py-2 rounded-xl text-xs font-extrabold bg-indigo-600 text-white transition flex items-center gap-2 cursor-pointer shadow-2xs';
+        if (btnErr) btnErr.className = 'px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200 transition flex items-center gap-2 cursor-pointer';
+      }
+    }
+
+    function filterProfileErrors(filterKey) {
+      currentProfileErrorFilter = filterKey;
+      switchProfileSubtab('errors');
+      const profile = loadMemberProfile();
+      const qMap = buildQuestionLookupMap();
+      renderProfileErrorBank(profile, qMap);
+    }
+
+    function renderProfileErrorBank(profile, qMap) {
+      const container = document.getElementById('profile-subtab-content-errors');
+      const filterBar = document.getElementById('profile-error-filter-bar');
+      if (!container) return;
+
+      const allErrors = Object.values(profile.questionStats || {})
+        .filter(s => s && s.activeError)
+        .sort((a, b) => (b.missedCount - a.missedCount) || (b.lastAttemptAt - a.lastAttemptAt));
+
+      const recurringCount = allErrors.filter(e => (e.missedCount || 0) >= 2).length;
+
+      // Render filter bar pills
+      if (filterBar) {
+        const pills = [
+          { key: 'all', label: `Toutes (${allErrors.length})` },
+          { key: 'recurring', label: `🔥 Récurrentes 2x+ (${recurringCount})` }
+        ];
+        CHAPTER_CATEGORIES.forEach(cat => {
+          const cnt = allErrors.filter(e => cat.filterFn(e.theme || '')).length;
+          if (cnt > 0) {
+            const shortTitle = cat.title.split('•')[0].trim();
+            pills.push({ key: cat.id, label: `${shortTitle} (${cnt})` });
+          }
+        });
+
+        filterBar.innerHTML = pills.map(p => {
+          const active = currentProfileErrorFilter === p.key;
+          const cls = active
+            ? 'px-2.5 py-1 rounded-lg text-xs font-bold bg-indigo-600 text-white cursor-pointer'
+            : 'px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 cursor-pointer';
+          return `<button type="button" onclick="filterProfileErrors('${p.key}')" class="${cls}">${escapeHtml(p.label)}</button>`;
+        }).join('');
+      }
+
+      // Apply current filter
+      const filtered = allErrors.filter(err => {
+        if (currentProfileErrorFilter === 'all') return true;
+        if (currentProfileErrorFilter === 'recurring') return (err.missedCount || 0) >= 2;
+        const cat = CHAPTER_CATEGORIES.find(c => c.id === currentProfileErrorFilter);
+        return cat ? cat.filterFn(err.theme || '') : true;
+      });
+
+      container.innerHTML = '';
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="p-8 rounded-2xl bg-slate-50 border border-slate-200 text-center space-y-2">
+            <div class="text-2xl">🎉</div>
+            <h4 class="text-sm font-bold text-slate-900">
+              ${allErrors.length === 0 ? "Votre carnet d'erreurs est vide !" : "Aucune erreur dans ce filtre"}
+            </h4>
+            <p class="text-xs text-slate-500 max-w-md mx-auto">
+              ${allErrors.length === 0
+                ? "Toutes les questions auxquelles vous avez répondu sont actuellement maîtrisées. Lancez une nouvelle session pour continuer à progresser."
+                : "Sélectionnez « Toutes » pour afficher les autres questions à retravailler."}
+            </p>
+          </div>
+        `;
+        return;
+      }
+
+      filtered.forEach(err => {
+        const q = qMap.get(err.qKey) || err.questionSnapshot;
+        if (!q) return;
+
+        const cat = getChapterForTheme(q.theme);
+        const chapShort = cat ? cat.title.split('•')[0].trim() : 'Chapitre';
+        const isRecurring = (err.missedCount || 0) >= 2;
+        const badgeCls = isRecurring
+          ? 'bg-rose-100 text-rose-800 border-rose-300'
+          : 'bg-amber-100 text-amber-800 border-amber-300';
+
+        let comparisonHtml = '';
+        if (isQcm(q)) {
+          const opts = q.rawOptions || q.options || [];
+          const corrLetters = q.rawCorrect || q.correct || [];
+          const userLetters = err.lastUserSel || [];
+
+          const userTexts = opts.filter(o => userLetters.includes(o.letter)).map(o => `${o.letter}. ${o.text}`);
+          const corrTexts = opts.filter(o => corrLetters.includes(o.letter)).map(o => `${o.letter}. ${o.text}`);
+
+          comparisonHtml = `
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
+              <div class="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-950">
+                <span class="font-bold text-rose-800 block mb-0.5">✗ Votre dernière réponse :</span>
+                <span>${userTexts.length > 0 ? escapeHtml(userTexts.join(' | ')) : 'Aucune réponse cochée'}</span>
+              </div>
+              <div class="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-950">
+                <span class="font-bold text-emerald-800 block mb-0.5">✓ Réponse attendue :</span>
+                <span>${escapeHtml(corrTexts.join(' | '))}</span>
+              </div>
+            </div>
+          `;
+        } else {
+          comparisonHtml = `
+            <div class="p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-950 text-xs">
+              <span class="font-bold">✍️ Question ouverte (${err.lastScore || 0} / ${q.points || 5} pts) :</span>
+              <span>Consultez les critères du corrigé ci-dessous pour retravailler votre rédaction.</span>
+            </div>
+          `;
+        }
+
+        const expId = `prof-err-exp-${err.qKey.replace(/[^a-zA-Z0-9_-]/g, '_')}`;
+        const expText = isQcm(q)
+          ? (q.explanation || 'Revoyez les explications détaillées par proposition lors du quiz de remédiation.')
+          : ((q.guidelines || []).join(' • ') || q.model_answer || '');
+
+        const card = document.createElement('div');
+        card.className = 'p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2.5';
+        card.innerHTML = `
+          <div class="flex items-start justify-between gap-2 flex-wrap">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="px-2 py-0.5 rounded text-xs font-extrabold border ${badgeCls}">
+                ${isRecurring ? '🔥' : '⚠️'} Ratée ${err.missedCount || 1} fois
+              </span>
+              <span class="px-2 py-0.5 rounded text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                ${escapeHtml(chapShort)} • ${escapeHtml(q.theme || '')}
+              </span>
+              ${q.document ? `<span class="text-xs text-slate-500">📄 ${escapeHtml(q.document)}</span>` : ''}
+            </div>
+            <span class="text-xs text-slate-500">${formatRelativeSessionDate(err.lastAttemptAt)}</span>
+          </div>
+
+          <p class="text-xs sm:text-sm font-bold text-slate-900 leading-snug">
+            ${escapeHtml(q.question)}
+          </p>
+
+          ${comparisonHtml}
+
+          <div class="flex items-center justify-between pt-1 flex-wrap gap-2">
+            <button type="button" onclick="toggleProfileErrorExplanation('${expId}')" class="text-xs font-bold text-indigo-600 hover:text-indigo-800 hover:underline cursor-pointer">
+              💡 Afficher le rappel de cours / corrigé
+            </button>
+            <div class="flex items-center gap-3">
+              <button type="button" onclick="startSingleErrorQuiz('${err.qKey}')" class="text-xs font-bold text-rose-600 hover:text-rose-800 hover:underline cursor-pointer">
+                🎯 Rejouer cette question
+              </button>
+              <button type="button" onclick="resolveProfileError('${err.qKey}')" class="text-xs font-semibold text-slate-500 hover:text-emerald-700 cursor-pointer">
+                ✓ Marquer comme maîtrisée
+              </button>
+            </div>
+          </div>
+
+          <div id="${expId}" class="hidden p-3 rounded-xl bg-white border border-slate-200 text-xs text-slate-700 leading-relaxed">
+            <strong class="text-slate-900">Explication pédagogique :</strong> ${escapeHtml(expText)}
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function toggleProfileErrorExplanation(elemId) {
+      const el = document.getElementById(elemId);
+      if (el) el.classList.toggle('hidden');
+    }
+
+    function resolveProfileError(qKey) {
+      const profile = loadMemberProfile();
+      if (profile.questionStats && profile.questionStats[qKey]) {
+        profile.questionStats[qKey].activeError = false;
+        saveMemberProfile(profile);
+        renderMemberProfile();
+      }
+    }
+
+    function startSingleErrorQuiz(qKey) {
+      const profile = loadMemberProfile();
+      const qMap = buildQuestionLookupMap();
+      const st = profile.questionStats[qKey];
+      const q = qMap.get(qKey) || (st && st.questionSnapshot);
+      if (!q) return;
+      startQuiz([q], true);
+      if (activeQuiz) {
+        activeQuiz.isProfileRemediation = true;
+        activeQuiz.remediationLabel = 'Remédiation ciblée (1 question)';
+      }
+    }
+
+    function startProfileRemediationQuiz(filterOpt) {
+      const profile = loadMemberProfile();
+      const qMap = buildQuestionLookupMap();
+      const filterKey = filterOpt || currentProfileErrorFilter || 'all';
+
+      const activeStats = Object.values(profile.questionStats || {}).filter(s => s && s.activeError);
+      const filteredStats = activeStats.filter(err => {
+        if (filterKey === 'all') return true;
+        if (filterKey === 'recurring') return (err.missedCount || 0) >= 2;
+        const cat = CHAPTER_CATEGORIES.find(c => c.id === filterKey);
+        return cat ? cat.filterFn(err.theme || '') : true;
+      });
+
+      const questionsToRun = filteredStats
+        .map(st => qMap.get(st.qKey) || st.questionSnapshot)
+        .filter(Boolean);
+
+      if (questionsToRun.length === 0) {
+        alert("Aucune erreur active à relancer dans votre carnet.");
+        return;
+      }
+
+      startQuiz(questionsToRun, true);
+      if (activeQuiz) {
+        activeQuiz.isProfileRemediation = true;
+        activeQuiz.remediationLabel = `Quiz de Remédiation (${questionsToRun.length} erreur${questionsToRun.length > 1 ? 's' : ''})`;
+      }
+    }
+
+    function trainOnFragileThemes() {
+      const weakThemes = window.__currentWeakThemesList || [];
+      if (weakThemes.length === 0) return;
+
+      setSelectionMode('theme');
+      selectedThemes = new Set(weakThemes);
+      renderThemesLists();
+      updateSelectedSummary();
+      navigateTab('themes');
+    }
+
+    function renderProfileSessionHistory(profile) {
+      const container = document.getElementById('profile-subtab-content-history');
+      if (!container) return;
+
+      const sessions = profile.sessions || [];
+      container.innerHTML = '';
+
+      if (sessions.length === 0) {
+        container.innerHTML = `
+          <div class="p-8 rounded-2xl bg-slate-50 border border-slate-200 text-center space-y-2">
+            <div class="text-2xl">🕒</div>
+            <h4 class="text-sm font-bold text-slate-900">Aucune session terminée</h4>
+            <p class="text-xs text-slate-500 max-w-md mx-auto">
+              Vos sessions d'entraînement et examens blancs apparaîtront automatiquement ici avec votre score, votre temps et le détail de vos réponses.
+            </p>
+          </div>
+        `;
+        return;
+      }
+
+      sessions.forEach(sess => {
+        let modeBadge = '<span class="px-2 py-0.5 rounded text-xs font-bold bg-purple-100 text-purple-800 border border-purple-200">🧠 Mode Révision</span>';
+        if (sess.mode === 'exam') {
+          modeBadge = '<span class="px-2 py-0.5 rounded text-xs font-bold bg-indigo-100 text-indigo-800 border border-indigo-200">⏱️ Mode Examen</span>';
+        } else if (sess.mode === 'remediation' || sess.mode === 'retry') {
+          modeBadge = '<span class="px-2 py-0.5 rounded text-xs font-bold bg-rose-100 text-rose-800 border border-rose-200">🎯 Remédiation</span>';
+        }
+
+        let scoreColor = 'text-emerald-700';
+        let statusSub = 'Excellente maîtrise';
+        if (sess.pct < 50) {
+          scoreColor = 'text-rose-600';
+          statusSub = 'À retravailler';
+        } else if (sess.pct < 75) {
+          scoreColor = 'text-amber-700';
+          statusSub = 'Bon socle';
+        }
+
+        const row = document.createElement('div');
+        row.className = 'p-4 rounded-xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4';
+        row.innerHTML = `
+          <div class="space-y-1">
+            <div class="flex items-center gap-2 flex-wrap">
+              ${modeBadge}
+              <span class="text-xs sm:text-sm font-extrabold text-slate-900">${escapeHtml(sess.title || 'Session QCM')}</span>
+              <span class="text-xs text-slate-500">• ${formatRelativeSessionDate(sess.timestamp)}</span>
+            </div>
+            <p class="text-xs text-slate-600">
+              ${sess.questionCount || 0} question${(sess.questionCount || 0) > 1 ? 's' : ''} • Durée : ${formatDurationText(sess.elapsedSeconds || 0)} • ${sess.missedCount || 0} erreur${(sess.missedCount || 0) > 1 ? 's' : ''}
+            </p>
+          </div>
+          <div class="flex items-center gap-3 self-end sm:self-center shrink-0">
+            <div class="text-right">
+              <div class="text-sm font-extrabold ${scoreColor}">${sess.earned} / ${sess.max} pts (${sess.pct}%)</div>
+              <div class="text-xs text-slate-500">${statusSub}</div>
+            </div>
+            <button type="button" onclick="reviewHistoricalSession('${sess.id}')" class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-100 text-slate-800 text-xs font-bold transition cursor-pointer shadow-2xs">
+              🔍 Revoir
+            </button>
+          </div>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    function reviewHistoricalSession(sessionId) {
+      const profile = loadMemberProfile();
+      const sess = (profile.sessions || []).find(s => s.id === sessionId);
+      if (!sess || !sess.items) return;
+
+      const qMap = buildQuestionLookupMap();
+      const themeScores = {};
+      const missedQuestions = [];
+      const allSessionQuestions = [];
+
+      sess.items.forEach(item => {
+        const st = profile.questionStats ? profile.questionStats[item.qKey] : null;
+        const baseQ = qMap.get(item.qKey) || (st && st.questionSnapshot);
+        if (!baseQ) return;
+
+        const qClone = {
+          ...baseQ,
+          activeOptions: (baseQ.rawOptions || baseQ.options || []).map(o => ({ ...o })),
+          correct: [...(baseQ.rawCorrect || baseQ.correct || [])]
+        };
+
+        const theme = qClone.theme || 'Autre';
+        if (!themeScores[theme]) {
+          themeScores[theme] = { totalPts: 0, earnedPts: 0, count: 0 };
+        }
+        themeScores[theme].count++;
+        const maxPts = isQcm(qClone) ? 1 : (parseInt(qClone.points, 10) || 5);
+        themeScores[theme].totalPts += maxPts;
+        themeScores[theme].earnedPts += (item.score || 0);
+
+        if (item.isMissed) {
+          missedQuestions.push(qClone);
+        }
+
+        allSessionQuestions.push({
+          question: qClone,
+          userQcmSel: item.origUserSel || [],
+          userOpenText: item.userOpenText || '',
+          score: item.score || 0,
+          isMissed: !!item.isMissed
+        });
+      });
+
+      lastResults = {
+        earned: sess.earned,
+        max: sess.max,
+        pct: sess.pct,
+        themeScores,
+        elapsedSeconds: sess.elapsedSeconds || 0,
+        missedQuestions,
+        allSessionQuestions
+      };
+
+      renderResults();
+      const badge = document.getElementById('res-status-badge');
+      if (badge) {
+        badge.textContent = `🔍 Archive du ${formatRelativeSessionDate(sess.timestamp)} (${sess.title})`;
+      }
+      navigateTab('results');
+    }
+
+    function exportMemberProfileJson() {
+      const profile = loadMemberProfile();
+      const dataStr = JSON.stringify(profile, null, 2);
+      const blob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const safeEmail = (profile.email || 'membre').replace(/[^a-zA-Z0-9._-]/g, '_');
+      const dateStr = new Date().toISOString().slice(0, 10);
+      a.href = url;
+      a.download = `ut2j_profil_UE{{UE_CODE}}_${safeEmail}_${dateStr}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function importMemberProfileJson(event) {
+      const file = event && event.target && event.target.files ? event.target.files[0] : null;
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        try {
+          const imported = JSON.parse(e.target.result);
+          if (!imported || typeof imported !== 'object' || !imported.questionStats) {
+            alert("Fichier JSON de profil invalide.");
+            return;
+          }
+          const current = loadMemberProfile();
+          imported.email = current.email;
+          imported.ueCode = '{{UE_CODE}}';
+          saveMemberProfile(imported);
+          renderMemberProfile();
+          alert("Profil et historique restaurés avec succès !");
+        } catch (err) {
+          alert("Impossible de lire ce fichier JSON.");
+        } finally {
+          event.target.value = '';
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function resetMemberProfileData() {
+      if (!confirm("Voulez-vous vraiment réinitialiser votre historique de sessions et votre carnet d'erreurs pour l'UE {{UE_CODE}} ?")) {
+        return;
+      }
+      const empty = createEmptyMemberProfile(getActiveMemberEmail());
+      saveMemberProfile(empty);
+      renderMemberProfile();
     }
 
     // ==============================================================
@@ -6198,7 +7445,7 @@ Réponds STRICTEMENT par un tableau JSON valide respectant cette structure exact
       if (typeof origNavigateTab === 'function') {
         window.navigateTab = function (tabName) {
           const result = origNavigateTab.apply(this, arguments);
-          ['themes', 'quiz', 'results', 'stats'].forEach(t => {
+          ['themes', 'quiz', 'results', 'stats', 'profile'].forEach(t => {
             const b = document.getElementById('nav-' + t);
             if (b) {
               if (t === tabName) b.setAttribute('aria-current', 'page');
