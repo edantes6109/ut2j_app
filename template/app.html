@@ -4341,6 +4341,16 @@
       renderPalette();
     }
 
+    function getOptionExplanationText(q, opt, isCorrect) {
+      if (opt && opt.explanation && String(opt.explanation).trim()) {
+        return String(opt.explanation).trim();
+      }
+      if (isCorrect) {
+        return "Proposition exacte validée par le cours et le corrigé de référence.";
+      }
+      return "Proposition inexacte au regard des repères théoriques et cliniques du cours.";
+    }
+
     function renderQcmOptions(q, idx) {
       const optContainer = document.getElementById('quiz-options-container');
       optContainer.innerHTML = '';
@@ -4357,6 +4367,7 @@
         let borderClass = 'border-slate-200 hover:border-indigo-400 hover:bg-slate-50 bg-white';
         let badgeClass = 'bg-slate-100 text-slate-700 border-slate-200';
         let statusBadgeHtml = '';
+        let optExplanationHtml = '';
 
         if (isSelected) {
           borderClass = 'border-indigo-600 bg-indigo-50/40 ring-1 ring-indigo-500';
@@ -4365,18 +4376,41 @@
 
         if (isChecked && hasKey) {
           const isCorrect = q.correct.includes(opt.letter);
+          const expText = getOptionExplanationText(q, opt, isCorrect);
           if (isCorrect && isSelected) {
             borderClass = 'border-emerald-500 bg-emerald-50/70 ring-1 ring-emerald-500';
             badgeClass = 'bg-emerald-600 text-white border-emerald-600';
             statusBadgeHtml = '<span class="px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-600 text-white whitespace-nowrap shadow-2xs">✓ Votre choix (Correct)</span>';
+            optExplanationHtml = `
+              <div class="mt-2 p-2.5 rounded-lg bg-emerald-100/80 border border-emerald-300 text-emerald-950 text-xs leading-relaxed font-normal">
+                <span class="font-bold text-emerald-900">✓ Pourquoi cette réponse est exacte :</span> ${escapeHtml(expText)}
+              </div>
+            `;
           } else if (isCorrect && !isSelected) {
             borderClass = 'border-emerald-300 bg-emerald-50/40 text-emerald-900 border-dashed';
             badgeClass = 'bg-emerald-600 text-white border-emerald-600';
             statusBadgeHtml = '<span class="px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 whitespace-nowrap">✓ Réponse attendue (Omission)</span>';
+            optExplanationHtml = `
+              <div class="mt-2 p-2.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-950 text-xs leading-relaxed font-normal">
+                <span class="font-bold text-emerald-800">💡 Pourquoi il fallait cocher cette réponse :</span> ${escapeHtml(expText)}
+              </div>
+            `;
           } else if (!isCorrect && isSelected) {
-            borderClass = 'border-rose-400 bg-rose-50/70';
+            borderClass = 'border-rose-400 bg-rose-50/70 ring-1 ring-rose-400';
             badgeClass = 'bg-rose-600 text-white border-rose-600';
             statusBadgeHtml = '<span class="px-2 py-0.5 rounded text-[11px] font-bold bg-rose-600 text-white whitespace-nowrap shadow-2xs">✗ Votre choix (Incorrect)</span>';
+            optExplanationHtml = `
+              <div class="mt-2 p-2.5 rounded-lg bg-rose-100/90 border border-rose-300 text-rose-950 text-xs leading-relaxed font-normal">
+                <span class="font-extrabold text-rose-800">⚠️ Pourquoi votre réponse sélectionnée est fausse :</span> ${escapeHtml(expText)}
+              </div>
+            `;
+          } else {
+            statusBadgeHtml = '<span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-slate-100 text-slate-600 border border-slate-200 whitespace-nowrap">✗ Proposition fausse</span>';
+            optExplanationHtml = `
+              <div class="mt-2 p-2 rounded-lg bg-slate-100/80 border border-slate-200 text-slate-700 text-xs leading-relaxed font-normal">
+                <span class="font-semibold text-slate-800">✗ Pourquoi cette proposition est fausse :</span> ${escapeHtml(expText)}
+              </div>
+            `;
           }
         }
 
@@ -4392,16 +4426,19 @@
           <input type="checkbox" value="${escapeHtml(opt.letter)}" ${isSelected ? 'checked' : ''} 
             ${isLocked ? 'disabled' : ''}
             class="mt-1 h-4 w-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 pointer-events-none">
-          <div class="flex-1 flex items-start justify-between gap-3 min-w-0">
-            <div class="flex items-start gap-3 min-w-0">
-              <span class="qcm-opt-badge flex-shrink-0 w-6 h-6 rounded-md ${badgeClass} text-xs font-bold flex items-center justify-center border">
-                ${escapeHtml(opt.letter)}
-              </span>
-              <span class="text-xs sm:text-sm font-semibold text-slate-900 pt-0.5 leading-normal">
-                ${escapeHtml(opt.text)} ${origNote}
-              </span>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-start justify-between gap-3 min-w-0">
+              <div class="flex items-start gap-3 min-w-0">
+                <span class="qcm-opt-badge flex-shrink-0 w-6 h-6 rounded-md ${badgeClass} text-xs font-bold flex items-center justify-center border">
+                  ${escapeHtml(opt.letter)}
+                </span>
+                <span class="text-xs sm:text-sm font-semibold text-slate-900 pt-0.5 leading-normal">
+                  ${escapeHtml(opt.text)} ${origNote}
+                </span>
+              </div>
+              ${statusBadgeHtml ? `<div class="shrink-0 pt-0.5 pl-2">${statusBadgeHtml}</div>` : ''}
             </div>
-            ${statusBadgeHtml ? `<div class="shrink-0 pt-0.5 pl-2">${statusBadgeHtml}</div>` : ''}
+            ${optExplanationHtml}
           </div>
         `;
 
@@ -4542,13 +4579,18 @@
                     <span class="flex items-center gap-1.5"><span>🎯</span> <span>Proposition(s) exacte(s) attendue(s) :</span></span>
                     ${hasShuffle ? '<span class="text-[10px] font-semibold text-indigo-700 bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded-full">🔀 Choix mélangés</span>' : ''}
                   </div>
-                  <div class="space-y-1 text-slate-800 text-xs">
+                  <div class="space-y-1.5 text-slate-800 text-xs">
                     ${correctOpts.map(o => `
                       <div class="flex items-start gap-2 py-0.5">
                         <span class="inline-flex items-center justify-center w-5 h-5 rounded font-bold text-[11px] bg-emerald-600 text-white shrink-0">${escapeHtml(o.letter)}</span>
-                        <div class="leading-snug">
-                          <span class="font-medium text-slate-900">${escapeHtml(o.text)}</span>
-                          ${o.origLetter && o.origLetter !== o.letter ? ` <span class="text-[10px] text-slate-500 font-normal italic">(Option ${escapeHtml(o.origLetter)} dans l'annale originale)</span>` : ''}
+                        <div class="leading-snug flex-1">
+                          <div>
+                            <span class="font-bold text-slate-900">${escapeHtml(o.text)}</span>
+                            ${o.origLetter && o.origLetter !== o.letter ? ` <span class="text-[10px] text-slate-500 font-normal italic">(Option ${escapeHtml(o.origLetter)} dans l'annale originale)</span>` : ''}
+                          </div>
+                          <div class="text-[11px] text-emerald-900 mt-0.5">
+                            <span class="font-semibold">✓ Justification :</span> ${escapeHtml(getOptionExplanationText(q, o, true))}
+                          </div>
                         </div>
                       </div>
                     `).join('')}
@@ -4557,7 +4599,69 @@
               `;
             }
 
-            content.innerHTML = sourceBannerHtml + correctPropositionsHtml + `<div class="p-3 rounded-lg bg-white/80 border border-indigo-100 text-slate-800 leading-relaxed font-normal"><p>${escapeHtml(q.explanation || "Solution validée par les annales et corrigés officiels de l'Université Toulouse Jean Jaurès.")}</p></div>`;
+            const selectedLetters = activeQuiz.userQcmSelections[idx] || new Set();
+            const wrongSelectedOpts = opts.filter(o => selectedLetters.has(o.letter) && !correctLetters.includes(o.letter));
+            let wrongSelectionsHtml = '';
+            if (wrongSelectedOpts.length > 0) {
+              wrongSelectionsHtml = `
+                <div class="p-3 rounded-xl bg-rose-50/95 border border-rose-300 shadow-2xs space-y-1.5">
+                  <div class="text-[11px] font-extrabold text-rose-900 flex items-center gap-1.5">
+                    <span>⚠️</span> <span>Pourquoi votre sélection est fausse :</span>
+                  </div>
+                  <div class="space-y-2 text-rose-950 text-xs">
+                    ${wrongSelectedOpts.map(o => `
+                      <div class="flex items-start gap-2 p-2 rounded-lg bg-white/90 border border-rose-200">
+                        <span class="inline-flex items-center justify-center w-5 h-5 rounded font-bold text-[11px] bg-rose-600 text-white shrink-0">${escapeHtml(o.letter)}</span>
+                        <div class="leading-snug flex-1">
+                          <div class="font-bold text-rose-950">${escapeHtml(o.text)}</div>
+                          <div class="text-xs text-rose-800 mt-0.5">
+                            <span class="font-bold">✗ Explication de l'erreur :</span> ${escapeHtml(getOptionExplanationText(q, o, false))}
+                          </div>
+                        </div>
+                      </div>
+                    `).join('')}
+                  </div>
+                </div>
+              `;
+            }
+
+            let allOptionsBreakdownHtml = '';
+            if (opts.length > 0) {
+              allOptionsBreakdownHtml = `
+                <div class="p-3 rounded-xl bg-white/95 border border-slate-200 shadow-2xs space-y-2">
+                  <div class="text-[11px] font-bold text-slate-900 flex items-center gap-1.5">
+                    <span>📋</span> <span>Explications détaillées pour chaque proposition :</span>
+                  </div>
+                  <div class="space-y-1.5 text-xs">
+                    ${opts.map(o => {
+                      const isOptCorr = correctLetters.includes(o.letter);
+                      const isOptSel = selectedLetters.has(o.letter);
+                      const expText = getOptionExplanationText(q, o, isOptCorr);
+                      return `
+                        <div class="p-2 rounded-lg border ${isOptCorr ? 'bg-emerald-50/60 border-emerald-200' : (isOptSel ? 'bg-rose-50/70 border-rose-200' : 'bg-slate-50/80 border-slate-200')} flex items-start gap-2">
+                          <span class="inline-flex items-center justify-center w-5 h-5 rounded font-bold text-[11px] ${isOptCorr ? 'bg-emerald-600 text-white' : (isOptSel ? 'bg-rose-600 text-white' : 'bg-slate-200 text-slate-700')} shrink-0 mt-0.5">${escapeHtml(o.letter)}</span>
+                          <div class="leading-snug flex-1">
+                            <div class="flex items-center gap-1.5 flex-wrap">
+                              <span class="font-bold text-slate-900">${escapeHtml(o.text)}</span>
+                              <span class="px-1.5 py-0.2 rounded text-[10px] font-bold ${isOptCorr ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">
+                                ${isOptCorr ? '✓ Vrai' : '✗ Faux'}
+                              </span>
+                              ${isOptSel && !isOptCorr ? '<span class="px-1.5 py-0.2 rounded text-[10px] font-bold bg-rose-600 text-white">Cochée à tort</span>' : ''}
+                              ${!isOptSel && isOptCorr ? '<span class="px-1.5 py-0.2 rounded text-[10px] font-bold bg-amber-100 text-amber-800">Omise</span>' : ''}
+                            </div>
+                            <p class="mt-0.5 ${isOptCorr ? 'text-emerald-950' : (isOptSel ? 'text-rose-900 font-medium' : 'text-slate-700')}">
+                              ${escapeHtml(expText)}
+                            </p>
+                          </div>
+                        </div>
+                      `;
+                    }).join('')}
+                  </div>
+                </div>
+              `;
+            }
+
+            content.innerHTML = sourceBannerHtml + wrongSelectionsHtml + correctPropositionsHtml + allOptionsBreakdownHtml + `<div class="p-3 rounded-lg bg-white/80 border border-indigo-100 text-slate-800 leading-relaxed font-normal"><span class="font-bold text-indigo-950 block mb-0.5">💡 Synthèse du cours :</span><p>${escapeHtml(q.explanation || "Solution validée par les annales et corrigés officiels de l'Université Toulouse Jean Jaurès.")}</p></div>`;
             const isOk = activeQuiz.scores[idx] === 1;
             document.getElementById('quiz-self-eval-label').textContent = 'Résultat de votre réponse :';
             evalControls.innerHTML = isOk ? `
@@ -4922,39 +5026,65 @@
           // Find full text of user selected options
           const userSelectedOptions = optionsList.filter(o => userSel.includes(o.letter));
 
-          // Generate HTML for all options with clear visual feedback
+          // Generate HTML for all options with clear visual feedback and per-option explanations
           let optionsHtml = '<div class="space-y-2 pt-2">';
           optionsList.forEach(opt => {
             const isOptCorrect = correctLetters.includes(opt.letter);
             const isOptSelected = userSel.includes(opt.letter);
+            const expText = getOptionExplanationText(q, opt, isOptCorrect);
 
             let rowClass = 'border-slate-200 bg-white text-slate-700';
             let badgeHtml = '';
+            let optExpBoxHtml = '';
 
             if (isOptCorrect && isOptSelected) {
               rowClass = 'border-emerald-400 bg-emerald-50/80 text-emerald-950 font-medium ring-1 ring-emerald-400';
               badgeHtml = '<span class="px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-600 text-white whitespace-nowrap">✓ Votre choix (Correct)</span>';
+              optExpBoxHtml = `
+                <div class="mt-2 p-2 rounded-lg bg-emerald-100/80 border border-emerald-300 text-emerald-950 text-xs font-normal leading-relaxed">
+                  <span class="font-bold text-emerald-900">✓ Pourquoi cette réponse est exacte :</span> ${escapeHtml(expText)}
+                </div>
+              `;
             } else if (isOptCorrect && !isOptSelected) {
               rowClass = 'border-emerald-300 bg-emerald-50/40 text-emerald-900 border-dashed';
               badgeHtml = '<span class="px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 whitespace-nowrap">✓ Réponse attendue (Omission)</span>';
+              optExpBoxHtml = `
+                <div class="mt-2 p-2 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-950 text-xs font-normal leading-relaxed">
+                  <span class="font-bold text-emerald-800">💡 Pourquoi il fallait cocher cette réponse :</span> ${escapeHtml(expText)}
+                </div>
+              `;
             } else if (!isOptCorrect && isOptSelected) {
-              rowClass = 'border-rose-300 bg-rose-50/80 text-rose-950 font-medium';
+              rowClass = 'border-rose-400 bg-rose-50/80 text-rose-950 font-medium ring-1 ring-rose-300';
               badgeHtml = '<span class="px-2 py-0.5 rounded text-[11px] font-bold bg-rose-600 text-white whitespace-nowrap">✗ Votre choix (Incorrect)</span>';
+              optExpBoxHtml = `
+                <div class="mt-2 p-2 rounded-lg bg-rose-100/90 border border-rose-300 text-rose-950 text-xs font-normal leading-relaxed">
+                  <span class="font-extrabold text-rose-800">⚠️ Pourquoi votre réponse sélectionnée est fausse :</span> ${escapeHtml(expText)}
+                </div>
+              `;
             } else {
-              rowClass = 'border-slate-200 bg-slate-50/40 text-slate-600 opacity-80';
+              rowClass = 'border-slate-200 bg-slate-50/40 text-slate-600';
+              badgeHtml = '<span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-slate-100 text-slate-600 border border-slate-200 whitespace-nowrap">✗ Proposition fausse</span>';
+              optExpBoxHtml = `
+                <div class="mt-2 p-2 rounded-lg bg-slate-100/80 border border-slate-200 text-slate-700 text-xs font-normal leading-relaxed">
+                  <span class="font-semibold text-slate-800">✗ Pourquoi cette proposition est fausse :</span> ${escapeHtml(expText)}
+                </div>
+              `;
             }
 
             optionsHtml += `
-              <div class="p-2.5 sm:p-3 rounded-xl border ${rowClass} flex items-start justify-between gap-3 transition">
-                <div class="flex items-start gap-2.5 flex-1 min-w-0">
-                  <span class="flex-shrink-0 w-6 h-6 rounded-md ${isOptCorrect ? 'bg-emerald-600 text-white' : (isOptSelected ? 'bg-rose-600 text-white' : 'bg-slate-200 text-slate-700')} text-xs font-bold flex items-center justify-center">
-                    ${escapeHtml(opt.letter)}
-                  </span>
-                  <span class="text-xs sm:text-sm pt-0.5 leading-snug">
-                    ${escapeHtml(opt.text)}${opt.origLetter && opt.origLetter !== opt.letter ? ` <span class="text-[10px] text-slate-400 font-normal italic">(origine: ${escapeHtml(opt.origLetter)})</span>` : ''}
-                  </span>
+              <div class="p-2.5 sm:p-3 rounded-xl border ${rowClass} space-y-1 transition">
+                <div class="flex items-start justify-between gap-3">
+                  <div class="flex items-start gap-2.5 flex-1 min-w-0">
+                    <span class="flex-shrink-0 w-6 h-6 rounded-md ${isOptCorrect ? 'bg-emerald-600 text-white' : (isOptSelected ? 'bg-rose-600 text-white' : 'bg-slate-200 text-slate-700')} text-xs font-bold flex items-center justify-center">
+                      ${escapeHtml(opt.letter)}
+                    </span>
+                    <span class="text-xs sm:text-sm pt-0.5 leading-snug">
+                      ${escapeHtml(opt.text)}${opt.origLetter && opt.origLetter !== opt.letter ? ` <span class="text-[10px] text-slate-400 font-normal italic">(origine: ${escapeHtml(opt.origLetter)})</span>` : ''}
+                    </span>
+                  </div>
+                  <div class="flex-shrink-0 pl-2">${badgeHtml}</div>
                 </div>
-                <div class="flex-shrink-0 pl-2">${badgeHtml}</div>
+                ${optExpBoxHtml}
               </div>
             `;
           });
@@ -4992,8 +5122,13 @@
                   <span>🎯</span> Bonne(s) réponse(s) détaillée(s) :
                 </span>
                 ${correctOptions.length > 0 ? `
-                  <ul class="mt-1 space-y-1 pl-5 list-disc">
-                    ${correctOptions.map(o => `<li><strong>[${escapeHtml(o.letter)}]</strong> ${escapeHtml(o.text)}</li>`).join('')}
+                  <ul class="mt-1 space-y-1.5 pl-5 list-disc">
+                    ${correctOptions.map(o => `
+                      <li>
+                        <strong>[${escapeHtml(o.letter)}]</strong> ${escapeHtml(o.text)}
+                        <div class="text-[11px] text-emerald-800 mt-0.5">✓ ${escapeHtml(getOptionExplanationText(q, o, true))}</div>
+                      </li>
+                    `).join('')}
                   </ul>
                 ` : `<p class="mt-0.5 italic text-slate-500">${escapeHtml(correctLetters.join(', ') || 'Conforme au syllabus')}</p>`}
               </div>
@@ -5003,8 +5138,16 @@
                   <span>👤</span> Votre réponse :
                 </span>
                 ${userSelectedOptions.length > 0 ? `
-                  <ul class="mt-1 space-y-1 pl-5 list-disc ${isOk ? 'text-emerald-900' : 'text-rose-900'}">
-                    ${userSelectedOptions.map(o => `<li><strong>[${escapeHtml(o.letter)}]</strong> ${escapeHtml(o.text)}</li>`).join('')}
+                  <ul class="mt-1 space-y-1.5 pl-5 list-disc ${isOk ? 'text-emerald-900' : 'text-rose-900'}">
+                    ${userSelectedOptions.map(o => {
+                      const isThisChoiceCorrect = correctLetters.includes(o.letter);
+                      return `
+                        <li>
+                          <strong>[${escapeHtml(o.letter)}]</strong> ${escapeHtml(o.text)}
+                          ${!isThisChoiceCorrect ? `<div class="text-[11px] text-rose-700 font-medium mt-0.5">⚠️ Pourquoi ce choix est faux : ${escapeHtml(getOptionExplanationText(q, o, false))}</div>` : `<div class="text-[11px] text-emerald-800 mt-0.5">✓ Choix exact : ${escapeHtml(getOptionExplanationText(q, o, true))}</div>`}
+                        </li>
+                      `;
+                    }).join('')}
                   </ul>
                 ` : `<p class="mt-0.5 italic text-rose-600">Aucune réponse sélectionnée.</p>`}
               </div>
@@ -5644,7 +5787,7 @@ Réponds UNIQUEMENT avec un tableau JSON valide au format suivant :
     "type": "${type}",
     "theme": "Nom exact du thème UE{{UE_CODE}}",
     "question": "Énoncé précis et rigoureux",
-    ${type === 'qcm' ? '"options": [{"letter": "A", "text": "..."}, {"letter": "B", "text": "..."}, {"letter": "C", "text": "..."}, {"letter": "D", "text": "..."}],\n    "correct": ["A"],\n    "explanation": "Réf. théorique ou justification clinique"' : '"points": "5",\n    "max_lines": "15",\n    "guidelines": ["Critère 1", "Critère 2"]'}
+    ${type === 'qcm' ? '"options": [{"letter": "A", "text": "...", "explanation": "Pourquoi cette proposition est vraie ou fausse"}, {"letter": "B", "text": "...", "explanation": "Pourquoi cette proposition est vraie ou fausse"}, {"letter": "C", "text": "...", "explanation": "Pourquoi cette proposition est vraie ou fausse"}, {"letter": "D", "text": "...", "explanation": "Pourquoi cette proposition est vraie ou fausse"}],\n    "correct": ["A"],\n    "explanation": "Synthèse théorique et justification globale"' : '"points": "5",\n    "max_lines": "15",\n    "guidelines": ["Critère 1", "Critère 2"]'}
   }
 ]`;
 
@@ -5854,12 +5997,12 @@ Réponds STRICTEMENT par un tableau JSON valide respectant cette structure exact
     "theme": "P1 – Ch.3 (3.4) La névrose",
     "question": "Énoncé précis...",
     "options": [
-      {"letter": "A", "text": "..."},
-      {"letter": "B", "text": "..."},
-      {"letter": "C", "text": "..."}
+      {"letter": "A", "text": "...", "explanation": "Pourquoi cette proposition est vraie ou fausse..."},
+      {"letter": "B", "text": "...", "explanation": "Pourquoi cette proposition est vraie ou fausse..."},
+      {"letter": "C", "text": "...", "explanation": "Pourquoi cette proposition est vraie ou fausse..."}
     ],
     "correct": ["A"],
-    "explanation": "Justification théorique et clinique..."
+    "explanation": "Synthèse théorique et clinique globale..."
   },
   {
     "type": "open",

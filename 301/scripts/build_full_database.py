@@ -324,6 +324,22 @@ def main():
 
     # Also save JSON files in 301/data/ for the web app pipeline
     json_qcm_path = os.path.join(DATA_DIR, "questions_database.json")
+    if os.path.exists(json_qcm_path):
+        try:
+            with open(json_qcm_path, "r", encoding="utf-8") as f:
+                existing_qcm = {q["id"]: q for q in json.load(f) if "id" in q}
+            for item in qcm_json_list:
+                old = existing_qcm.get(item["id"])
+                if old:
+                    if old.get("explanation") and not item.get("explanation"):
+                        item["explanation"] = old["explanation"]
+                    old_opts = {o["letter"]: o for o in old.get("options", []) if "letter" in o}
+                    for o in item.get("options", []):
+                        old_o = old_opts.get(o["letter"])
+                        if old_o and old_o.get("explanation") and not o.get("explanation"):
+                            o["explanation"] = old_o["explanation"]
+        except Exception:
+            pass
     with open(json_qcm_path, "w", encoding="utf-8") as f:
         json.dump(qcm_json_list, f, ensure_ascii=False, indent=2)
     print(f"✅ Saved QCM JSON data to: {json_qcm_path}")
