@@ -799,15 +799,11 @@
               </div>
             </div>
 
-            <!-- Direct Action Buttons in Quiz Settings Card -->
-            <div class="space-y-1.5 pt-1">
+            <!-- Direct Action Button in Quiz Settings Card -->
+            <div class="pt-1">
               <button type="button" onclick="startQuiz()" class="w-full py-2.5 px-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs shadow-sm transition flex items-center justify-center gap-1.5 cursor-pointer">
                 <span id="param-primary-launch-label">Commencer le Quiz</span>
                 <span aria-hidden="true">→</span>
-              </button>
-              <button type="button" onclick="launchConfiguredQuizInLiveRoom()" class="w-full py-2 px-3 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-800 border border-rose-300 font-extrabold text-xs transition flex items-center justify-center gap-1.5 cursor-pointer" title="Créer directement un Salon Live-Quiz Multi-Joueurs avec votre sélection et votre nombre de questions">
-                <span>📡</span>
-                <span>Lancer en Salon Live-Quiz Multi-Joueurs</span>
               </button>
             </div>
           </div>
@@ -823,11 +819,6 @@
             <div class="text-xs sm:text-sm font-semibold text-slate-900 truncate" id="sticky-launch-info">—</div>
           </div>
           <div class="flex items-center gap-2 shrink-0">
-            <button type="button" onclick="launchConfiguredQuizInLiveRoom()" id="sticky-live-launch-btn" class="py-2.5 px-3.5 sm:px-4 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs sm:text-sm shadow-md transition flex items-center gap-1.5 cursor-pointer" title="Héberger cette série en direct dans un Salon Live-Quiz Multi-Joueurs">
-              <span>📡</span>
-              <span class="hidden sm:inline">Salon Live-Quiz Multi-Joueurs</span>
-              <span class="sm:hidden">Salon Live</span>
-            </button>
             <button type="button" onclick="startQuiz()" id="sticky-launch-btn" class="py-2.5 px-4 sm:px-6 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs sm:text-sm shadow-md transition flex items-center gap-2 cursor-pointer">
               <span id="sticky-launch-btn-label">Commencer le Quiz</span>
               <span aria-hidden="true">→</span>
@@ -2402,18 +2393,29 @@
                   Chapitre
                 </span>
               </div>
-              <div class="flex items-center gap-3">
+              <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
                 <span id="live-q-answered-status" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
                   0 / 1 ont répondu
                 </span>
                 <span id="live-q-timer-badge" class="px-3 py-1 rounded-xl text-sm font-extrabold font-mono bg-rose-600 text-white shadow-2xs">
                   ⏱️ 25s
                 </span>
+                <button type="button" onclick="toggleHostPauseLiveQuiz()" id="live-btn-host-pause" class="hidden px-3 py-1 rounded-xl border border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-900 text-xs font-extrabold transition flex items-center gap-1.5 shadow-2xs cursor-pointer" title="Mettre en pause ou reprendre le Quiz Live pour tous les joueurs">
+                  <span id="live-btn-host-pause-icon">⏸️</span>
+                  <span id="live-btn-host-pause-text">Pause</span>
+                </button>
               </div>
             </div>
             <!-- Smooth Countdown Bar -->
             <div class="w-full h-2 rounded-full bg-slate-200 overflow-hidden">
               <div id="live-q-timer-bar" class="bg-rose-600 h-full transition-all duration-300" style="width: 100%"></div>
+            </div>
+            <!-- Paused Notice Banner -->
+            <div id="live-q-paused-banner" class="hidden px-3.5 py-2 rounded-xl bg-amber-100/90 border border-amber-300 text-amber-950 text-xs font-extrabold flex items-center justify-between gap-2">
+              <span class="flex items-center gap-2">
+                <span>⏸️</span>
+                <span>Quiz en pause par l'hôte — Le chronomètre et les réponses sont temporairement suspendus.</span>
+              </span>
             </div>
           </div>
 
@@ -5721,97 +5723,7 @@
               document.getElementById('quiz-feedback-badge').textContent = 'Sujet officiel';
             }
 
-            let correctPropositionsHtml = '';
-            if (correctOpts.length > 0) {
-              correctPropositionsHtml = `
-                <div class="p-3 rounded-xl bg-white/95 border border-emerald-200 shadow-2xs space-y-1.5">
-                  <div class="text-[11px] font-bold text-emerald-950 flex items-center justify-between">
-                    <span class="flex items-center gap-1.5"><span>🎯</span> <span>Proposition(s) exacte(s) attendue(s) :</span></span>
-                    ${hasShuffle ? '<span class="text-[10px] font-semibold text-indigo-700 bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded-full">🔀 Choix mélangés</span>' : ''}
-                  </div>
-                  <div class="space-y-1.5 text-slate-800 text-xs">
-                    ${correctOpts.map(o => `
-                      <div class="flex items-start gap-2 py-0.5">
-                        <span class="inline-flex items-center justify-center w-5 h-5 rounded font-bold text-[11px] bg-emerald-600 text-white shrink-0">${escapeHtml(o.letter)}</span>
-                        <div class="leading-snug flex-1">
-                          <div>
-                            <span class="font-bold text-slate-900">${escapeHtml(o.text)}</span>
-                            ${o.origLetter && o.origLetter !== o.letter ? ` <span class="text-[10px] text-slate-500 font-normal italic">(Option ${escapeHtml(o.origLetter)} dans l'annale originale)</span>` : ''}
-                          </div>
-                          <div class="text-[11px] text-emerald-900 mt-0.5">
-                            <span class="font-semibold">✓ Justification :</span> ${escapeHtml(getOptionExplanationText(q, o, true))}
-                          </div>
-                        </div>
-                      </div>
-                    `).join('')}
-                  </div>
-                </div>
-              `;
-            }
-
-            const selectedLetters = activeQuiz.userQcmSelections[idx] || new Set();
-            const wrongSelectedOpts = opts.filter(o => selectedLetters.has(o.letter) && !correctLetters.includes(o.letter));
-            let wrongSelectionsHtml = '';
-            if (wrongSelectedOpts.length > 0) {
-              wrongSelectionsHtml = `
-                <div class="p-3 rounded-xl bg-rose-50/95 border border-rose-300 shadow-2xs space-y-1.5">
-                  <div class="text-[11px] font-extrabold text-rose-900 flex items-center gap-1.5">
-                    <span>⚠️</span> <span>Pourquoi votre sélection est fausse :</span>
-                  </div>
-                  <div class="space-y-2 text-rose-950 text-xs">
-                    ${wrongSelectedOpts.map(o => `
-                      <div class="flex items-start gap-2 p-2 rounded-lg bg-white/90 border border-rose-200">
-                        <span class="inline-flex items-center justify-center w-5 h-5 rounded font-bold text-[11px] bg-rose-600 text-white shrink-0">${escapeHtml(o.letter)}</span>
-                        <div class="leading-snug flex-1">
-                          <div class="font-bold text-rose-950">${escapeHtml(o.text)}</div>
-                          <div class="text-xs text-rose-800 mt-0.5">
-                            <span class="font-bold">✗ Explication de l'erreur :</span> ${escapeHtml(getOptionExplanationText(q, o, false))}
-                          </div>
-                        </div>
-                      </div>
-                    `).join('')}
-                  </div>
-                </div>
-              `;
-            }
-
-            let allOptionsBreakdownHtml = '';
-            if (opts.length > 0) {
-              allOptionsBreakdownHtml = `
-                <div class="p-3 rounded-xl bg-white/95 border border-slate-200 shadow-2xs space-y-2">
-                  <div class="text-[11px] font-bold text-slate-900 flex items-center gap-1.5">
-                    <span>📋</span> <span>Explications détaillées pour chaque proposition :</span>
-                  </div>
-                  <div class="space-y-1.5 text-xs">
-                    ${opts.map(o => {
-                      const isOptCorr = correctLetters.includes(o.letter);
-                      const isOptSel = selectedLetters.has(o.letter);
-                      const expText = getOptionExplanationText(q, o, isOptCorr);
-                      return `
-                        <div class="p-2 rounded-lg border ${isOptCorr ? 'bg-emerald-50/60 border-emerald-200' : (isOptSel ? 'bg-rose-50/70 border-rose-200' : 'bg-slate-50/80 border-slate-200')} flex items-start gap-2">
-                          <span class="inline-flex items-center justify-center w-5 h-5 rounded font-bold text-[11px] ${isOptCorr ? 'bg-emerald-600 text-white' : (isOptSel ? 'bg-rose-600 text-white' : 'bg-slate-200 text-slate-700')} shrink-0 mt-0.5">${escapeHtml(o.letter)}</span>
-                          <div class="leading-snug flex-1">
-                            <div class="flex items-center gap-1.5 flex-wrap">
-                              <span class="font-bold text-slate-900">${escapeHtml(o.text)}</span>
-                              <span class="px-1.5 py-0.2 rounded text-[10px] font-bold ${isOptCorr ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">
-                                ${isOptCorr ? '✓ Vrai' : '✗ Faux'}
-                              </span>
-                              ${isOptSel && !isOptCorr ? '<span class="px-1.5 py-0.2 rounded text-[10px] font-bold bg-rose-600 text-white">Cochée à tort</span>' : ''}
-                              ${!isOptSel && isOptCorr ? '<span class="px-1.5 py-0.2 rounded text-[10px] font-bold bg-amber-100 text-amber-800">Omise</span>' : ''}
-                            </div>
-                            <p class="mt-0.5 ${isOptCorr ? 'text-emerald-950' : (isOptSel ? 'text-rose-900 font-medium' : 'text-slate-700')}">
-                              ${escapeHtml(expText)}
-                            </p>
-                          </div>
-                        </div>
-                      `;
-                    }).join('')}
-                  </div>
-                </div>
-              `;
-            }
-
-            content.innerHTML = sourceBannerHtml + wrongSelectionsHtml + correctPropositionsHtml + allOptionsBreakdownHtml + `<div class="p-3 rounded-lg bg-white/80 border border-indigo-100 text-slate-800 leading-relaxed font-normal"><span class="font-bold text-indigo-950 block mb-0.5">💡 Synthèse du cours :</span><p>${escapeHtml(q.explanation || "Solution validée par les annales et corrigés officiels de l'Université Toulouse Jean Jaurès.")}</p></div>`;
+            content.innerHTML = sourceBannerHtml + `<div class="p-3 rounded-lg bg-white/80 border border-indigo-100 text-slate-800 leading-relaxed font-normal"><span class="font-bold text-indigo-950 block mb-0.5">💡 Synthèse du cours :</span><p>${escapeHtml(q.explanation || "Solution validée par les annales et corrigés officiels de l'Université Toulouse Jean Jaurès.")}</p></div>`;
             const isOk = activeQuiz.scores[idx] === 1;
             document.getElementById('quiz-self-eval-label').textContent = 'Résultat de votre réponse :';
             evalControls.innerHTML = isOk ? `
@@ -7672,8 +7584,76 @@
         status: liveRoomState.status,
         currentQIndex: liveRoomState.currentQIndex,
         questionStartedAt: liveRoomState.questionStartedAt,
+        isPaused: Boolean(liveRoomState.isPaused),
+        pausedAt: liveRoomState.pausedAt || 0,
+        accumulatedPausedMs: liveRoomState.accumulatedPausedMs || 0,
         players: liveRoomState.players
       };
+    }
+
+    function getLiveQuestionElapsedMs() {
+      if (!liveRoomState || !liveRoomState.questionStartedAt) return 0;
+      const refNow = (liveRoomState.isPaused && liveRoomState.pausedAt)
+        ? liveRoomState.pausedAt
+        : Date.now();
+      return Math.max(0, (refNow - liveRoomState.questionStartedAt) - (liveRoomState.accumulatedPausedMs || 0));
+    }
+
+    function updateLivePauseUI() {
+      if (!liveRoomState) return;
+      const pauseBtn = document.getElementById('live-btn-host-pause');
+      const pauseIcon = document.getElementById('live-btn-host-pause-icon');
+      const pauseText = document.getElementById('live-btn-host-pause-text');
+      const pauseBanner = document.getElementById('live-q-paused-banner');
+      const lockBtn = document.getElementById('live-btn-lock-answer');
+
+      if (pauseBtn) {
+        if (liveRoomState.isHost && liveRoomState.status === 'question') {
+          pauseBtn.classList.remove('hidden');
+          if (liveRoomState.isPaused) {
+            pauseBtn.className = 'px-3 py-1 rounded-xl border border-emerald-400 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold transition flex items-center gap-1.5 shadow-2xs cursor-pointer';
+            if (pauseIcon) pauseIcon.textContent = '▶️';
+            if (pauseText) pauseText.textContent = 'Reprendre';
+          } else {
+            pauseBtn.className = 'px-3 py-1 rounded-xl border border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-900 text-xs font-extrabold transition flex items-center gap-1.5 shadow-2xs cursor-pointer';
+            if (pauseIcon) pauseIcon.textContent = '⏸️';
+            if (pauseText) pauseText.textContent = 'Pause';
+          }
+        } else {
+          pauseBtn.classList.add('hidden');
+        }
+      }
+
+      if (pauseBanner) {
+        pauseBanner.classList.toggle('hidden', !liveRoomState.isPaused);
+      }
+
+      if (lockBtn && !liveRoomState.myLockedAnswer) {
+        lockBtn.disabled = Boolean(liveRoomState.isPaused);
+        lockBtn.classList.toggle('opacity-50', Boolean(liveRoomState.isPaused));
+        lockBtn.classList.toggle('cursor-not-allowed', Boolean(liveRoomState.isPaused));
+      }
+
+      renderLiveQuestionOptions();
+    }
+
+    function toggleHostPauseLiveQuiz() {
+      if (!liveRoomState || !liveRoomState.isHost || liveRoomState.status !== 'question') return;
+      if (!liveRoomState.isPaused) {
+        liveRoomState.isPaused = true;
+        liveRoomState.pausedAt = Date.now();
+      } else {
+        const pauseDelta = Math.max(0, Date.now() - (liveRoomState.pausedAt || Date.now()));
+        liveRoomState.accumulatedPausedMs = (liveRoomState.accumulatedPausedMs || 0) + pauseDelta;
+        liveRoomState.isPaused = false;
+        liveRoomState.pausedAt = 0;
+      }
+      updateLivePauseUI();
+      broadcastLiveMessage({
+        type: 'ROOM_STATE',
+        roomCode: liveRoomState.roomCode,
+        state: serializeLiveRoomPublicState()
+      });
     }
 
     function broadcastLiveMessage(msg) {
@@ -7945,6 +7925,9 @@
       liveRoomState.status = state.status;
       liveRoomState.currentQIndex = state.currentQIndex || 0;
       liveRoomState.questionStartedAt = state.questionStartedAt || Date.now();
+      liveRoomState.isPaused = Boolean(state.isPaused);
+      liveRoomState.pausedAt = state.pausedAt || 0;
+      liveRoomState.accumulatedPausedMs = state.accumulatedPausedMs || 0;
 
       if (state.status === 'lobby') {
         renderLiveLobby();
@@ -7954,6 +7937,7 @@
           startLiveQuestionRound(liveRoomState.currentQIndex, false);
         } else {
           updateLiveAnsweredCounterUI();
+          updateLivePauseUI();
         }
       } else if (state.status === 'reveal') {
         if (prevStatus !== 'reveal') {
@@ -8059,7 +8043,12 @@
 
       liveRoomState.status = 'question';
       liveRoomState.currentQIndex = qIdx;
-      liveRoomState.questionStartedAt = Date.now();
+      if (broadcastFromHost || !liveRoomState.questionStartedAt) {
+        liveRoomState.questionStartedAt = Date.now();
+        liveRoomState.isPaused = false;
+        liveRoomState.pausedAt = 0;
+        liveRoomState.accumulatedPausedMs = 0;
+      }
       liveRoomState.mySelectedOptions = new Set();
       liveRoomState.myLockedAnswer = false;
 
@@ -8101,7 +8090,7 @@
         lockBtn.disabled = false;
       }
 
-      renderLiveQuestionOptions();
+      updateLivePauseUI();
       updateLiveAnsweredCounterUI();
 
       const timerSec = liveRoomState.timerSeconds || 0;
@@ -8111,22 +8100,32 @@
       const timerBar = document.getElementById('live-q-timer-bar');
 
       if (isUnlimited) {
-        if (timerBadge) {
-          timerBadge.textContent = '⏱️ Illimité';
-          timerBadge.className = 'px-3 py-1 rounded-xl text-sm font-extrabold font-mono bg-indigo-600 text-white shadow-2xs';
-        }
-        if (timerBar) {
-          timerBar.style.width = '100%';
-          timerBar.className = 'bg-indigo-600 h-full transition-all duration-300';
-        }
+        const updateUnlimitedTick = () => {
+          if (!liveRoomState || liveRoomState.status !== 'question') {
+            clearInterval(liveCountdownInterval);
+            return;
+          }
+          if (liveRoomState.isPaused) {
+            if (timerBadge) {
+              timerBadge.textContent = '⏸️ En pause';
+              timerBadge.className = 'px-3 py-1 rounded-xl text-sm font-extrabold font-mono bg-amber-500 text-white shadow-2xs';
+            }
+          } else {
+            if (timerBadge) {
+              timerBadge.textContent = '⏱️ Illimité';
+              timerBadge.className = 'px-3 py-1 rounded-xl text-sm font-extrabold font-mono bg-indigo-600 text-white shadow-2xs';
+            }
+          }
+          if (timerBar) {
+            timerBar.style.width = '100%';
+            timerBar.className = liveRoomState.isPaused
+              ? 'bg-amber-500 h-full transition-all duration-300'
+              : 'bg-indigo-600 h-full transition-all duration-300';
+          }
+        };
+        updateUnlimitedTick();
+        liveCountdownInterval = setInterval(updateUnlimitedTick, 250);
         return;
-      }
-
-      if (timerBadge) {
-        timerBadge.className = 'px-3 py-1 rounded-xl text-sm font-extrabold font-mono bg-rose-600 text-white shadow-2xs';
-      }
-      if (timerBar) {
-        timerBar.className = 'bg-rose-600 h-full transition-all duration-300';
       }
 
       const updateTick = () => {
@@ -8134,13 +8133,31 @@
           clearInterval(liveCountdownInterval);
           return;
         }
-        const elapsed = Date.now() - liveRoomState.questionStartedAt;
+        const elapsed = getLiveQuestionElapsedMs();
         const remainingMs = Math.max(0, totalMs - elapsed);
         const remainingSec = Math.ceil(remainingMs / 1000);
         const pct = Math.max(0, Math.min(100, (remainingMs / totalMs) * 100));
 
-        if (timerBadge) timerBadge.textContent = `⏱️ ${remainingSec}s`;
-        if (timerBar) timerBar.style.width = `${pct}%`;
+        if (liveRoomState.isPaused) {
+          if (timerBadge) {
+            timerBadge.textContent = `⏸️ ${remainingSec}s`;
+            timerBadge.className = 'px-3 py-1 rounded-xl text-sm font-extrabold font-mono bg-amber-500 text-white shadow-2xs';
+          }
+          if (timerBar) {
+            timerBar.style.width = `${pct}%`;
+            timerBar.className = 'bg-amber-500 h-full transition-all duration-300';
+          }
+          return;
+        }
+
+        if (timerBadge) {
+          timerBadge.textContent = `⏱️ ${remainingSec}s`;
+          timerBadge.className = 'px-3 py-1 rounded-xl text-sm font-extrabold font-mono bg-rose-600 text-white shadow-2xs';
+        }
+        if (timerBar) {
+          timerBar.style.width = `${pct}%`;
+          timerBar.className = 'bg-rose-600 h-full transition-all duration-300';
+        }
 
         if (remainingMs <= 0) {
           clearInterval(liveCountdownInterval);
@@ -8168,7 +8185,7 @@
       list.innerHTML = normOpts.map(opt => {
         const letter = opt.letter;
         const isSelected = liveRoomState.mySelectedOptions.has(letter);
-        const locked = liveRoomState.myLockedAnswer;
+        const locked = liveRoomState.myLockedAnswer || Boolean(liveRoomState.isPaused);
         const baseCls = isSelected
           ? 'bg-indigo-50 border-indigo-500 text-indigo-950 ring-2 ring-indigo-200'
           : 'bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-800';
@@ -8190,7 +8207,7 @@
     }
 
     function toggleLiveOption(letter) {
-      if (!liveRoomState || liveRoomState.status !== 'question' || liveRoomState.myLockedAnswer) return;
+      if (!liveRoomState || liveRoomState.status !== 'question' || liveRoomState.myLockedAnswer || liveRoomState.isPaused) return;
       if (liveRoomState.mySelectedOptions.has(letter)) {
         liveRoomState.mySelectedOptions.delete(letter);
       } else {
@@ -8201,6 +8218,7 @@
 
     function submitLivePlayerAnswer(autoTimeout) {
       if (!liveRoomState || liveRoomState.status !== 'question' || liveRoomState.myLockedAnswer) return;
+      if (liveRoomState.isPaused && !autoTimeout) return;
       liveRoomState.myLockedAnswer = true;
 
       const q = liveRoomState.questions[liveRoomState.currentQIndex];
@@ -8216,7 +8234,7 @@
           // Unlimited time: flat 1000 points without decay
           deltaPoints = 1000;
         } else {
-          const elapsed = Math.max(0, Date.now() - liveRoomState.questionStartedAt);
+          const elapsed = getLiveQuestionElapsedMs();
           const remainingRatio = Math.max(0, Math.min(1, (totalMs - elapsed) / totalMs));
           const speedBonus = Math.round(500 * remainingRatio);
           deltaPoints = 1000 + speedBonus;
