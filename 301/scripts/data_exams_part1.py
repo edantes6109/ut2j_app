@@ -576,7 +576,7 @@ EXAMS_PART1 = [
                     "C": "La construction du cerveau n’est jamais totalement achevée, même à l’âge adulte.",
                     "D": "Ce développement cérébral très lent fait partie des caractéristiques néoténiques chez l’être humain."
                 },
-                "answer": "A, C, D"
+                "answer": "A, B, C, D"
             },
             {
                 "q_num": 4,

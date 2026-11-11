@@ -3387,10 +3387,14 @@ html.dark [class~="border-blue-300/60"]{border-color:rgba(59,130,246,.4)}
         try {
           localStorage.removeItem('ue304_auth_email');
           localStorage.removeItem('ue304_auth_pin');
+          localStorage.removeItem('ue301_auth_email');
+          localStorage.removeItem('ue301_auth_pin');
+          localStorage.removeItem('ue304_auth_email');
+          localStorage.removeItem('ue304_auth_pin');
           localStorage.removeItem('ut2j_auth_email');
           localStorage.removeItem('ut2j_auth_pin');
         } catch (e) {}
-        window.location.href = window.location.pathname;
+        window.location.href = '../index.html';
       }
     }
 
@@ -3421,10 +3425,10 @@ html.dark [class~="border-blue-300/60"]{border-color:rgba(59,130,246,.4)}
         }
       } catch (e) {}
 
-      // 2. Mémorisation locale (LocalStorage)
+      // 2. Mémorisation locale depuis le portail principal (LocalStorage)
       try {
-        const savedEmail = normalizeAuthEmail(localStorage.getItem('ue304_auth_email') || localStorage.getItem('ut2j_auth_email'));
-        const savedPin = normalizeAuthPin(localStorage.getItem('ue304_auth_pin') || localStorage.getItem('ut2j_auth_pin'));
+        const savedEmail = normalizeAuthEmail(localStorage.getItem('ut2j_auth_email') || localStorage.getItem('ue304_auth_email'));
+        const savedPin = normalizeAuthPin(localStorage.getItem('ut2j_auth_pin') || localStorage.getItem('ue304_auth_pin'));
         if (savedEmail && savedPin && isCredentialsAuthorized(savedEmail, savedPin)) {
           unlockAppInterface(savedEmail);
           return;
@@ -3437,7 +3441,18 @@ html.dark [class~="border-blue-300/60"]{border-color:rgba(59,130,246,.4)}
         return;
       }
 
-      // 4. Par défaut: afficher le modal de verrouillage
+      // 4. Rediriger vers la fenêtre de connexion centrale du portail principal (../index.html)
+      try {
+        let hubUrl = '../index.html';
+        const q = new URLSearchParams();
+        q.set('next_ue', '304');
+        if (window.__incomingLiveRoomCode) {
+          q.set('live', window.__incomingLiveRoomCode);
+        }
+        window.location.replace(hubUrl + '?' + q.toString());
+        return;
+      } catch (e) {}
+
       const modal = document.getElementById('auth-gate-modal');
       const appContainer = document.getElementById('app-content-container');
       if (modal) modal.classList.remove('hidden');

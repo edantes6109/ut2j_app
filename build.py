@@ -323,7 +323,16 @@ def build_ue(code):
 # --------------------------------------------------------------------------
 def build_landing(ues):
     cards = []
+    all_hashes = []
+    seen_hashes = set()
     for code in ues:
+        ue_dir = os.path.join(ROOT, code)
+        for u in read_allowed_users(ue_dir):
+            h = hashlib.sha256(f"{u['email']}:{u['pin']}".encode("utf-8")).hexdigest()
+            if h not in seen_hashes:
+                seen_hashes.add(h)
+                all_hashes.append(h)
+
         cfg = load_json(os.path.join(ROOT, code, "ue.json"))
         course_cfg = load_json(os.path.join(ROOT, code, "config.json"), default={})
         data_dir = os.path.join(ROOT, code, "data")
@@ -370,6 +379,8 @@ def build_landing(ues):
         """.strip())
 
     cards_html = "\n".join("      " + c for c in cards).strip()
+    hashes_js = json.dumps(all_hashes, ensure_ascii=False)
+    ues_js = json.dumps(list(ues), ensure_ascii=False)
     page = """<!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -392,6 +403,7 @@ def build_landing(ues):
       --border: #e2e8f0;
       --border-hover: #6366f1;
       --accent: #4f46e5;
+      --accent-hover: #4338ca;
       --emerald: #059669;
       --rose: #e11d48;
     }
@@ -405,7 +417,8 @@ def build_landing(ues):
         --subcard: #0f172a;
         --border: #334155;
         --border-hover: #818cf8;
-        --accent: #818cf8;
+        --accent: #6366f1;
+        --accent-hover: #4f46e5;
         --emerald: #34d399;
         --rose: #fb7185;
       }
@@ -420,6 +433,131 @@ def build_landing(ues):
       display: flex;
       flex-direction: column;
       align-items: center;
+    }
+    /* Central Login Window */
+    .auth-gate {
+      width: 100%;
+      max-width: 26rem;
+      margin: auto;
+      background: var(--card);
+      border: 1.5px solid var(--border);
+      border-radius: 1.5rem;
+      padding: 2rem 1.75rem;
+      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.12);
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+    .auth-gate-top {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .auth-lock-icon {
+      width: 3.5rem;
+      height: 3.5rem;
+      border-radius: 1rem;
+      background: rgba(99, 102, 241, 0.12);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      margin-bottom: 0.25rem;
+    }
+    .auth-badge {
+      font-size: 0.7rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.25rem 0.7rem;
+      border-radius: 999px;
+      background: rgba(99, 102, 241, 0.12);
+      color: var(--accent);
+    }
+    .auth-title {
+      font-size: 1.35rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+    .auth-desc {
+      font-size: 0.82rem;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+    .auth-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .auth-field label {
+      display: block;
+      font-size: 0.72rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+      margin-bottom: 0.4rem;
+    }
+    .auth-field input {
+      width: 100%;
+      padding: 0.75rem 0.9rem;
+      border-radius: 0.85rem;
+      border: 1.5px solid var(--border);
+      background: var(--subcard);
+      color: var(--fg);
+      font-size: 0.92rem;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .auth-field input:focus {
+      border-color: var(--border-hover);
+    }
+    .auth-pin-input {
+      font-family: monospace;
+      letter-spacing: 0.25em;
+      text-align: center;
+      font-size: 1.05rem !important;
+      font-weight: 700;
+    }
+    .auth-error {
+      display: none;
+      padding: 0.75rem 0.9rem;
+      border-radius: 0.85rem;
+      background: rgba(225, 29, 72, 0.1);
+      border: 1px solid rgba(225, 29, 72, 0.3);
+      color: var(--rose);
+      font-size: 0.78rem;
+      font-weight: 600;
+      line-height: 1.4;
+    }
+    .auth-btn {
+      width: 100%;
+      padding: 0.85rem 1rem;
+      border-radius: 0.9rem;
+      border: none;
+      background: var(--accent);
+      color: #ffffff;
+      font-size: 0.9rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+    .auth-btn:hover {
+      background: var(--accent-hover);
+    }
+    .auth-foot {
+      text-align: center;
+      font-size: 0.72rem;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+      padding-top: 0.85rem;
     }
     main {
       width: 100%;
@@ -450,12 +588,12 @@ def build_landing(ues):
       font-size: 0.78rem;
       font-weight: 600;
       background: rgba(99, 102, 241, 0.1);
-      color: var(--accent);
+      color: var(--border-hover);
       border: 1px solid rgba(99, 102, 241, 0.25);
       width: fit-content;
     }
     .profile-widget {
-      display: none;
+      display: flex;
       flex-direction: column;
       gap: 0.9rem;
       padding: 1.15rem 1.35rem;
@@ -494,7 +632,7 @@ def build_landing(ues):
       font-weight: 800;
       text-transform: uppercase;
       letter-spacing: 0.04em;
-      color: var(--accent);
+      color: var(--border-hover);
     }
     .profile-email {
       font-size: 0.85rem;
@@ -601,7 +739,7 @@ def build_landing(ues):
       gap: 0.5rem;
     }
     .ue-avg {
-      color: var(--accent);
+      color: var(--border-hover);
     }
     .ue-bar-bg {
       width: 100%;
@@ -621,7 +759,7 @@ def build_landing(ues):
       color: var(--muted);
     }
     .ue-profile-link {
-      color: var(--accent);
+      color: var(--border-hover);
       font-weight: 800;
       cursor: pointer;
     }
@@ -635,7 +773,7 @@ def build_landing(ues):
       gap: 0.35rem;
       font-size: 0.85rem;
       font-weight: 700;
-      color: var(--accent);
+      color: var(--border-hover);
     }
     footer {
       margin-top: 3rem;
@@ -646,10 +784,44 @@ def build_landing(ues):
   </style>
 </head>
 <body>
-  <main>
+
+  <!-- Central Login Window (shown first before entering the main portal) -->
+  <div id="hub-auth-gate" class="auth-gate">
+    <div class="auth-gate-top">
+      <div class="auth-lock-icon">🔒</div>
+      <span class="auth-badge">Portail Privé • L2 Psychologie UT2J</span>
+      <h2 class="auth-title">Connexion Membre</h2>
+      <p class="auth-desc">
+        Identifiez-vous une seule fois pour accéder à votre profil global, vos statistiques et vos espaces d'entraînement <strong>UE 301</strong> &amp; <strong>UE 304</strong>.
+      </p>
+    </div>
+
+    <form class="auth-form" onsubmit="handleHubLogin(event)">
+      <div class="auth-field">
+        <label for="hub-email-input">Votre adresse email</label>
+        <input type="email" id="hub-email-input" required autocomplete="email" placeholder="ex: prenom.nom@gmail.com" />
+      </div>
+      <div class="auth-field">
+        <label for="hub-pin-input">Code PIN personnel</label>
+        <input type="password" id="hub-pin-input" required maxlength="10" autocomplete="current-password" placeholder="••••" class="auth-pin-input" />
+      </div>
+      <div id="hub-auth-error" class="auth-error"></div>
+      <button type="submit" class="auth-btn">
+        <span>Entrer sur le portail</span>
+        <span>→</span>
+      </button>
+    </form>
+
+    <div class="auth-foot">
+      ✨ Session mémorisée automatiquement sur votre appareil
+    </div>
+  </div>
+
+  <!-- Main Portal Content (unlocked after login) -->
+  <main id="hub-main-content" style="display: none;">
     <header>
       <h1>📚 Révisions QCM • UT2J</h1>
-      <p class="sub">Choisissez votre unité d'enseignement pour commencer l'entraînement.</p>
+      <p class="sub">Bienvenue sur votre espace personnel. Consultez votre synthèse globale ou choisissez votre UE.</p>
       <div id="user-session-badge" class="user-pill">
         <span>👤</span>
         <span>Connecté : <strong id="user-email-text" style="font-family: monospace;"></strong></span>
@@ -672,7 +844,7 @@ def build_landing(ues):
       <div class="profile-kpis">
         <div class="profile-kpi-box">
           <div class="profile-kpi-title">Moyenne générale</div>
-          <div id="hub-profile-avg" class="profile-kpi-val" style="color: var(--accent);">—</div>
+          <div id="hub-profile-avg" class="profile-kpi-val" style="color: var(--border-hover);">—</div>
         </div>
         <div class="profile-kpi-box">
           <div class="profile-kpi-title">Temps d'étude</div>
@@ -695,18 +867,170 @@ def build_landing(ues):
   </main>
 
   <script>
+    const ALLOWED_CREDENTIAL_HASHES = {{ALLOWED_HASHES}};
+    const AVAILABLE_UES = {{AVAILABLE_UES}};
     let activeHubEmail = '';
     let activeHubPin = '';
+
+    function sha256Sync(ascii) {
+      function rightRotate(value, amount) {
+        return (value >>> amount) | (value << (32 - amount));
+      }
+      var mathPow = Math.pow;
+      var maxWord = mathPow(2, 32);
+      var lengthProperty = "length";
+      var i, j;
+      var result = "";
+      var words = [];
+      var asciiBitLength = ascii[lengthProperty] * 8;
+      var hash = sha256Sync.h = sha256Sync.h || [];
+      var k = sha256Sync.k = sha256Sync.k || [];
+      var primeCounter = k[lengthProperty];
+      var isComposite = {};
+      for (var candidate = 2; primeCounter < 64; candidate++) {
+        if (!isComposite[candidate]) {
+          for (i = 0; i < 313; i += candidate) {
+            isComposite[i] = candidate;
+          }
+          hash[primeCounter] = (mathPow(candidate, .5) * maxWord) | 0;
+          k[primeCounter++] = (mathPow(candidate, 1 / 3) * maxWord) | 0;
+        }
+      }
+      hash = hash.slice(0);
+      words = [];
+      for (i = 0; i < ascii[lengthProperty]; i++) {
+        var code = ascii.charCodeAt(i);
+        words[i >> 2] |= (code & 0xff) << ((3 - (i % 4)) * 8);
+      }
+      words[asciiBitLength >> 5] |= 0x80 << (24 - (asciiBitLength % 32));
+      words[(((asciiBitLength + 64) >> 9) << 4) + 15] = asciiBitLength;
+      for (i = 0; i < words[lengthProperty]; i += 16) {
+        var w = words.slice(i, i + 16);
+        var oldHash = hash.slice(0);
+        for (j = 0; j < 64; j++) {
+          var w15 = w[j - 15], w2 = w[j - 2];
+          var s0 = rightRotate(w15, 7) ^ rightRotate(w15, 18) ^ (w15 >>> 3);
+          var s1 = rightRotate(w2, 17) ^ rightRotate(w2, 19) ^ (w2 >>> 10);
+          w[j] = j < 16 ? (w[j] | 0) : ((w[j - 16] + s0 + w[j - 7] + s1) | 0);
+          var ch = (hash[4] & hash[5]) ^ (~hash[4] & hash[6]);
+          var maj = (hash[0] & hash[1]) ^ (hash[0] & hash[2]) ^ (hash[1] & hash[2]);
+          var temp1 = (hash[7] + (rightRotate(hash[4], 6) ^ rightRotate(hash[4], 11) ^ rightRotate(hash[4], 25)) + ch + k[j] + w[j]) | 0;
+          var temp2 = ((rightRotate(hash[0], 2) ^ rightRotate(hash[0], 13) ^ rightRotate(hash[0], 22)) + maj) | 0;
+          hash[7] = hash[6];
+          hash[6] = hash[5];
+          hash[5] = hash[4];
+          hash[4] = (hash[3] + temp1) | 0;
+          hash[3] = hash[2];
+          hash[2] = hash[1];
+          hash[1] = hash[0];
+          hash[0] = (temp1 + temp2) | 0;
+        }
+        for (j = 0; j < 8; j++) {
+          hash[j] = (hash[j] + oldHash[j]) | 0;
+        }
+      }
+      for (i = 0; i < 8; i++) {
+        for (j = 3; j >= 0; j--) {
+          var b = (hash[i] >> (8 * j)) & 255;
+          result += (b < 16 ? "0" : "") + b.toString(16);
+        }
+      }
+      return result;
+    }
+
+    function normalizeEmail(e) {
+      return (e || '').trim().toLowerCase();
+    }
+
+    function normalizePin(p) {
+      return (p || '').trim();
+    }
+
+    function isAuthorizedOnHub(email, pin) {
+      if (!ALLOWED_CREDENTIAL_HASHES || ALLOWED_CREDENTIAL_HASHES.length === 0) return true;
+      const e = normalizeEmail(email);
+      const p = normalizePin(pin);
+      if (!e || !p) return false;
+      return ALLOWED_CREDENTIAL_HASHES.includes(sha256Sync(e + ':' + p));
+    }
+
+    function persistHubAuth(email, pin) {
+      const e = normalizeEmail(email);
+      const p = normalizePin(pin);
+      activeHubEmail = e;
+      activeHubPin = p;
+      try {
+        localStorage.setItem('ut2j_auth_email', e);
+        localStorage.setItem('ut2j_auth_pin', p);
+        AVAILABLE_UES.forEach(code => {
+          localStorage.setItem('ue' + code + '_auth_email', e);
+          localStorage.setItem('ue' + code + '_auth_pin', p);
+        });
+      } catch (err) {}
+    }
+
+    function unlockHubPortal(email, pin) {
+      persistHubAuth(email, pin);
+      const urlParams = new URLSearchParams(window.location.search);
+      const nextUe = urlParams.get('next_ue');
+      const liveCode = urlParams.get('live');
+      if (nextUe && AVAILABLE_UES.includes(nextUe)) {
+        let target = './' + nextUe + '/index.html';
+        const q = new URLSearchParams();
+        if (liveCode) q.set('live', liveCode);
+        if (q.toString()) target += '?' + q.toString();
+        window.location.href = target;
+        return;
+      }
+
+      const gate = document.getElementById('hub-auth-gate');
+      const main = document.getElementById('hub-main-content');
+      if (gate) gate.style.display = 'none';
+      if (main) main.style.display = 'block';
+
+      document.querySelectorAll('a.card').forEach(a => {
+        const href = a.getAttribute('href');
+        a.href = href.split('?')[0];
+      });
+
+      const badge = document.getElementById('user-session-badge');
+      const userSpan = document.getElementById('user-email-text');
+      if (badge && userSpan && activeHubEmail) {
+        userSpan.textContent = activeHubEmail;
+        badge.style.display = 'inline-flex';
+      }
+
+      renderHubMemberDashboard(activeHubEmail);
+    }
+
+    function handleHubLogin(e) {
+      e.preventDefault();
+      const emailEl = document.getElementById('hub-email-input');
+      const pinEl = document.getElementById('hub-pin-input');
+      const errEl = document.getElementById('hub-auth-error');
+      const email = normalizeEmail(emailEl ? emailEl.value : '');
+      const pin = normalizePin(pinEl ? pinEl.value : '');
+
+      if (isAuthorizedOnHub(email, pin)) {
+        if (errEl) errEl.style.display = 'none';
+        unlockHubPortal(email, pin);
+      } else {
+        if (errEl) {
+          errEl.textContent = "Combinaison email et code PIN incorrecte. Ce code d'accès est strictement personnel.";
+          errEl.style.display = 'block';
+        }
+      }
+    }
 
     function clearSession(e) {
       if (e) e.preventDefault();
       try {
         localStorage.removeItem('ut2j_auth_email');
         localStorage.removeItem('ut2j_auth_pin');
-        localStorage.removeItem('ue301_auth_email');
-        localStorage.removeItem('ue301_auth_pin');
-        localStorage.removeItem('ue304_auth_email');
-        localStorage.removeItem('ue304_auth_pin');
+        AVAILABLE_UES.forEach(code => {
+          localStorage.removeItem('ue' + code + '_auth_email');
+          localStorage.removeItem('ue' + code + '_auth_pin');
+        });
       } catch (err) {}
       window.location.href = window.location.pathname;
     }
@@ -716,11 +1040,7 @@ def build_landing(ues):
         e.preventDefault();
         e.stopPropagation();
       }
-      let url = './' + ueCode + '/index.html?tab=profile';
-      if (activeHubEmail && activeHubPin) {
-        url += '&email=' + encodeURIComponent(activeHubEmail) + '&pin=' + encodeURIComponent(activeHubPin);
-      }
-      window.location.href = url;
+      window.location.href = './' + ueCode + '/index.html?tab=profile';
     }
 
     function renderHubMemberDashboard(email) {
@@ -822,45 +1142,46 @@ def build_landing(ues):
 
     document.addEventListener('DOMContentLoaded', () => {
       const urlParams = new URLSearchParams(window.location.search);
-      let email = urlParams.get('email') || 
-                  localStorage.getItem('ut2j_auth_email') || 
-                  localStorage.getItem('ue304_auth_email') || 
-                  localStorage.getItem('ue301_auth_email') || '';
-      let pin = urlParams.get('pin') || 
-                localStorage.getItem('ut2j_auth_pin') || 
-                localStorage.getItem('ue304_auth_pin') || 
-                localStorage.getItem('ue301_auth_pin') || '';
+      const urlEmail = normalizeEmail(urlParams.get('email'));
+      const urlPin = normalizePin(urlParams.get('pin'));
 
-      activeHubEmail = email;
-      activeHubPin = pin;
-
-      if (email && pin) {
+      if (urlEmail && urlPin && isAuthorizedOnHub(urlEmail, urlPin)) {
+        unlockHubPortal(urlEmail, urlPin);
         try {
-          localStorage.setItem('ut2j_auth_email', email);
-          localStorage.setItem('ut2j_auth_pin', pin);
+          window.history.replaceState({}, document.title, window.location.pathname);
         } catch (e) {}
-
-        // Forward credentials to cards
-        document.querySelectorAll('a.card').forEach(a => {
-          const href = a.getAttribute('href');
-          const cleanHref = href.split('?')[0];
-          a.href = cleanHref + '?email=' + encodeURIComponent(email) + '&pin=' + encodeURIComponent(pin);
-        });
-
-        const badge = document.getElementById('user-session-badge');
-        const userSpan = document.getElementById('user-email-text');
-        if (badge && userSpan) {
-          userSpan.textContent = email;
-          badge.style.display = 'inline-flex';
-        }
+        return;
       }
 
-      renderHubMemberDashboard(email);
+      const savedEmail = normalizeEmail(
+        localStorage.getItem('ut2j_auth_email') ||
+        localStorage.getItem('ue301_auth_email') ||
+        localStorage.getItem('ue304_auth_email') || ''
+      );
+      const savedPin = normalizePin(
+        localStorage.getItem('ut2j_auth_pin') ||
+        localStorage.getItem('ue301_auth_pin') ||
+        localStorage.getItem('ue304_auth_pin') || ''
+      );
+
+      if (savedEmail && savedPin && isAuthorizedOnHub(savedEmail, savedPin)) {
+        unlockHubPortal(savedEmail, savedPin);
+        return;
+      }
+
+      if (!ALLOWED_CREDENTIAL_HASHES || ALLOWED_CREDENTIAL_HASHES.length === 0) {
+        unlockHubPortal('', '');
+        return;
+      }
+
+      // Show the Central Login Window
+      const emailInput = document.getElementById('hub-email-input');
+      if (emailInput) setTimeout(() => emailInput.focus(), 100);
     });
   </script>
 </body>
 </html>
-""".replace("{{CARDS}}", cards_html)
+""".replace("{{CARDS}}", cards_html).replace("{{ALLOWED_HASHES}}", hashes_js).replace("{{AVAILABLE_UES}}", ues_js)
     with open(os.path.join(ROOT, "index.html"), "w", encoding="utf-8") as f:
         f.write(page)
     print(f"\nGenerated landing page index.html listing: {', '.join(ues)}")
