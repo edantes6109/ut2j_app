@@ -317,6 +317,11 @@
           </button>
         </nav>
 
+        <button onclick="openLiveQuizModal()" class="px-3.5 py-2 rounded-xl text-xs font-bold transition-all bg-rose-600 hover:bg-rose-700 text-white shadow-sm flex items-center gap-1.5 whitespace-nowrap cursor-pointer">
+          <span>📡</span>
+          <span>Quiz Live</span>
+        </button>
+
         <button onclick="openAiGeneratorModal()" class="px-3.5 py-2 rounded-xl text-xs font-bold transition-all bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white shadow-sm flex items-center gap-1.5 whitespace-nowrap">
           <span>✨</span>
           <span>Générateur IA</span>
@@ -336,25 +341,68 @@
     <!-- ============================================================== -->
     <section id="tab-content-themes" class="space-y-5 pb-24">
 
-      <!-- AI Promotion Banner -->
-      <div class="bg-gradient-to-r from-purple-50 via-indigo-50 to-blue-50 border border-purple-200 rounded-2xl p-4 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div class="space-y-0.5">
-          <div class="flex items-center gap-2 flex-wrap">
-            <span class="text-[11px] font-extrabold uppercase tracking-wider text-purple-700 bg-purple-100 px-2 py-0.5 rounded-full">
-              ✨ NOUVEAU • GÉNÉRATEUR IA
-            </span>
-            <h3 class="text-xs sm:text-sm font-bold text-slate-900">
-              Générez de nouvelles questions d'examen sur-mesure
+      <!-- Top Engagement Bar: AI Generator + Daily Sprint + Live Quiz Room -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-3.5">
+        <!-- AI Promotion Banner -->
+        <div class="lg:col-span-4 bg-gradient-to-r from-purple-50 via-indigo-50 to-blue-50 border border-purple-200 rounded-2xl p-4 shadow-xs flex flex-col justify-between gap-3">
+          <div class="space-y-0.5">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="text-xs font-extrabold uppercase tracking-wider text-purple-700 bg-purple-100 px-2 py-0.5 rounded-full">
+                ✨ GÉNÉRATEUR IA
+              </span>
+            </div>
+            <h3 class="text-xs sm:text-sm font-bold text-slate-900 pt-1">
+              Questions sur-mesure
             </h3>
+            <p class="text-xs text-slate-600 leading-relaxed">
+              Créez des QCM ou cas cliniques inédits hors-ligne ou via API.
+            </p>
           </div>
-          <p class="text-xs text-slate-600 leading-relaxed">
-            Créez des QCM, questions rédactionnelles ou cas cliniques inédits instantanément (100% hors-ligne) ou connectez votre clé Gemini / OpenAI.
-          </p>
+          <button onclick="openAiGeneratorModal()" class="w-full px-3.5 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold shadow-xs transition flex items-center justify-center gap-1.5 cursor-pointer">
+            <span>✨ Ouvrir le générateur</span>
+            <span>→</span>
+          </button>
         </div>
-        <button onclick="openAiGeneratorModal()" class="px-3.5 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold shadow-xs transition flex items-center justify-center gap-1.5 whitespace-nowrap self-start sm:self-center">
-          <span>✨ Créer des questions</span>
-          <span>→</span>
-        </button>
+
+        <!-- Quick Daily Sprint Banner -->
+        <div class="lg:col-span-4 bg-gradient-to-r from-indigo-50 via-white to-emerald-50 border border-indigo-200 rounded-2xl p-4 shadow-xs flex flex-col justify-between gap-3">
+          <div class="space-y-0.5">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="text-xs font-extrabold uppercase tracking-wider text-indigo-700 bg-indigo-100 px-2 py-0.5 rounded-full">
+                ⚡ SPRINT 3 MIN
+              </span>
+            </div>
+            <h3 class="text-xs sm:text-sm font-bold text-slate-900 pt-1">
+              Quiz Express du Jour (5 QCM)
+            </h3>
+            <p class="text-xs text-slate-600 leading-relaxed">
+              Mix intelligent : vos erreurs + classiques d'annales + inédites.
+            </p>
+          </div>
+          <button type="button" onclick="startDailySprintQuiz()" class="w-full px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-extrabold shadow-xs transition flex items-center justify-center gap-1.5 cursor-pointer">
+            <span>⚡ Lancer le Sprint (5 Q.)</span>
+          </button>
+        </div>
+
+        <!-- Live Multiplayer Quiz Banner -->
+        <div class="lg:col-span-4 bg-gradient-to-r from-rose-50 via-white to-amber-50 border border-rose-200 rounded-2xl p-4 shadow-xs flex flex-col justify-between gap-3">
+          <div class="space-y-0.5">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="text-xs font-extrabold uppercase tracking-wider text-rose-700 bg-rose-100 px-2 py-0.5 rounded-full">
+                📡 MULTI-JOUEURS EN DIRECT
+              </span>
+            </div>
+            <h3 class="text-xs sm:text-sm font-bold text-slate-900 pt-1">
+              Salon Quiz Live (Chrono & Points)
+            </h3>
+            <p class="text-xs text-slate-600 leading-relaxed">
+              Créez un quiz partagé en direct : chrono par question et classement live.
+            </p>
+          </div>
+          <button type="button" onclick="openLiveQuizModal()" class="w-full px-3.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-extrabold shadow-xs transition flex items-center justify-center gap-1.5 cursor-pointer">
+            <span>📡 Créer / Rejoindre un Salon Live</span>
+          </button>
+        </div>
       </div>
 
       <!-- Question Types Filter Selector Card -->
@@ -672,16 +720,35 @@
 
             <!-- Quiz Mode Selector -->
             <div class="space-y-1.5">
-              <label class="block text-xs font-bold text-slate-700">Mode</label>
-              <div class="flex gap-1.5">
-                <label class="flex-1 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border-2 border-indigo-600 bg-indigo-50/50 cursor-pointer transition text-xs font-bold text-slate-900" id="mode-label-revision" title="Correction immédiate, repères théoriques et auto-évaluation guidée.">
+              <label class="block text-xs font-bold text-slate-700">Mode de passage</label>
+              <div class="grid grid-cols-2 gap-1.5">
+                <label class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border-2 border-indigo-600 bg-indigo-50/50 cursor-pointer transition text-xs font-bold text-slate-900" id="mode-label-revision" title="Correction immédiate, repères théoriques et auto-évaluation guidée.">
                   <input type="radio" name="quiz_mode" value="revision" checked onchange="updateModeUI()" class="text-indigo-600">
                   <span>🎓 Révision</span>
                 </label>
-                <label class="flex-1 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 cursor-pointer transition text-xs font-bold text-slate-900" id="mode-label-exam" title="Chronométré, aucun indice pendant l'épreuve, bilan et notation à la fin.">
+                <label class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 cursor-pointer transition text-xs font-bold text-slate-900" id="mode-label-exam" title="Chronométré, aucun indice pendant l'épreuve, bilan et notation à la fin.">
                   <input type="radio" name="quiz_mode" value="exam" onchange="updateModeUI()" class="text-indigo-600">
                   <span>⏱️ Examen blanc</span>
                 </label>
+                <label class="col-span-2 flex items-center justify-between gap-1.5 px-2.5 py-2 rounded-lg border border-rose-200 bg-rose-50/60 hover:bg-rose-50 cursor-pointer transition text-xs font-extrabold text-rose-900" id="mode-label-live" title="Crée un salon synchronisé partageable avec chrono par question et classement en direct.">
+                  <span class="flex items-center gap-1.5">
+                    <input type="radio" name="quiz_mode" value="live" onchange="updateModeUI()" class="text-rose-600">
+                    <span>📡 Salon Live-Quiz Multi-Joueurs</span>
+                  </span>
+                  <span class="px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-rose-600 text-white uppercase">Partageable</span>
+                </label>
+              </div>
+              <!-- Extra timer setting shown when Salon Live-Quiz Multi-Joueurs mode is chosen -->
+              <div id="live-mode-timer-box" class="hidden pt-1">
+                <div class="flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-lg bg-rose-50 border border-rose-200 text-xs">
+                  <span class="font-bold text-rose-900">⏱️ Chrono / question (Live) :</span>
+                  <select id="param-live-timer-select" class="bg-white border border-rose-300 rounded-md px-2 py-0.5 text-xs font-extrabold text-rose-900">
+                    <option value="15">15 secondes</option>
+                    <option value="25" selected>25 secondes</option>
+                    <option value="35">35 secondes</option>
+                    <option value="45">45 secondes</option>
+                  </select>
+                </div>
               </div>
               <p class="text-[11px] text-slate-500 leading-tight" id="mode-hint">Correction immédiate, repères théoriques et auto-évaluation guidée.</p>
             </div>
@@ -730,6 +797,18 @@
                 <span class="font-bold text-indigo-600 text-right" id="summary-quiz-count">10 questions</span>
               </div>
             </div>
+
+            <!-- Direct Action Buttons in Quiz Settings Card -->
+            <div class="space-y-1.5 pt-1">
+              <button type="button" onclick="startQuiz()" class="w-full py-2.5 px-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs shadow-sm transition flex items-center justify-center gap-1.5 cursor-pointer">
+                <span id="param-primary-launch-label">Commencer le Quiz</span>
+                <span aria-hidden="true">→</span>
+              </button>
+              <button type="button" onclick="launchConfiguredQuizInLiveRoom()" class="w-full py-2 px-3 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-800 border border-rose-300 font-extrabold text-xs transition flex items-center justify-center gap-1.5 cursor-pointer" title="Créer directement un Salon Live-Quiz Multi-Joueurs avec votre sélection et votre nombre de questions">
+                <span>📡</span>
+                <span>Lancer en Salon Live-Quiz Multi-Joueurs</span>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -737,15 +816,22 @@
 
       <!-- Always-visible launch bar (no need to scroll to the bottom) -->
       <div class="fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur border-t border-slate-200 shadow-[0_-4px_16px_rgba(0,0,0,0.08)]" id="sticky-launch-bar">
-        <div class="max-w-5xl mx-auto px-3 sm:px-5 py-2.5 flex items-center justify-between gap-3">
+        <div class="max-w-5xl mx-auto px-3 sm:px-5 py-2.5 flex items-center justify-between gap-3 flex-wrap">
           <div class="min-w-0">
             <div class="text-[11px] uppercase tracking-wider font-bold text-slate-500">Série préparée</div>
             <div class="text-xs sm:text-sm font-semibold text-slate-900 truncate" id="sticky-launch-info">—</div>
           </div>
-          <button type="button" onclick="startQuiz()" id="sticky-launch-btn" class="shrink-0 py-2.5 px-4 sm:px-6 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-md transition flex items-center gap-2">
-            <span>Commencer le Quiz</span>
-            <span aria-hidden="true">→</span>
-          </button>
+          <div class="flex items-center gap-2 shrink-0">
+            <button type="button" onclick="launchConfiguredQuizInLiveRoom()" id="sticky-live-launch-btn" class="py-2.5 px-3.5 sm:px-4 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs sm:text-sm shadow-md transition flex items-center gap-1.5 cursor-pointer" title="Héberger cette série en direct dans un Salon Live-Quiz Multi-Joueurs">
+              <span>📡</span>
+              <span class="hidden sm:inline">Salon Live-Quiz Multi-Joueurs</span>
+              <span class="sm:hidden">Salon Live</span>
+            </button>
+            <button type="button" onclick="startQuiz()" id="sticky-launch-btn" class="py-2.5 px-4 sm:px-6 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs sm:text-sm shadow-md transition flex items-center gap-2 cursor-pointer">
+              <span id="sticky-launch-btn-label">Commencer le Quiz</span>
+              <span aria-hidden="true">→</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -879,6 +965,22 @@
           </div>
         </div>
 
+        <!-- Confidence Selector Bar (Indice de Certitude) -->
+        <div id="quiz-confidence-bar" class="pt-3 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <span class="text-xs font-semibold text-slate-600 flex items-center gap-1.5">
+            <span>🤔</span>
+            <span>Indice de certitude (pour vos boîtes de Leitner) :</span>
+          </span>
+          <div class="flex items-center gap-1.5">
+            <button type="button" onclick="setQuestionConfidence('sure')" id="quiz-conf-btn-sure" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-600 text-white transition cursor-pointer">
+              💪 Sûr(e) de moi
+            </button>
+            <button type="button" onclick="setQuestionConfidence('hesitate')" id="quiz-conf-btn-hesitate" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition cursor-pointer">
+              🤔 J'hésite / Au hasard
+            </button>
+          </div>
+        </div>
+
         <!-- Navigation Buttons -->
         <div class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t border-slate-200">
           <button onclick="navigateQuestion(-1)" id="btn-prev-q" class="w-full sm:w-auto px-4 py-2.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-xs sm:text-sm font-semibold text-slate-800 transition flex items-center justify-center gap-2 shadow-xs">
@@ -966,6 +1068,10 @@
           <div id="res-hero-perfect-badge" class="pt-3 border-t border-slate-100 text-xs font-bold text-emerald-700 hidden">
             🎉 Félicitations ! 100% de réussite, aucune question incorrecte à retravailler.
           </div>
+
+          <!-- Peer Challenge Outcome Box (Shown when finishing a friend's challenge) -->
+          <div id="res-challenge-outcome-box" class="hidden mt-3 p-3.5 rounded-xl bg-indigo-50 border border-indigo-200 text-xs text-indigo-950 font-semibold">
+          </div>
         </div>
       </div>
 
@@ -996,6 +1102,9 @@
           <div class="space-y-2 pt-2">
             <button onclick="retryMissedQuestions()" id="btn-retry-missed" class="w-full py-2.5 px-4 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs sm:text-sm font-bold shadow-xs transition flex items-center justify-center gap-2">
               <span>🎯 Rejouer uniquement les erreurs</span>
+            </button>
+            <button type="button" onclick="openLiveQuizWithCurrentQuestions()" class="w-full py-2.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs sm:text-sm font-bold shadow-xs transition flex items-center justify-center gap-2 cursor-pointer">
+              <span>📡 Lancer cette série en Salon Live (Multi-joueurs)</span>
             </button>
             <button onclick="restartCurrentQuiz()" class="w-full py-2.5 px-4 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-xs sm:text-sm font-semibold text-slate-800 transition flex items-center justify-center gap-2">
               <span>🔄 Recommencer cette série</span>
@@ -1426,6 +1535,350 @@
         </div>
       </div>
 
+      <!-- ============================================================== -->
+      <!-- ESPACE COACHING & PROGRESSION (4 INTERACTIVE PILLARS)          -->
+      <!-- ============================================================== -->
+      <div class="card-white rounded-2xl p-4 sm:p-5 shadow-sm border border-indigo-200 bg-gradient-to-r from-indigo-50/40 via-white to-purple-50/40 space-y-3">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div class="flex items-center gap-2.5 flex-wrap">
+            <span class="px-2.5 py-1 rounded-lg text-xs font-extrabold bg-indigo-600 text-white shadow-2xs">
+              🚀 ESPACE COACHING & PROGRESSION
+            </span>
+            <h3 class="text-sm sm:text-base font-extrabold text-slate-900">
+              Entraînement Quotidien, Mémorisation Active & Salon Live
+            </h3>
+          </div>
+          <button type="button" onclick="switchCoachingPillar('all')" id="coaching-tab-btn-all" class="self-start sm:self-auto px-3 py-1.5 rounded-lg text-xs font-extrabold bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 transition cursor-pointer">
+            📋 Tout afficher
+          </button>
+        </div>
+
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-2 pt-1">
+          <button type="button" onclick="switchCoachingPillar('habits')" id="coaching-tab-btn-habits" class="px-3 py-2.5 rounded-xl text-xs font-extrabold transition bg-indigo-600 text-white shadow-xs flex items-center justify-center gap-1.5 cursor-pointer">
+            <span>⚡</span><span>1. Habitudes & Sprint</span>
+          </button>
+          <button type="button" onclick="switchCoachingPillar('pedagogy')" id="coaching-tab-btn-pedagogy" class="px-3 py-2.5 rounded-xl text-xs font-bold transition bg-white text-slate-700 hover:bg-slate-50 border border-slate-200 flex items-center justify-center gap-1.5 cursor-pointer">
+            <span>🧠</span><span>2. Leitner & Flashcards</span>
+          </button>
+          <button type="button" onclick="switchCoachingPillar('gamification')" id="coaching-tab-btn-gamification" class="px-3 py-2.5 rounded-xl text-xs font-bold transition bg-white text-slate-700 hover:bg-slate-50 border border-slate-200 flex items-center justify-center gap-1.5 cursor-pointer">
+            <span>🎓</span><span>3. Note /20 & Trophées</span>
+          </button>
+          <button type="button" onclick="switchCoachingPillar('social')" id="coaching-tab-btn-social" class="px-3 py-2.5 rounded-xl text-xs font-bold transition bg-white text-slate-700 hover:bg-slate-50 border border-slate-200 flex items-center justify-center gap-1.5 cursor-pointer">
+            <span>📡</span><span>4. Salon Live Multi-Joueurs</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- PILLAR 1: DAILY HABITS (QUIZ EXPRESS DU JOUR + WEEKLY GOAL & 4-WEEK HEATMAP) -->
+      <div id="coaching-pillar-habits" class="space-y-6">
+        <!-- 1B. QUIZ EXPRESS DU JOUR (5-MINUTE DAILY SPRINT) -->
+        <div class="card-white rounded-2xl p-5 sm:p-6 shadow-sm border-2 border-indigo-200 bg-gradient-to-br from-indigo-50/50 via-white to-emerald-50/30 space-y-4">
+          <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
+            <div class="space-y-2 max-w-2xl">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-indigo-600 text-white">
+                  ⚡ QUIZ EXPRESS DU JOUR
+                </span>
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                  ⏱️ ~3 minutes • 5 QCM ciblés
+                </span>
+              </div>
+              <h3 class="text-base sm:text-lg font-extrabold text-slate-900">
+                Votre mix intelligent quotidien est prêt
+              </h3>
+              <p class="text-xs text-slate-600 leading-relaxed">
+                Validez votre régularité quotidienne en 3 minutes grâce à une sélection algorithmique sur-mesure :
+              </p>
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1">
+                <div class="p-2.5 rounded-xl bg-white border border-rose-200 flex items-center gap-2.5">
+                  <span class="text-base">📕</span>
+                  <div>
+                    <div id="sprint-mix-errors" class="text-xs font-extrabold text-rose-700">Erreurs à revoir</div>
+                    <div class="text-xs text-slate-500">Issues de votre carnet</div>
+                  </div>
+                </div>
+                <div class="p-2.5 rounded-xl bg-white border border-amber-200 flex items-center gap-2.5">
+                  <span class="text-base">🔥</span>
+                  <div>
+                    <div id="sprint-mix-recurring" class="text-xs font-extrabold text-amber-700">Classiques d'annales</div>
+                    <div class="text-xs text-slate-500">Haute probabilité</div>
+                  </div>
+                </div>
+                <div class="p-2.5 rounded-xl bg-white border border-indigo-200 flex items-center gap-2.5">
+                  <span class="text-base">✨</span>
+                  <div>
+                    <div id="sprint-mix-unseen" class="text-xs font-extrabold text-indigo-700">Questions inédites</div>
+                    <div class="text-xs text-slate-500">Étend votre couverture</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex flex-col items-stretch sm:items-end justify-center gap-2 shrink-0">
+              <button type="button" onclick="startDailySprintQuiz()" class="px-6 py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs sm:text-sm shadow-sm transition flex items-center justify-center gap-2 cursor-pointer">
+                <span>⚡</span>
+                <span>Lancer le Sprint (5 QCM)</span>
+              </button>
+              <span class="text-xs text-slate-500 text-center sm:text-right">
+                Maintient votre série active & fait progresser vos boîtes
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Weekly Goal + 4-Week (28-Day) Activity Heatmap -->
+        <div class="card-white rounded-2xl p-5 shadow-sm border border-slate-200 space-y-3">
+          <div class="flex items-center justify-between border-b border-slate-200 pb-2.5 gap-2 flex-wrap">
+            <span class="text-xs font-extrabold uppercase tracking-wider text-indigo-700 flex items-center gap-1.5">
+              <span>📅</span>
+              <span>Objectif Hebdo & Régularité (4 dernières semaines • 28 jours)</span>
+            </span>
+            <select id="profile-weekly-goal-select" onchange="changeMemberWeeklyGoal(this.value)" class="bg-slate-50 border border-slate-300 rounded-lg px-2 py-1 text-xs font-bold text-slate-800">
+              <option value="30">Cible : 30 Q. / sem</option>
+              <option value="50" selected>Cible : 50 Q. / sem</option>
+              <option value="100">Cible : 100 Q. / sem</option>
+            </select>
+          </div>
+
+          <div class="space-y-1.5">
+            <div class="flex items-baseline justify-between">
+              <div>
+                <span id="profile-weekly-done" class="text-2xl font-extrabold text-slate-900">0</span>
+                <span id="profile-weekly-target" class="text-xs font-semibold text-slate-500">/ 50 questions cette semaine</span>
+              </div>
+              <span id="profile-weekly-pct" class="px-2 py-0.5 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">0%</span>
+            </div>
+            <div class="w-full h-2 rounded-full bg-slate-100 border border-slate-200 overflow-hidden">
+              <div id="profile-weekly-bar" class="bg-indigo-600 h-full rounded-full transition-all" style="width: 0%"></div>
+            </div>
+          </div>
+
+          <!-- 28-Day (4 Weeks) Compact Heatmap Grid -->
+          <div id="profile-heatmap-grid" class="grid grid-cols-7 gap-1 pt-1 text-center">
+            <!-- Populated by JS (28 days) -->
+          </div>
+        </div>
+      </div>
+
+      <!-- PILLAR 2: PEDAGOGY (LEITNER BOXES + INTERACTIVE FLASHCARDS) -->
+      <div id="coaching-pillar-pedagogy" class="space-y-6">
+        <!-- 1D. LEITNER SPACED-REPETITION BOXES -->
+        <div class="card-white rounded-2xl p-5 shadow-sm border border-slate-200 space-y-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 pb-3">
+            <div>
+              <h3 class="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-slate-900 flex items-center gap-2">
+                <span>📦</span>
+                <span>Boîtes de Leitner (Mémorisation Espacée)</span>
+              </h3>
+              <p class="text-xs text-slate-500 mt-0.5">
+                Une question passe en <strong>Boîte 3 (Maîtrisée ⭐)</strong> après 2 réponses justes consécutives avec l'indice « 💪 Sûr(e) de moi ».
+              </p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+            <!-- Box 0 -->
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2 flex flex-col justify-between">
+              <div class="space-y-1">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-extrabold uppercase text-slate-600">Boîte 0 • Inédites</span>
+                  <span class="text-base">🆕</span>
+                </div>
+                <div id="leitner-count-0" class="text-2xl font-extrabold text-slate-900">0</div>
+                <p class="text-xs text-slate-500">Questions officielles jamais rencontrées.</p>
+              </div>
+              <button type="button" onclick="startLeitnerBoxQuiz(0)" id="leitner-btn-0" class="w-full py-2 px-3 rounded-lg bg-white hover:bg-slate-100 border border-slate-300 text-xs font-bold text-slate-800 transition cursor-pointer">
+                Explorer 15 inédites →
+              </button>
+            </div>
+
+            <!-- Box 1 -->
+            <div class="p-4 rounded-xl bg-rose-50/50 border border-rose-200 space-y-2 flex flex-col justify-between">
+              <div class="space-y-1">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-extrabold uppercase text-rose-700">Boîte 1 • À revoir</span>
+                  <span class="text-base">📕</span>
+                </div>
+                <div id="leitner-count-1" class="text-2xl font-extrabold text-rose-700">0</div>
+                <p class="text-xs text-slate-600">Dernière tentative incorrecte. Priorité haute.</p>
+              </div>
+              <button type="button" onclick="startLeitnerBoxQuiz(1)" id="leitner-btn-1" class="w-full py-2 px-3 rounded-lg bg-rose-600 hover:bg-rose-700 disabled:opacity-50 text-white text-xs font-bold transition cursor-pointer">
+                Réviser la Boîte 1 →
+              </button>
+            </div>
+
+            <!-- Box 2 -->
+            <div class="p-4 rounded-xl bg-amber-50/50 border border-amber-200 space-y-2 flex flex-col justify-between">
+              <div class="space-y-1">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-extrabold uppercase text-amber-800">Boîte 2 • Consolidation</span>
+                  <span class="text-base">⏳</span>
+                </div>
+                <div id="leitner-count-2" class="text-2xl font-extrabold text-amber-700">0</div>
+                <p class="text-xs text-slate-600">Réussie 1 fois ou signalée « 🤔 J'hésite ».</p>
+              </div>
+              <button type="button" onclick="startLeitnerBoxQuiz(2)" id="leitner-btn-2" class="w-full py-2 px-3 rounded-lg bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-slate-950 text-xs font-bold transition cursor-pointer">
+                Confirmer vers Boîte 3 →
+              </button>
+            </div>
+
+            <!-- Box 3 -->
+            <div class="p-4 rounded-xl bg-emerald-50/50 border border-emerald-200 space-y-2 flex flex-col justify-between">
+              <div class="space-y-1">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-extrabold uppercase text-emerald-800">Boîte 3 • Maîtrisées</span>
+                  <span class="text-base">⭐</span>
+                </div>
+                <div id="leitner-count-3" class="text-2xl font-extrabold text-emerald-700">0</div>
+                <p class="text-xs text-slate-600">Validées 2+ fois de suite avec certitude.</p>
+              </div>
+              <div class="py-2 px-3 rounded-lg bg-emerald-100/80 border border-emerald-200 text-emerald-800 text-xs font-bold text-center">
+                ✓ Acquis à long terme
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Interactive Flip Flashcards -->
+        <div class="card-white rounded-2xl p-5 shadow-sm border border-slate-200 flex flex-col justify-between space-y-4">
+          <div class="space-y-3">
+            <div class="flex items-center justify-between border-b border-slate-200 pb-2.5 gap-2 flex-wrap">
+              <span class="text-xs font-extrabold uppercase tracking-wider text-purple-700 flex items-center gap-1.5">
+                <span>🃏</span>
+                <span>Flashcards • Rappel Actif Express</span>
+              </span>
+              <div class="flex items-center gap-2">
+                <select id="profile-fc-filter" onchange="initProfileFlashcards(this.value)" class="bg-slate-50 border border-slate-300 rounded-lg px-2 py-1 text-xs font-semibold text-slate-800">
+                  <option value="all">Tous chapitres</option>
+                  <option value="errors">Mes erreurs uniquement</option>
+                </select>
+                <span id="profile-fc-counter" class="text-xs font-bold text-slate-500">1 / 1</span>
+              </div>
+            </div>
+
+            <div onclick="flipProfileFlashcard()" id="profile-fc-card" class="min-h-[165px] p-5 rounded-2xl bg-gradient-to-br from-indigo-50/70 via-white to-purple-50/70 border-2 border-indigo-200 hover:border-indigo-400 flex flex-col items-center justify-center text-center cursor-pointer transition select-none space-y-2">
+              <span id="profile-fc-side-badge" class="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-indigo-100 text-indigo-800">
+                RECTO • QUESTION (Cliquez pour retourner)
+              </span>
+              <p id="profile-fc-theme" class="text-xs font-semibold text-slate-500"></p>
+              <p id="profile-fc-text" class="text-xs sm:text-sm font-bold text-slate-900 leading-relaxed max-w-xl">
+                Chargement des flashcards...
+              </p>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between gap-2 pt-1">
+            <button type="button" onclick="stepProfileFlashcard(-1)" class="py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 text-xs font-bold cursor-pointer">
+              ← Préc.
+            </button>
+            <button type="button" onclick="flipProfileFlashcard()" class="flex-1 py-2 px-3 rounded-xl bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-800 text-xs font-extrabold cursor-pointer">
+              ↺ Retourner la carte
+            </button>
+            <button type="button" onclick="stepProfileFlashcard(1)" class="py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold cursor-pointer">
+              Suivante →
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- PILLAR 3: GAMIFICATION (EXAM READINESS /20 + ACADEMIC BADGES) -->
+      <div id="coaching-pillar-gamification" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- Exam Readiness Simulator (/20) -->
+        <div class="lg:col-span-6 card-white rounded-2xl p-5 shadow-sm border border-slate-200 flex flex-col justify-between space-y-4">
+          <div class="space-y-3">
+            <div class="flex items-center justify-between border-b border-slate-200 pb-2.5 flex-wrap gap-2">
+              <span class="text-xs font-extrabold uppercase tracking-wider text-emerald-700 flex items-center gap-1.5">
+                <span>🎓</span>
+                <span>Indice de Préparation & Note Estimée</span>
+              </span>
+              <span id="profile-readiness-mention" class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                En attente de données
+              </span>
+            </div>
+
+            <div class="flex items-center justify-between gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
+              <div class="space-y-1">
+                <div class="text-xs font-bold text-slate-600">Estimation actuelle au partiel</div>
+                <p class="text-xs text-slate-500 leading-snug">
+                  Pondération : Récurrences (45%) • Score QCM (35%) • Couverture sans impasse (20%)
+                </p>
+              </div>
+              <div class="text-right shrink-0">
+                <div id="profile-readiness-grade" class="text-2xl sm:text-3xl font-extrabold text-indigo-600">
+                  — <span class="text-sm font-normal text-slate-500">/ 20</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Interactive Error-Fix Simulator Slider -->
+            <div class="space-y-1.5 pt-1">
+              <label for="profile-sim-slider" class="text-xs font-bold text-indigo-700 flex items-center justify-between">
+                <span>🎛️ Simuler la correction de vos erreurs :</span>
+                <span id="profile-sim-label" class="font-extrabold">0 / 0 erreur corrigée</span>
+              </label>
+              <input type="range" id="profile-sim-slider" min="0" max="0" value="0" oninput="updateReadinessSimulation(this.value)" class="w-full accent-indigo-600 cursor-pointer" />
+            </div>
+          </div>
+
+          <div class="grid grid-cols-3 gap-2.5 pt-2 border-t border-slate-100 text-xs">
+            <div class="p-2 rounded-lg bg-slate-50 border border-slate-200">
+              <div class="text-slate-500">Top Annales</div>
+              <div id="profile-readiness-rec" class="font-extrabold text-emerald-700 mt-0.5">0%</div>
+            </div>
+            <div class="p-2 rounded-lg bg-slate-50 border border-slate-200">
+              <div class="text-slate-500">Précision</div>
+              <div id="profile-readiness-acc" class="font-extrabold text-indigo-700 mt-0.5">0%</div>
+            </div>
+            <div class="p-2 rounded-lg bg-slate-50 border border-slate-200">
+              <div class="text-slate-500">Couverture</div>
+              <div id="profile-readiness-cov" class="font-extrabold text-amber-700 mt-0.5">0%</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Academic Badges Showcase -->
+        <div class="lg:col-span-6 card-white rounded-2xl p-5 shadow-sm border border-slate-200 space-y-3">
+          <div class="flex items-center justify-between border-b border-slate-200 pb-2.5">
+            <span class="text-xs font-extrabold uppercase tracking-wider text-amber-800 flex items-center gap-1.5">
+              <span>🏅</span>
+              <span>Trophées & Jalons Académiques</span>
+            </span>
+            <span id="profile-badges-summary" class="text-xs font-bold text-slate-500">0 / 6 débloqués</span>
+          </div>
+          <div id="profile-badges-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- PILLAR 4: LIVE MULTIPLAYER QUIZ ARENA LAUNCHER -->
+      <div id="coaching-pillar-social" class="card-white rounded-2xl p-5 sm:p-6 shadow-sm border-2 border-rose-200 bg-gradient-to-r from-rose-50/60 via-white to-indigo-50/50 space-y-4">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div class="space-y-1.5 max-w-2xl">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-rose-600 text-white">
+                📡 SALON LIVE-QUIZ MULTI-JOUEURS
+              </span>
+              <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                ⏱️ Chrono par question • 1000 à 1500 pts / QCM
+              </span>
+            </div>
+            <h3 class="text-base sm:text-lg font-extrabold text-slate-900">
+              Révisez en direct à plusieurs avec classement temps réel
+            </h3>
+            <p class="text-xs text-slate-600 leading-relaxed">
+              Créez un salon partageable (code à 4 chiffres ou lien direct) ou rejoignez celui d'un camarade. L'hôte contrôle le passage à la question suivante après chaque correction.
+            </p>
+          </div>
+          <div class="flex items-center gap-2.5 flex-wrap shrink-0">
+            <button type="button" onclick="openLiveQuizModal()" class="px-5 py-3 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs sm:text-sm font-extrabold shadow-sm transition flex items-center gap-2 cursor-pointer">
+              <span>📡</span>
+              <span>Créer ou Rejoindre un Salon Live</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
       <!-- 2. WEAK POINTS SPOTLIGHT + CHAPTER MASTERY GRID -->
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
@@ -1780,6 +2233,288 @@
 
   <!-- Hidden file input for importing JSON file -->
   <input type="file" id="ai-import-file-input" accept=".json" class="hidden" onchange="importAiQuestionsJsonFile(event)">
+
+  <!-- ============================================================== -->
+  <!-- LIVE MULTIPLAYER QUIZ ARENA MODAL (KAHOOT-STYLE)               -->
+  <!-- ============================================================== -->
+  <div id="live-quiz-modal" class="fixed inset-0 bg-slate-900/75 backdrop-blur-xs flex items-center justify-center z-50 p-3 sm:p-5 hidden">
+    <div class="card-white rounded-3xl max-w-4xl w-full max-h-[94vh] flex flex-col shadow-2xl border border-slate-200 overflow-hidden">
+
+      <!-- Modal Header -->
+      <div class="p-4 sm:p-5 border-b border-slate-200 flex items-center justify-between bg-gradient-to-r from-rose-50 via-white to-indigo-50">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-rose-600 text-white flex items-center justify-center text-lg font-extrabold shadow-xs">
+            📡
+          </div>
+          <div>
+            <div class="flex items-center gap-2 flex-wrap">
+              <h3 class="text-sm sm:text-base font-extrabold text-slate-900">
+                Salon Quiz Live Multi-Joueurs • UE {{UE_CODE}}
+              </h3>
+              <span id="live-room-code-pill" class="hidden px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-indigo-600 text-white font-mono">
+                CODE : ----
+              </span>
+            </div>
+            <p id="live-modal-subtitle" class="text-xs text-slate-500">
+              Chrono synchronisé par question • Bonus de rapidité (1000 à 1500 pts) • Classement en direct
+            </p>
+          </div>
+        </div>
+        <button type="button" onclick="closeLiveQuizModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-sm flex items-center justify-center transition cursor-pointer">
+          ✕
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="p-4 sm:p-6 overflow-y-auto custom-scrollbar flex-1 space-y-5">
+
+        <!-- VIEW 1: SETUP / JOIN OR CREATE LOBBY -->
+        <div id="live-view-setup" class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <!-- Create Room (Host) -->
+          <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-4 flex flex-col justify-between">
+            <div class="space-y-3">
+              <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-rose-100 text-rose-800 border border-rose-200">
+                <span>👑 CRÉER UN SALON (HÔTE)</span>
+              </div>
+              <h4 class="text-base font-extrabold text-slate-900">
+                Héberger un Quiz Live partageable
+              </h4>
+              <p class="text-xs text-slate-600 leading-relaxed">
+                Utilise les chapitres ou annales cochés dans votre sélection actuelle et génère un lien direct pour les autres membres.
+              </p>
+
+              <div class="grid grid-cols-2 gap-3 pt-1">
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 mb-1">Nombre de QCM</label>
+                  <select id="live-setup-count" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-900">
+                    <option value="5">5 QCM (Rapide)</option>
+                    <option value="10" selected>10 QCM (Standard)</option>
+                    <option value="15">15 QCM</option>
+                    <option value="20">20 QCM (Examen)</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 mb-1">Chrono / question</label>
+                  <select id="live-setup-timer" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-900">
+                    <option value="15">15 secondes</option>
+                    <option value="25" selected>25 secondes</option>
+                    <option value="35">35 secondes</option>
+                    <option value="45">45 secondes</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <button type="button" onclick="createLiveQuizRoom()" id="btn-create-live-room" class="w-full py-3 px-4 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs sm:text-sm font-extrabold shadow-sm transition flex items-center justify-center gap-2 cursor-pointer">
+              <span>📡</span>
+              <span>Créer le Salon & Obtenir le Lien</span>
+            </button>
+          </div>
+
+          <!-- Join Room (Participant) -->
+          <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-4 flex flex-col justify-between">
+            <div class="space-y-3">
+              <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-indigo-100 text-indigo-800 border border-indigo-200">
+                <span>🎮 REJOINDRE UN SALON</span>
+              </div>
+              <h4 class="text-base font-extrabold text-slate-900">
+                Vous avez un code de salon ?
+              </h4>
+              <p class="text-xs text-slate-600 leading-relaxed">
+                Saisissez le code à 4 chiffres communiqué par l'hôte (ou cliquez directement sur son lien partagé).
+              </p>
+
+              <div class="pt-1">
+                <label class="block text-xs font-bold text-slate-700 mb-1">Code du salon (4 chiffres)</label>
+                <input type="text" id="live-join-code-input" maxlength="8" placeholder="ex: 4829" class="w-full bg-white border border-slate-300 rounded-xl px-4 py-2.5 text-center font-mono text-base font-extrabold tracking-widest text-slate-900" />
+              </div>
+            </div>
+
+            <button type="button" onclick="joinLiveQuizRoomFromInput()" id="btn-join-live-room" class="w-full py-3 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs sm:text-sm font-extrabold shadow-sm transition flex items-center justify-center gap-2 cursor-pointer">
+              <span>🚀</span>
+              <span>Rejoindre le Salon Live</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- VIEW 2: WAITING LOBBY (SALLE D'ATTENTE) -->
+        <div id="live-view-lobby" class="hidden space-y-5">
+          <div class="p-5 rounded-2xl bg-indigo-50/70 border-2 border-indigo-200 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div class="space-y-1">
+              <div class="text-xs font-extrabold uppercase tracking-wider text-indigo-700">
+                🔗 Partagez ce salon avec le groupe
+              </div>
+              <div class="flex items-baseline gap-3 flex-wrap">
+                <span class="text-xs text-slate-600">Code d'accès :</span>
+                <span id="live-lobby-code-display" class="text-2xl font-extrabold font-mono text-indigo-700 tracking-wider">----</span>
+                <span id="live-lobby-meta-display" class="text-xs font-semibold text-slate-600">• 10 QCM • 25s / question</span>
+              </div>
+              <p id="live-connection-status" class="text-xs text-emerald-700 font-semibold">
+                🟢 Salon actif et prêt à recevoir les joueurs
+              </p>
+            </div>
+            <div class="flex items-center gap-2 flex-wrap">
+              <button type="button" onclick="copyLiveRoomShareLink()" class="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-extrabold shadow-xs transition flex items-center gap-1.5 cursor-pointer">
+                <span>📋 Copier le lien d'invitation</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Connected Players List -->
+          <div class="space-y-2.5">
+            <div class="flex items-center justify-between">
+              <h4 class="text-xs font-extrabold uppercase tracking-wider text-slate-700">
+                👥 Participants connectés (<span id="live-lobby-player-count">1</span>)
+              </h4>
+              <span class="text-xs text-slate-500">Les joueurs apparaissent ici dès qu'ils ouvrent le lien</span>
+            </div>
+            <div id="live-lobby-players-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+
+          <!-- Host Start Action / Guest Waiting Notice -->
+          <div class="pt-3 border-t border-slate-200 flex items-center justify-between gap-3 flex-wrap">
+            <button type="button" onclick="leaveLiveQuizRoom()" class="px-4 py-2.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold cursor-pointer">
+              ← Quitter le salon
+            </button>
+            <button type="button" onclick="hostStartLiveGame()" id="live-btn-host-start" class="px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-extrabold shadow-md transition flex items-center gap-2 cursor-pointer">
+              <span>🚀 Démarrer le Quiz Live maintenant</span>
+            </button>
+            <div id="live-guest-waiting-msg" class="hidden text-xs font-bold text-indigo-700 bg-indigo-50 px-4 py-2.5 rounded-xl border border-indigo-200">
+              ⏳ En attente du lancement de la partie par l'hôte...
+            </div>
+          </div>
+        </div>
+
+        <!-- VIEW 3: ACTIVE TIMED QUESTION -->
+        <div id="live-view-question" class="hidden space-y-4">
+          <!-- Top Status Bar: Question Counter + Countdown Timer + Answered Counter -->
+          <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5">
+            <div class="flex items-center justify-between gap-2 flex-wrap">
+              <div class="flex items-center gap-2">
+                <span id="live-q-counter-badge" class="px-2.5 py-1 rounded-lg text-xs font-extrabold bg-indigo-600 text-white">
+                  Question 1 / 10
+                </span>
+                <span id="live-q-theme-badge" class="text-xs font-bold text-slate-700 truncate max-w-xs sm:max-w-md">
+                  Chapitre
+                </span>
+              </div>
+              <div class="flex items-center gap-3">
+                <span id="live-q-answered-status" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                  0 / 1 ont répondu
+                </span>
+                <span id="live-q-timer-badge" class="px-3 py-1 rounded-xl text-sm font-extrabold font-mono bg-rose-600 text-white shadow-2xs">
+                  ⏱️ 25s
+                </span>
+              </div>
+            </div>
+            <!-- Smooth Countdown Bar -->
+            <div class="w-full h-2 rounded-full bg-slate-200 overflow-hidden">
+              <div id="live-q-timer-bar" class="bg-rose-600 h-full transition-all duration-300" style="width: 100%"></div>
+            </div>
+          </div>
+
+          <!-- Question Text -->
+          <div class="p-4 sm:p-5 rounded-2xl bg-white border border-slate-200 space-y-3 shadow-2xs">
+            <p id="live-q-text" class="text-sm sm:text-base font-extrabold text-slate-900 leading-snug">
+              Question...
+            </p>
+            <p class="text-xs text-slate-500">
+              * Sélectionnez la ou les propositions exactes puis cliquez sur « 🔒 Valider ma réponse » avant la fin du décompte.
+            </p>
+            <div id="live-q-options-list" class="space-y-2.5 pt-1">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+
+          <!-- Lock-in Answer Bar -->
+          <div class="flex items-center justify-between gap-3 pt-1">
+            <div id="live-q-locked-notice" class="hidden text-xs font-extrabold text-emerald-700 bg-emerald-50 border border-emerald-200 px-4 py-2.5 rounded-xl">
+              🔒 Réponse enregistrée ! En attente des autres participants...
+            </div>
+            <button type="button" onclick="submitLivePlayerAnswer()" id="live-btn-lock-answer" class="ml-auto px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs sm:text-sm font-extrabold shadow-md transition flex items-center gap-2 cursor-pointer">
+              <span>🔒 Valider ma réponse</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- VIEW 4: ROUND REVEAL, EXPLANATION & LIVE LEADERBOARD (HOST-CONTROLLED) -->
+        <div id="live-view-reveal" class="hidden space-y-5">
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+            <!-- Left: Correct Answer & Explanation -->
+            <div class="lg:col-span-7 p-4 sm:p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+              <div class="flex items-center justify-between gap-2">
+                <span id="live-reveal-self-badge" class="px-2.5 py-1 rounded-full text-xs font-extrabold bg-emerald-100 text-emerald-800">
+                  ✓ +1350 pts
+                </span>
+                <span id="live-reveal-q-num" class="text-xs font-bold text-slate-500">Question 1 / 10</span>
+              </div>
+              <p id="live-reveal-q-text" class="text-xs sm:text-sm font-extrabold text-slate-900 leading-snug"></p>
+              <div id="live-reveal-correct-box" class="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-950 space-y-1">
+              </div>
+              <div id="live-reveal-explanation" class="p-3 rounded-xl bg-white border border-slate-200 text-xs text-slate-700 leading-relaxed">
+              </div>
+            </div>
+
+            <!-- Right: Live Leaderboard -->
+            <div class="lg:col-span-5 p-4 sm:p-5 rounded-2xl bg-white border border-slate-200 space-y-3 flex flex-col justify-between">
+              <div class="space-y-3">
+                <div class="flex items-center justify-between border-b border-slate-200 pb-2">
+                  <h4 class="text-xs font-extrabold uppercase tracking-wider text-indigo-700">
+                    🏆 Classement en Direct
+                  </h4>
+                  <span class="text-xs text-slate-500">Points + Bonus vitesse</span>
+                </div>
+                <div id="live-reveal-leaderboard" class="space-y-2">
+                  <!-- Populated by JS -->
+                </div>
+              </div>
+
+              <!-- Host Next Question Button / Guest Waiting -->
+              <div class="pt-3 border-t border-slate-100">
+                <button type="button" onclick="hostNextLiveQuestion()" id="live-btn-host-next" class="w-full py-3 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs sm:text-sm font-extrabold shadow-md transition flex items-center justify-center gap-2 cursor-pointer">
+                  <span id="live-btn-host-next-label">Question suivante →</span>
+                </button>
+                <div id="live-reveal-guest-wait" class="hidden text-center text-xs font-bold text-slate-500 py-2">
+                  ⏳ L'hôte passera à la question suivante après discussion...
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- VIEW 5: FINAL PODIUM -->
+        <div id="live-view-podium" class="hidden space-y-5 text-center py-2">
+          <div class="space-y-1">
+            <span class="px-3 py-1 rounded-full text-xs font-extrabold bg-amber-100 text-amber-800 border border-amber-300">
+              🏆 PODIUM FINAL DU QUIZ LIVE
+            </span>
+            <h3 class="text-xl sm:text-2xl font-extrabold text-slate-900 pt-1">
+              Félicitations à tous les participants !
+            </h3>
+            <p class="text-xs text-slate-500">
+              Vos réponses personnelles ont également été enregistrées dans votre profil et votre carnet d'erreurs.
+            </p>
+          </div>
+
+          <div id="live-podium-list" class="max-w-xl mx-auto space-y-2.5 text-left">
+            <!-- Populated by JS -->
+          </div>
+
+          <div class="pt-3 flex items-center justify-center gap-3">
+            <button type="button" onclick="closeLiveQuizModal(); navigateTab('profile');" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-extrabold cursor-pointer">
+              👤 Voir l'impact dans Mon Profil
+            </button>
+            <button type="button" onclick="closeLiveQuizModal()" class="px-4 py-2.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold cursor-pointer">
+              Fermer
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
 
   </div> <!-- End #app-content-container -->
 
@@ -2173,6 +2908,14 @@
       if (typeof updateProfileNavBadge === 'function') {
         updateProfileNavBadge();
       }
+      if (window.__incomingLiveRoomCode) {
+        const roomToJoin = window.__incomingLiveRoomCode;
+        window.__incomingLiveRoomCode = null;
+        setTimeout(() => {
+          openLiveQuizModal();
+          joinLiveQuizRoom(roomToJoin);
+        }, 120);
+      }
       if (window.__initialRequestedTab === 'profile') {
         window.__initialRequestedTab = null;
         navigateTab('profile');
@@ -2235,6 +2978,10 @@
         const reqTab = urlParams.get('tab');
         if (reqTab) {
           window.__initialRequestedTab = reqTab;
+        }
+        const liveRoomParam = urlParams.get('live');
+        if (liveRoomParam) {
+          window.__incomingLiveRoomCode = liveRoomParam.trim().toUpperCase();
         }
         const urlEmail = normalizeAuthEmail(urlParams.get('email'));
         const urlPin = normalizeAuthPin(urlParams.get('pin'));
@@ -3921,11 +4668,16 @@
               </div>
             </label>
 
-            <div class="flex items-center gap-2 self-start sm:self-center pl-7 sm:pl-0">
+            <div class="flex items-center gap-2 self-start sm:self-center pl-7 sm:pl-0 flex-wrap">
               <div class="flex items-center gap-1.5">${badges}</div>
               ${c.total > 0 ? `
-                <button type="button" class="btn-launch-source px-3 py-1.5 rounded-lg border border-indigo-200 bg-indigo-50 hover:bg-indigo-100 text-indigo-800 text-xs font-bold transition whitespace-nowrap shadow-xs">
+                <button type="button" class="btn-launch-source px-3 py-1.5 rounded-lg border border-indigo-200 bg-indigo-50 hover:bg-indigo-100 text-indigo-800 text-xs font-bold transition whitespace-nowrap shadow-xs cursor-pointer">
                   🎯 Passer cette annale (${c.total})
+                </button>
+              ` : ''}
+              ${c.qcm > 0 ? `
+                <button type="button" class="btn-launch-source-live px-2.5 py-1.5 rounded-lg border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-800 text-xs font-extrabold transition whitespace-nowrap shadow-xs cursor-pointer" title="Lancer cette annale dans un Salon Live-Quiz Multi-Joueurs">
+                  📡 Salon Live
                 </button>
               ` : ''}
             </div>
@@ -3938,6 +4690,21 @@
             btn.addEventListener('click', (e) => {
               e.stopPropagation();
               launchSingleSource(doc.name);
+            });
+          }
+        }
+        if (c.qcm > 0) {
+          const btnLive = card.querySelector('.btn-launch-source-live');
+          if (btnLive) {
+            btnLive.addEventListener('click', (e) => {
+              e.stopPropagation();
+              selectionMode = 'source';
+              selectedSources = new Set([doc.name]);
+              document.querySelectorAll('#sources-list-container input[type="checkbox"]').forEach(cb => {
+                cb.checked = cb.value === doc.name;
+              });
+              setQuizCount('all');
+              launchConfiguredQuizInLiveRoom();
             });
           }
         }
@@ -4167,29 +4934,96 @@
     }
 
     function updateModeUI() {
-      const selected = document.querySelector('input[name="quiz_mode"]:checked').value;
+      const checkedEl = document.querySelector('input[name="quiz_mode"]:checked');
+      const selected = checkedEl ? checkedEl.value : 'revision';
       currentQuizSettings.mode = selected;
       const revLabel = document.getElementById('mode-label-revision');
       const examLabel = document.getElementById('mode-label-exam');
-      if (selected === 'revision') {
-        revLabel.className = 'flex-1 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border-2 border-indigo-600 bg-indigo-50/50 cursor-pointer transition text-xs font-bold text-slate-900';
-        examLabel.className = 'flex-1 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 cursor-pointer transition text-xs font-bold text-slate-900';
-      } else {
-        revLabel.className = 'flex-1 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 cursor-pointer transition text-xs font-bold text-slate-900';
-        examLabel.className = 'flex-1 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border-2 border-indigo-600 bg-indigo-50/50 cursor-pointer transition text-xs font-bold text-slate-900';
+      const liveLabel = document.getElementById('mode-label-live');
+      const liveTimerBox = document.getElementById('live-mode-timer-box');
+      const stickyLabel = document.getElementById('sticky-launch-btn-label');
+      const paramLabel = document.getElementById('param-primary-launch-label');
+
+      const baseOptCls = 'flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 cursor-pointer transition text-xs font-bold text-slate-900';
+      const activeOptCls = 'flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border-2 border-indigo-600 bg-indigo-50/50 cursor-pointer transition text-xs font-bold text-slate-900';
+
+      if (revLabel) revLabel.className = selected === 'revision' ? activeOptCls : baseOptCls;
+      if (examLabel) examLabel.className = selected === 'exam' ? activeOptCls : baseOptCls;
+      if (liveLabel) {
+        liveLabel.className = selected === 'live'
+          ? 'col-span-2 flex items-center justify-between gap-1.5 px-2.5 py-2 rounded-lg border-2 border-rose-600 bg-rose-50 cursor-pointer transition text-xs font-extrabold text-rose-900 shadow-2xs'
+          : 'col-span-2 flex items-center justify-between gap-1.5 px-2.5 py-2 rounded-lg border border-rose-200 bg-rose-50/60 hover:bg-rose-50 cursor-pointer transition text-xs font-extrabold text-rose-900';
       }
+      if (liveTimerBox) {
+        liveTimerBox.classList.toggle('hidden', selected !== 'live');
+      }
+
+      const btnText = selected === 'live' ? '📡 Créer le Salon Live-Quiz Multi-Joueurs' : 'Commencer le Quiz';
+      if (stickyLabel) stickyLabel.textContent = btnText;
+      if (paramLabel) paramLabel.textContent = btnText;
+
       const hint = document.getElementById('mode-hint');
       if (hint) {
-        hint.textContent = selected === 'revision'
-          ? 'Correction immédiate, repères théoriques et auto-évaluation guidée.'
-          : "Chronométré, aucun indice pendant l'épreuve, bilan et notation à la fin.";
+        if (selected === 'revision') {
+          hint.textContent = 'Correction immédiate, repères théoriques et auto-évaluation guidée.';
+        } else if (selected === 'exam') {
+          hint.textContent = "Chronométré, aucun indice pendant l'épreuve, bilan et notation à la fin.";
+        } else {
+          hint.textContent = "Crée un salon Live partageable avec votre sélection actuelle, chrono par question et classement en direct.";
+        }
       }
+    }
+
+    function buildConfiguredQcmListForLive() {
+      let pool = getActivePool().filter(isQcm);
+      if (pool.length === 0) {
+        pool = QCM_DATASET.filter(isQcm);
+      }
+      const shuffleCb = document.getElementById('opt-shuffle-q');
+      const uniqueCb = document.getElementById('opt-unique-q');
+      const doShuffle = shuffleCb ? shuffleCb.checked : true;
+      const doUnique = uniqueCb ? uniqueCb.checked : true;
+
+      let candidates = [...pool];
+      if (doShuffle) candidates = shuffleArray(candidates);
+
+      if (doUnique) {
+        let clusters = clusterQuestions(candidates);
+        if (doShuffle) clusters = shuffleArray(clusters);
+        candidates = clusters.map(c => c.canonical);
+      }
+
+      const maxAvail = candidates.length;
+      const reqCount = currentQuizSettings.count === 'all'
+        ? maxAvail
+        : Math.min(parseInt(currentQuizSettings.count, 10) || 10, maxAvail);
+
+      return candidates.slice(0, Math.max(1, reqCount));
+    }
+
+    function launchConfiguredQuizInLiveRoom() {
+      const configuredQuestions = buildConfiguredQcmListForLive();
+      if (!configuredQuestions || configuredQuestions.length === 0) {
+        alert("Aucune question QCM disponible avec vos filtres actuels.");
+        return;
+      }
+      const paramTimer = document.getElementById('param-live-timer-select');
+      const modalTimer = document.getElementById('live-setup-timer');
+      if (paramTimer && modalTimer) {
+        modalTimer.value = paramTimer.value;
+      }
+      openLiveQuizModal();
+      createLiveQuizRoom(configuredQuestions);
     }
 
     // ==============================================================
     // QUIZ SESSION ENGINE
     // ==============================================================
     function startQuiz(customQuestionList = null, isRetrySession = false) {
+      if (!customQuestionList && currentQuizSettings.mode === 'live') {
+        launchConfiguredQuizInLiveRoom();
+        return;
+      }
       let pool = customQuestionList ? [...customQuestionList] : getActivePool();
       if (pool.length === 0) {
         alert("Aucune question disponible avec vos filtres actuels.");
@@ -4303,6 +5137,7 @@
         currentIndex: 0,
         userQcmSelections: {},
         userOpenAnswers: {},
+        userConfidence: {},
         bookmarked: new Set(),
         checkedState: {},
         scores: {},
@@ -4609,7 +5444,34 @@
       if (idx === 0) btnPrev.classList.add('opacity-50', 'cursor-not-allowed');
       else btnPrev.classList.remove('opacity-50', 'cursor-not-allowed');
 
+      if (typeof renderQuestionConfidenceBar === 'function') {
+        renderQuestionConfidenceBar(idx);
+      }
+
       renderPalette();
+    }
+
+    function setQuestionConfidence(mode) {
+      if (!activeQuiz) return;
+      const idx = activeQuiz.currentIndex;
+      if (!activeQuiz.userConfidence) activeQuiz.userConfidence = {};
+      activeQuiz.userConfidence[idx] = mode === 'hesitate' ? 'hesitate' : 'sure';
+      renderQuestionConfidenceBar(idx);
+    }
+
+    function renderQuestionConfidenceBar(idx) {
+      if (!activeQuiz) return;
+      const conf = (activeQuiz.userConfidence && activeQuiz.userConfidence[idx]) || 'sure';
+      const btnSure = document.getElementById('quiz-conf-btn-sure');
+      const btnHes = document.getElementById('quiz-conf-btn-hesitate');
+      if (!btnSure || !btnHes) return;
+      if (conf === 'hesitate') {
+        btnHes.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-500 text-slate-950 transition cursor-pointer shadow-2xs';
+        btnSure.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition cursor-pointer';
+      } else {
+        btnSure.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-600 text-white transition cursor-pointer shadow-2xs';
+        btnHes.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition cursor-pointer';
+      }
     }
 
     function getOptionExplanationText(q, opt, isCorrect) {
@@ -5193,6 +6055,7 @@
           question: q,
           userQcmSel: Array.from(activeQuiz.userQcmSelections[i] || []),
           userOpenText: activeQuiz.userOpenAnswers[i] || '',
+          confidence: (activeQuiz.userConfidence && activeQuiz.userConfidence[i]) || 'sure',
           score: activeQuiz.scores[i] !== undefined ? activeQuiz.scores[i] : 0,
           isMissed: missedIndices.includes(i)
         }))
@@ -5228,6 +6091,21 @@
       document.getElementById('res-time-spent').textContent = formatDurationText(r.elapsedSeconds);
       document.getElementById('res-correct-count').textContent = `${r.earned} / ${r.max} pts`;
       document.getElementById('res-missed-count').textContent = `${r.missedQuestions.length} épreuve${r.missedQuestions.length > 1 ? 's' : ''}`;
+
+      // Peer Challenge Comparison Box
+      const chalBox = document.getElementById('res-challenge-outcome-box');
+      if (chalBox) {
+        if (activeQuiz && activeQuiz.challengeMeta) {
+          const cm = activeQuiz.challengeMeta;
+          chalBox.classList.remove('hidden');
+          const beatScore = r.earned > cm.score || (r.earned === cm.score && r.elapsedSeconds < cm.time);
+          chalBox.innerHTML = beatScore
+            ? `🏆 <strong>Défi remporté face à ${escapeHtml(cm.by)} !</strong> Votre score : ${r.earned}/${r.max} en ${formatDurationText(r.elapsedSeconds)} (vs ${cm.score}/${cm.max} en ${formatDurationText(cm.time)}).`
+            : `⚔️ <strong>Résultat du défi de ${escapeHtml(cm.by)} :</strong> Votre score : ${r.earned}/${r.max} en ${formatDurationText(r.elapsedSeconds)} (Score à battre : ${cm.score}/${cm.max} en ${formatDurationText(cm.time)}).`;
+        } else {
+          chalBox.classList.add('hidden');
+        }
+      }
 
       const missedCount = r.missedQuestions.length;
       const heroRetryBtn = document.getElementById('hero-btn-retry-missed');
@@ -5681,6 +6559,7 @@
         existing.lastUserSel = origUserSel;
         existing.lastUserOpenText = item.userOpenText || '';
         existing.lastScore = item.score;
+        existing.lastConfidence = item.confidence || 'sure';
         existing.theme = q.theme || existing.theme;
         existing.document = q.document || existing.document;
 
@@ -5690,8 +6569,13 @@
           existing.activeError = true;
         } else {
           existing.correctCount = (existing.correctCount || 0) + 1;
-          existing.consecutiveCorrect = (existing.consecutiveCorrect || 0) + 1;
           existing.activeError = false;
+          if (item.confidence === 'hesitate') {
+            // Stays in Leitner Box 2 (En consolidation) when answered with hesitation
+            existing.consecutiveCorrect = 1;
+          } else {
+            existing.consecutiveCorrect = (existing.consecutiveCorrect || 0) + 1;
+          }
         }
 
         if (q.isAiGenerated) {
@@ -6071,8 +6955,1458 @@
       const histCountBadge = document.getElementById('profile-subtab-history-count');
       if (histCountBadge) histCountBadge.textContent = String(totalSessions);
 
+      // 5. Render Engagement Modules (Daily Sprint, Readiness /20, Weekly Heatmap, Leitner Boxes, Flashcards, Badges)
+      renderDailySprintCard(profile, qMap);
+      renderExamReadinessAndSimulation(profile, qMap);
+      renderWeeklyGoalAndHeatmap(profile);
+      renderLeitnerBoxes(profile, qMap);
+      initProfileFlashcards();
+      renderAcademicBadges(profile, qMap);
+
       renderProfileErrorBank(profile, qMap);
       renderProfileSessionHistory(profile);
+    }
+
+    // --------------------------------------------------------------
+    // ENGAGEMENT MODULE 1: DAILY 5-QCM SPRINT & WEEKLY HEATMAP
+    // --------------------------------------------------------------
+    function buildDailySprintQuestions(profile, qMap) {
+      const statsMap = profile.questionStats || {};
+      const allOfficialQcm = QCM_DATASET.filter(isQcm);
+
+      // 1. Up to 2 active errors (prioritizing recurring errors)
+      const activeErrStats = Object.values(statsMap)
+        .filter(s => s && s.activeError && s.type === 'qcm')
+        .sort((a, b) => (b.missedCount - a.missedCount) || (b.lastAttemptAt - a.lastAttemptAt));
+      const errQs = activeErrStats.map(s => qMap.get(s.qKey) || s.questionSnapshot).filter(Boolean).slice(0, 2);
+      const chosenKeys = new Set(errQs.map(getProfileQuestionKey));
+
+      // 2. Up to 2 high-recurrence exam questions not already chosen
+      const clusters = clusterQuestions(allOfficialQcm)
+        .filter(c => c.allDocuments.length >= 2)
+        .sort((a, b) => b.allDocuments.length - a.allDocuments.length);
+      const recCandidates = shuffleArray(clusters.slice(0, 15).map(c => c.canonical))
+        .filter(q => !chosenKeys.has(getProfileQuestionKey(q)));
+      const recQs = recCandidates.slice(0, 2);
+      recQs.forEach(q => chosenKeys.add(getProfileQuestionKey(q)));
+
+      // 3. Fill remaining up to 5 with unseen official QCMs (or any remaining QCMs)
+      const needed = Math.max(0, 5 - (errQs.length + recQs.length));
+      const unseenCandidates = shuffleArray(
+        allOfficialQcm.filter(q => !statsMap[getProfileQuestionKey(q)] && !chosenKeys.has(getProfileQuestionKey(q)))
+      );
+      let unseenQs = unseenCandidates.slice(0, needed);
+      if (unseenQs.length < needed) {
+        const fallback = shuffleArray(allOfficialQcm.filter(q => !chosenKeys.has(getProfileQuestionKey(q))));
+        unseenQs = [...unseenQs, ...fallback.slice(0, needed - unseenQs.length)];
+      }
+
+      return {
+        errCount: errQs.length,
+        recCount: recQs.length,
+        unseenCount: unseenQs.length,
+        questions: [...errQs, ...recQs, ...unseenQs]
+      };
+    }
+
+    let currentCoachingPillar = 'all';
+
+    function switchCoachingPillar(pillar) {
+      currentCoachingPillar = pillar || 'all';
+      const pillars = ['habits', 'pedagogy', 'gamification', 'social'];
+      pillars.forEach(p => {
+        const el = document.getElementById('coaching-pillar-' + p);
+        const btn = document.getElementById('coaching-tab-btn-' + p);
+        const show = currentCoachingPillar === 'all' || currentCoachingPillar === p;
+        if (el) {
+          el.classList.toggle('hidden', !show);
+        }
+        if (btn) {
+          if (currentCoachingPillar === p) {
+            btn.className = 'px-3 py-2.5 rounded-xl text-xs font-extrabold transition bg-indigo-600 text-white shadow-xs flex items-center justify-center gap-1.5 cursor-pointer';
+          } else {
+            btn.className = 'px-3 py-2.5 rounded-xl text-xs font-bold transition bg-white text-slate-700 hover:bg-slate-50 border border-slate-200 flex items-center justify-center gap-1.5 cursor-pointer';
+          }
+        }
+      });
+
+      const allBtn = document.getElementById('coaching-tab-btn-all');
+      if (allBtn) {
+        if (currentCoachingPillar === 'all') {
+          allBtn.className = 'self-start sm:self-auto px-3 py-1.5 rounded-lg text-xs font-extrabold bg-indigo-600 text-white border border-indigo-600 transition cursor-pointer shadow-2xs';
+        } else {
+          allBtn.className = 'self-start sm:self-auto px-3 py-1.5 rounded-lg text-xs font-extrabold bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 transition cursor-pointer';
+        }
+      }
+    }
+
+    function renderDailySprintCard(profile, qMap) {
+      const mix = buildDailySprintQuestions(profile, qMap);
+      const elErr = document.getElementById('sprint-mix-errors');
+      const elRec = document.getElementById('sprint-mix-recurring');
+      const elUnseen = document.getElementById('sprint-mix-unseen');
+      if (elErr) elErr.textContent = `${mix.errCount} erreur${mix.errCount > 1 ? 's' : ''} à revoir`;
+      if (elRec) elRec.textContent = `${mix.recCount} classique${mix.recCount > 1 ? 's' : ''} d'annales`;
+      if (elUnseen) elUnseen.textContent = `${mix.unseenCount} question${mix.unseenCount > 1 ? 's' : ''} inédite${mix.unseenCount > 1 ? 's' : ''}`;
+    }
+
+    function startDailySprintQuiz() {
+      const profile = loadMemberProfile();
+      const qMap = buildQuestionLookupMap();
+      const mix = buildDailySprintQuestions(profile, qMap);
+      if (mix.questions.length === 0) return;
+
+      startQuiz(mix.questions, false);
+      if (activeQuiz) {
+        activeQuiz.isProfileRemediation = true;
+        activeQuiz.remediationLabel = '⚡ Sprint Express du Jour (5 QCM)';
+      }
+    }
+
+    function changeMemberWeeklyGoal(val) {
+      const target = parseInt(val, 10) || 50;
+      const profile = loadMemberProfile();
+      profile.weeklyGoal = target;
+      saveMemberProfile(profile);
+      renderWeeklyGoalAndHeatmap(profile);
+    }
+
+    function renderWeeklyGoalAndHeatmap(profile) {
+      const goal = parseInt(profile.weeklyGoal, 10) || 50;
+      const selEl = document.getElementById('profile-weekly-goal-select');
+      if (selEl) selEl.value = String(goal);
+
+      const sessions = profile.sessions || [];
+      const oneWeekAgo = Date.now() - 7 * 86400000;
+      const weeklyDone = sessions
+        .filter(s => s.timestamp >= oneWeekAgo)
+        .reduce((sum, s) => sum + (s.questionCount || 0), 0);
+
+      const pct = Math.min(100, Math.round((weeklyDone / goal) * 100));
+      const doneEl = document.getElementById('profile-weekly-done');
+      const targetEl = document.getElementById('profile-weekly-target');
+      const pctEl = document.getElementById('profile-weekly-pct');
+      const barEl = document.getElementById('profile-weekly-bar');
+
+      if (doneEl) doneEl.textContent = String(weeklyDone);
+      if (targetEl) targetEl.textContent = `/ ${goal} questions cette semaine`;
+      if (pctEl) pctEl.textContent = `${pct}%`;
+      if (barEl) barEl.style.width = `${pct}%`;
+
+      // 28-Day (4 Weeks) Compact Heatmap
+      const grid = document.getElementById('profile-heatmap-grid');
+      if (!grid) return;
+
+      const dayCounts = {};
+      sessions.forEach(s => {
+        const d = new Date(s.timestamp);
+        const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        dayCounts[key] = (dayCounts[key] || 0) + (s.questionCount || 0);
+      });
+
+      const dayNames = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
+      grid.innerHTML = '';
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      for (let offset = 27; offset >= 0; offset--) {
+        const dt = new Date(today);
+        dt.setDate(today.getDate() - offset);
+        const key = `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`;
+        const count = dayCounts[key] || 0;
+        const label = offset === 0 ? 'Auj.' : `${dayNames[dt.getDay()].slice(0, 2)} ${String(dt.getDate()).padStart(2, '0')}`;
+
+        let boxCls = 'bg-slate-50 border-slate-200 text-slate-400';
+        if (count >= 20) {
+          boxCls = 'bg-emerald-100 border-emerald-300 text-emerald-900';
+        } else if (count > 0) {
+          boxCls = 'bg-emerald-50 border-emerald-200 text-emerald-800';
+        } else if (offset === 0) {
+          boxCls = 'bg-indigo-50/60 border-indigo-300 text-indigo-800';
+        }
+
+        const cell = document.createElement('div');
+        cell.className = `py-1 px-1 rounded-lg border ${boxCls} leading-tight`;
+        cell.title = `${dt.toLocaleDateString('fr-FR')} : ${count} question${count > 1 ? 's' : ''}`;
+        cell.innerHTML = `
+          <div class="text-[10px] font-medium opacity-75 truncate">${label}</div>
+          <div class="text-[11px] font-extrabold">${count > 0 ? `${count}Q` : '·'}</div>
+        `;
+        grid.appendChild(cell);
+      }
+    }
+
+    // --------------------------------------------------------------
+    // ENGAGEMENT MODULE 2: EXAM READINESS GAUGE (/20) & SIMULATION
+    // --------------------------------------------------------------
+    let cachedReadinessMetrics = null;
+
+    function renderExamReadinessAndSimulation(profile, qMap) {
+      const statsMap = profile.questionStats || {};
+      const allOfficial = [...QCM_DATASET, ...OPEN_DATASET];
+      const totalOfficial = Math.max(1, allOfficial.length);
+
+      // 1. Recurring questions mastery (45%)
+      const clusters = clusterQuestions(allOfficial);
+      const topClusters = clusters.filter(c => c.allDocuments.length >= 2);
+      const targetClusters = topClusters.length > 0 ? topClusters : clusters;
+      let recMastered = 0;
+      targetClusters.forEach(c => {
+        const key = getProfileQuestionKey(c.canonical);
+        const st = statsMap[key];
+        if (st && st.correctCount > 0 && !st.activeError) recMastered++;
+      });
+      const recPct = Math.round((recMastered / Math.max(1, targetClusters.length)) * 100);
+
+      // 2. Accuracy (35%)
+      const allStats = Object.values(statsMap);
+      const totalAttempts = allStats.reduce((s, x) => s + (x.attempts || 0), 0);
+      const totalCorrect = allStats.reduce((s, x) => s + (x.correctCount || 0), 0);
+      const accPct = totalAttempts > 0 ? Math.round((totalCorrect / totalAttempts) * 100) : 0;
+
+      // 3. Official coverage without blind spots (20%)
+      const seenOfficial = allStats.filter(s => !s.isAiGenerated && qMap.has(s.qKey)).length;
+      const covPct = Math.round((seenOfficial / totalOfficial) * 100);
+
+      const activeErrorsCount = allStats.filter(s => s && s.activeError).length;
+      const baseGrade20 = totalAttempts > 0
+        ? Math.min(20, ((recPct * 0.45 + accPct * 0.35 + covPct * 0.20) / 100) * 20)
+        : 0;
+
+      cachedReadinessMetrics = {
+        recPct,
+        accPct,
+        covPct,
+        baseGrade20,
+        activeErrorsCount,
+        totalAttempts,
+        totalOfficial
+      };
+
+      const slider = document.getElementById('profile-sim-slider');
+      if (slider) {
+        slider.max = String(activeErrorsCount);
+        slider.value = '0';
+        slider.disabled = activeErrorsCount === 0;
+      }
+
+      updateReadinessSimulation(0);
+    }
+
+    function updateReadinessSimulation(fixedVal) {
+      if (!cachedReadinessMetrics) return;
+      const m = cachedReadinessMetrics;
+      const fixed = Math.min(m.activeErrorsCount, Math.max(0, parseInt(fixedVal, 10) || 0));
+
+      const simLabel = document.getElementById('profile-sim-label');
+      if (simLabel) {
+        simLabel.textContent = `${fixed} / ${m.activeErrorsCount} erreur${m.activeErrorsCount > 1 ? 's' : ''} corrigée${fixed > 1 ? 's' : ''}`;
+      }
+
+      const gradeEl = document.getElementById('profile-readiness-grade');
+      const mentionEl = document.getElementById('profile-readiness-mention');
+      const recEl = document.getElementById('profile-readiness-rec');
+      const accEl = document.getElementById('profile-readiness-acc');
+      const covEl = document.getElementById('profile-readiness-cov');
+
+      if (m.totalAttempts === 0) {
+        if (gradeEl) gradeEl.innerHTML = `— <span class="text-sm font-normal text-slate-500">/ 20</span>`;
+        if (mentionEl) {
+          mentionEl.textContent = 'Complétez un 1er quiz';
+          mentionEl.className = 'px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-100 text-slate-600 border border-slate-200';
+        }
+        return;
+      }
+
+      const simRec = Math.min(100, m.recPct + Math.round(fixed * 2.2));
+      const simAcc = Math.min(100, m.accPct + Math.round(fixed * 1.8));
+      const simCov = Math.min(100, m.covPct + Math.round((fixed / m.totalOfficial) * 100));
+      const simGrade = Math.min(20, ((simRec * 0.45 + simAcc * 0.35 + simCov * 0.20) / 100) * 20);
+
+      if (gradeEl) {
+        gradeEl.innerHTML = `${simGrade.toFixed(1)} <span class="text-sm font-normal text-slate-500">/ 20</span>`;
+      }
+      if (recEl) recEl.textContent = `${simRec}%`;
+      if (accEl) accEl.textContent = `${simAcc}%`;
+      if (covEl) covEl.textContent = `${simCov}%`;
+
+      if (mentionEl) {
+        if (simGrade >= 16) {
+          mentionEl.textContent = 'Mention Très Bien visée 🏆';
+          mentionEl.className = 'px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200';
+        } else if (simGrade >= 14) {
+          mentionEl.textContent = 'Mention Bien visée 🎉';
+          mentionEl.className = 'px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200';
+        } else if (simGrade >= 12) {
+          mentionEl.textContent = 'Mention Assez Bien 👍';
+          mentionEl.className = 'px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200';
+        } else if (simGrade >= 10) {
+          mentionEl.textContent = 'Validation L2 (≥ 10/20) ✓';
+          mentionEl.className = 'px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200';
+        } else {
+          mentionEl.textContent = 'En progression (< 10/20)';
+          mentionEl.className = 'px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200';
+        }
+      }
+    }
+
+    // --------------------------------------------------------------
+    // ENGAGEMENT MODULE 3: LEITNER SPACED-REPETITION BOXES
+    // --------------------------------------------------------------
+    function classifyQuestionsIntoLeitnerBoxes(profile) {
+      const statsMap = profile.questionStats || {};
+      const allOfficial = [...QCM_DATASET, ...OPEN_DATASET];
+      const boxes = { 0: [], 1: [], 2: [], 3: [] };
+
+      allOfficial.forEach(q => {
+        const key = getProfileQuestionKey(q);
+        const st = statsMap[key];
+        if (!st || !st.attempts) {
+          boxes[0].push(q);
+        } else if (st.activeError) {
+          boxes[1].push(q);
+        } else if ((st.consecutiveCorrect || 0) >= 2 && st.lastConfidence !== 'hesitate') {
+          boxes[3].push(q);
+        } else {
+          boxes[2].push(q);
+        }
+      });
+      return boxes;
+    }
+
+    function renderLeitnerBoxes(profile) {
+      const boxes = classifyQuestionsIntoLeitnerBoxes(profile);
+      const total = Math.max(1, QCM_DATASET.length + OPEN_DATASET.length);
+
+      [0, 1, 2, 3].forEach(num => {
+        const el = document.getElementById(`leitner-count-${num}`);
+        const cnt = boxes[num].length;
+        const pct = Math.round((cnt / total) * 100);
+        if (el) {
+          el.innerHTML = `${cnt} <span class="text-xs font-normal text-slate-500">(${pct}%)</span>`;
+        }
+        const btn = document.getElementById(`leitner-btn-${num}`);
+        if (btn) {
+          btn.disabled = cnt === 0;
+        }
+      });
+    }
+
+    function startLeitnerBoxQuiz(boxNum) {
+      const profile = loadMemberProfile();
+      const boxes = classifyQuestionsIntoLeitnerBoxes(profile);
+      const list = boxes[boxNum] || [];
+      if (list.length === 0) return;
+
+      const selected = shuffleArray([...list]).slice(0, 15);
+      startQuiz(selected, boxNum === 1);
+      if (activeQuiz) {
+        activeQuiz.isProfileRemediation = true;
+        const labels = {
+          0: `Boîte 0 • Questions inédites (${selected.length})`,
+          1: `Boîte 1 • Erreurs à revoir (${selected.length})`,
+          2: `Boîte 2 • Consolidation (${selected.length})`
+        };
+        activeQuiz.remediationLabel = labels[boxNum] || 'Session Leitner';
+      }
+    }
+
+    // --------------------------------------------------------------
+    // ENGAGEMENT MODULE 4: INTERACTIVE FLIP FLASHCARDS & BADGES
+    // --------------------------------------------------------------
+    let profileFlashcardDeck = [];
+    let profileFlashcardIndex = 0;
+    let profileFlashcardFlipped = false;
+
+    function initProfileFlashcards(filterModeOpt) {
+      const selEl = document.getElementById('profile-fc-filter');
+      const mode = filterModeOpt || (selEl ? selEl.value : 'all');
+      const profile = loadMemberProfile();
+      const statsMap = profile.questionStats || {};
+
+      let pool = [...QCM_DATASET, ...OPEN_DATASET];
+      if (mode === 'errors') {
+        const errPool = pool.filter(q => {
+          const st = statsMap[getProfileQuestionKey(q)];
+          return st && st.activeError;
+        });
+        if (errPool.length > 0) pool = errPool;
+      }
+
+      profileFlashcardDeck = pool.map(q => {
+        let answerSummary = '';
+        if (isQcm(q)) {
+          const opts = q.rawOptions || q.options || [];
+          const corr = q.rawCorrect || q.correct || [];
+          const corrTexts = opts.filter(o => corr.includes(o.letter)).map(o => `${o.letter}. ${o.text}`).join(' | ');
+          answerSummary = `✓ Réponse : ${corrTexts}\n\n💡 ${q.explanation || ''}`.trim();
+        } else {
+          answerSummary = (q.guidelines || []).join(' • ') || q.model_answer || '';
+        }
+        return {
+          theme: q.theme || 'Cours',
+          front: q.question,
+          back: answerSummary
+        };
+      });
+
+      profileFlashcardIndex = 0;
+      profileFlashcardFlipped = false;
+      renderCurrentProfileFlashcard();
+    }
+
+    function renderCurrentProfileFlashcard() {
+      const badge = document.getElementById('profile-fc-side-badge');
+      const themeEl = document.getElementById('profile-fc-theme');
+      const textEl = document.getElementById('profile-fc-text');
+      const counterEl = document.getElementById('profile-fc-counter');
+
+      if (!profileFlashcardDeck || profileFlashcardDeck.length === 0) {
+        if (textEl) textEl.textContent = 'Aucune carte disponible.';
+        return;
+      }
+
+      const card = profileFlashcardDeck[profileFlashcardIndex];
+      if (counterEl) counterEl.textContent = `${profileFlashcardIndex + 1} / ${profileFlashcardDeck.length}`;
+      if (themeEl) themeEl.textContent = card.theme;
+
+      if (!profileFlashcardFlipped) {
+        if (badge) {
+          badge.className = 'px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-indigo-100 text-indigo-800';
+          badge.textContent = 'RECTO • QUESTION (Cliquez pour retourner)';
+        }
+        if (textEl) textEl.textContent = card.front;
+      } else {
+        if (badge) {
+          badge.className = 'px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-emerald-100 text-emerald-800';
+          badge.textContent = 'VERSO • RÉPONSE & REPÈRES DE COURS';
+        }
+        if (textEl) textEl.textContent = card.back;
+      }
+    }
+
+    function flipProfileFlashcard() {
+      profileFlashcardFlipped = !profileFlashcardFlipped;
+      renderCurrentProfileFlashcard();
+    }
+
+    function stepProfileFlashcard(delta) {
+      if (!profileFlashcardDeck || profileFlashcardDeck.length === 0) return;
+      profileFlashcardIndex = (profileFlashcardIndex + delta + profileFlashcardDeck.length) % profileFlashcardDeck.length;
+      profileFlashcardFlipped = false;
+      renderCurrentProfileFlashcard();
+    }
+
+    function renderAcademicBadges(profile, qMap) {
+      const sessions = profile.sessions || [];
+      const allStats = Object.values(profile.questionStats || {});
+      const streak = computeStudyStreakDays(sessions);
+
+      const examSessions = sessions.filter(s => s.mode === 'exam').length;
+      const highScoresCount = sessions.filter(s => (s.pct || 0) >= 80 && (s.questionCount || 0) >= 10).length;
+      const resolvedErrorsCount = allStats.filter(s => (s.missedCount || 0) > 0 && !s.activeError).length;
+
+      let bestChapMastery = 0;
+      let coveredChaptersCount = 0;
+      const allOfficial = [...QCM_DATASET, ...OPEN_DATASET];
+
+      CHAPTER_CATEGORIES.forEach(cat => {
+        const catOfficial = allOfficial.filter(q => cat.filterFn(q.theme || ''));
+        const catStats = allStats.filter(s => cat.filterFn(s.theme || ''));
+        const att = catStats.reduce((a, b) => a + (b.attempts || 0), 0);
+        const corr = catStats.reduce((a, b) => a + (b.correctCount || 0), 0);
+        if (att >= 5) {
+          const pct = Math.round((corr / att) * 100);
+          if (pct > bestChapMastery) bestChapMastery = pct;
+        }
+        const seenInCat = catStats.filter(s => !s.isAiGenerated).length;
+        if (catOfficial.length > 0 && (seenInCat / catOfficial.length) >= 0.4) {
+          coveredChaptersCount++;
+        }
+      });
+
+      const badges = [
+        {
+          icon: '🥇',
+          title: 'Première Annale Blanche',
+          desc: 'Terminer une session en mode Examen chronométré.',
+          unlocked: examSessions >= 1,
+          prog: `${Math.min(1, examSessions)} / 1 examen`
+        },
+        {
+          icon: '🧠',
+          title: 'Spécialiste de Chapitre',
+          desc: 'Atteindre ≥ 85% de réussite sur un chapitre (min. 5 essais).',
+          unlocked: bestChapMastery >= 85,
+          prog: `Meilleur : ${bestChapMastery}%`
+        },
+        {
+          icon: '🎯',
+          title: "Dompteur d'Erreurs",
+          desc: "Corriger au moins 5 questions de son carnet d'erreurs.",
+          unlocked: resolvedErrorsCount >= 5,
+          prog: `${Math.min(5, resolvedErrorsCount)} / 5 résolues`
+        },
+        {
+          icon: '🔥',
+          title: 'Régularité Exemplaire',
+          desc: "S'entraîner 3 jours consécutifs ou compléter 5 sessions.",
+          unlocked: streak >= 3 || sessions.length >= 5,
+          prog: `${sessions.length} sessions (${streak}j série)`
+        },
+        {
+          icon: '🛡️',
+          title: 'Zéro Impasse',
+          desc: 'Couvrir au moins 40% des questions de chaque chapitre.',
+          unlocked: CHAPTER_CATEGORIES.length > 0 && coveredChaptersCount >= CHAPTER_CATEGORIES.length,
+          prog: `${coveredChaptersCount} / ${CHAPTER_CATEGORIES.length} chapitres`
+        },
+        {
+          icon: '👑',
+          title: 'Maître des Annales UT2J',
+          desc: 'Obtenir ≥ 80% sur 3 séries de 10+ questions.',
+          unlocked: highScoresCount >= 3,
+          prog: `${Math.min(3, highScoresCount)} / 3 séries ≥ 80%`
+        }
+      ];
+
+      const unlockedCount = badges.filter(b => b.unlocked).length;
+      const sumEl = document.getElementById('profile-badges-summary');
+      if (sumEl) sumEl.textContent = `${unlockedCount} / ${badges.length} débloqués`;
+
+      const grid = document.getElementById('profile-badges-grid');
+      if (!grid) return;
+      grid.innerHTML = badges.map(b => {
+        const cls = b.unlocked
+          ? 'bg-emerald-50/70 border-emerald-300 text-slate-900'
+          : 'bg-slate-50 border-slate-200 text-slate-500 opacity-75';
+        const statusCls = b.unlocked ? 'text-emerald-700 font-bold' : 'text-slate-500 font-medium';
+        return `
+          <div class="p-3 rounded-xl border ${cls} flex items-start gap-2.5 text-xs">
+            <div class="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-base shrink-0">${b.icon}</div>
+            <div class="space-y-0.5 min-w-0">
+              <div class="font-extrabold truncate">${escapeHtml(b.title)}</div>
+              <p class="text-[11px] leading-snug opacity-85">${escapeHtml(b.desc)}</p>
+              <div class="text-[11px] ${statusCls}">${b.unlocked ? '✓ Débloqué' : '🔒 ' + escapeHtml(b.prog)}</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // --------------------------------------------------------------
+    // ENGAGEMENT MODULE 5: LIVE MULTIPLAYER QUIZ ARENA (KAHOOT-STYLE)
+    // --------------------------------------------------------------
+    let liveRoomState = null;
+    let livePeerInstance = null;
+    let liveHostConnections = [];
+    let liveGuestConn = null;
+    let liveBroadcastChan = null;
+    let liveCountdownInterval = null;
+    let livePresetQuestions = null;
+
+    function getMemberShortDisplayName() {
+      const email = getActiveMemberEmail();
+      if (!email || email === 'anonyme') return 'Membre-' + Math.floor(100 + Math.random() * 900);
+      const local = email.split('@')[0] || 'Membre';
+      return local.replace(/[._-]+/g, ' ').replace(/\b\w/g, c => c.toUpperCase()).slice(0, 18);
+    }
+
+    function getMyLivePlayerId() {
+      if (!window.__myLivePlayerId) {
+        const email = getActiveMemberEmail();
+        window.__myLivePlayerId = (email && email !== 'anonyme' ? email : 'guest') + '_' + Math.random().toString(36).slice(2, 7);
+      }
+      return window.__myLivePlayerId;
+    }
+
+    function ensurePeerJsLoaded() {
+      return new Promise((resolve) => {
+        if (window.Peer) {
+          resolve(true);
+          return;
+        }
+        const existing = document.getElementById('peerjs-cdn-script');
+        if (existing) {
+          existing.addEventListener('load', () => resolve(Boolean(window.Peer)));
+          existing.addEventListener('error', () => resolve(false));
+          return;
+        }
+        const script = document.createElement('script');
+        script.id = 'peerjs-cdn-script';
+        script.src = 'https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js';
+        script.async = true;
+        script.onload = () => resolve(Boolean(window.Peer));
+        script.onerror = () => resolve(false);
+        document.head.appendChild(script);
+      });
+    }
+
+    function showLiveSubView(viewName) {
+      const views = ['setup', 'lobby', 'question', 'reveal', 'podium'];
+      views.forEach(v => {
+        const el = document.getElementById('live-view-' + v);
+        if (el) {
+          if (v === viewName) el.classList.remove('hidden');
+          else el.classList.add('hidden');
+        }
+      });
+    }
+
+    function openLiveQuizModal() {
+      const modal = document.getElementById('live-quiz-modal');
+      if (!modal) return;
+      modal.classList.remove('hidden');
+      if (!liveRoomState) {
+        showLiveSubView('setup');
+        const pill = document.getElementById('live-room-code-pill');
+        if (pill) pill.classList.add('hidden');
+      }
+    }
+
+    function closeLiveQuizModal() {
+      const modal = document.getElementById('live-quiz-modal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function openLiveQuizWithCurrentQuestions() {
+      if (lastResults && Array.isArray(lastResults.allSessionQuestions) && lastResults.allSessionQuestions.length > 0) {
+        livePresetQuestions = lastResults.allSessionQuestions.map(item => item.question).filter(Boolean);
+      } else {
+        livePresetQuestions = null;
+      }
+      openLiveQuizModal();
+      createLiveQuizRoom(livePresetQuestions);
+    }
+
+    function cleanupLiveTransports() {
+      if (liveCountdownInterval) {
+        clearInterval(liveCountdownInterval);
+        liveCountdownInterval = null;
+      }
+      if (liveBroadcastChan) {
+        try { liveBroadcastChan.close(); } catch (e) {}
+        liveBroadcastChan = null;
+      }
+      if (liveGuestConn) {
+        try { liveGuestConn.close(); } catch (e) {}
+        liveGuestConn = null;
+      }
+      liveHostConnections.forEach(c => {
+        try { c.close(); } catch (e) {}
+      });
+      liveHostConnections = [];
+      if (livePeerInstance) {
+        try { livePeerInstance.destroy(); } catch (e) {}
+        livePeerInstance = null;
+      }
+    }
+
+    function leaveLiveQuizRoom() {
+      cleanupLiveTransports();
+      liveRoomState = null;
+      livePresetQuestions = null;
+      const pill = document.getElementById('live-room-code-pill');
+      if (pill) pill.classList.add('hidden');
+      showLiveSubView('setup');
+    }
+
+    function getNormalizedLiveQcmOptions(q) {
+      if (!q || !q.options) return [];
+      const raw = q.activeOptions || q.options;
+      if (Array.isArray(raw)) {
+        return raw.map(o => ({
+          letter: String(o.letter || '').trim().toUpperCase(),
+          text: String(o.text || '')
+        })).filter(o => o.letter);
+      }
+      return ['A', 'B', 'C', 'D', 'E']
+        .filter(l => raw[l])
+        .map(l => ({ letter: l, text: String(raw[l]) }));
+    }
+
+    function pickLiveRoomQuestions(desiredCount, presetList) {
+      if (Array.isArray(presetList) && presetList.length > 0) {
+        return presetList.filter(isQcm);
+      }
+      let pool = [];
+      try {
+        pool = getActivePool().filter(isQcm);
+        if (currentQuizSettings && currentQuizSettings.uniqueQ) {
+          pool = deduplicateQuestions(pool);
+        }
+      } catch (e) {}
+      if (!pool || pool.length === 0) {
+        pool = QCM_DATASET.filter(isQcm);
+      }
+      const copy = [...pool];
+      shuffleArray(copy);
+      return copy.slice(0, Math.min(desiredCount, copy.length));
+    }
+
+    function serializeLiveRoomPublicState() {
+      if (!liveRoomState) return null;
+      return {
+        roomCode: liveRoomState.roomCode,
+        hostId: liveRoomState.hostId,
+        hostName: liveRoomState.hostName,
+        timerSeconds: liveRoomState.timerSeconds,
+        questionKeys: liveRoomState.questionKeys,
+        status: liveRoomState.status,
+        currentQIndex: liveRoomState.currentQIndex,
+        questionStartedAt: liveRoomState.questionStartedAt,
+        players: liveRoomState.players
+      };
+    }
+
+    function broadcastLiveMessage(msg) {
+      if (liveBroadcastChan) {
+        try { liveBroadcastChan.postMessage(msg); } catch (e) {}
+      }
+      if (liveRoomState && liveRoomState.isHost) {
+        liveHostConnections.forEach(conn => {
+          try {
+            if (conn && conn.open) conn.send(msg);
+          } catch (e) {}
+        });
+      } else if (liveGuestConn && liveGuestConn.open) {
+        try { liveGuestConn.send(msg); } catch (e) {}
+      }
+    }
+
+    function setupLiveBroadcastChannel(code) {
+      if (typeof BroadcastChannel === 'undefined') return;
+      try {
+        liveBroadcastChan = new BroadcastChannel('ut2j_live_{{UE_CODE}}_' + code);
+        liveBroadcastChan.onmessage = (ev) => {
+          if (ev && ev.data) {
+            handleIncomingLiveMessage(ev.data);
+          }
+        };
+      } catch (e) {}
+    }
+
+    async function createLiveQuizRoom(presetList) {
+      cleanupLiveTransports();
+      const countSel = document.getElementById('live-setup-count');
+      const timerSel = document.getElementById('live-setup-timer');
+      const desiredCount = parseInt(countSel ? countSel.value : '10', 10) || 10;
+      const timerSeconds = parseInt(timerSel ? timerSel.value : '25', 10) || 25;
+
+      const selectedQuestions = pickLiveRoomQuestions(desiredCount, presetList);
+      if (!selectedQuestions || selectedQuestions.length === 0) {
+        alert("Aucune question disponible. Veuillez sélectionner au moins un chapitre ou une annale.");
+        return;
+      }
+
+      const code = String(Math.floor(1000 + Math.random() * 9000));
+      const myId = getMyLivePlayerId();
+      const myName = getMemberShortDisplayName();
+
+      liveRoomState = {
+        isHost: true,
+        roomCode: code,
+        hostId: myId,
+        hostName: myName,
+        timerSeconds: timerSeconds,
+        questions: selectedQuestions,
+        questionKeys: selectedQuestions.map(q => getProfileQuestionKey(q)),
+        status: 'lobby',
+        currentQIndex: 0,
+        questionStartedAt: 0,
+        mySelectedOptions: new Set(),
+        myLockedAnswer: false,
+        myPersonalHistory: [],
+        recordedToProfile: false,
+        players: {
+          [myId]: {
+            id: myId,
+            name: myName,
+            isHost: true,
+            score: 0,
+            correctCount: 0,
+            answeredCurrent: false,
+            lastDelta: 0,
+            lastCorrect: false,
+            lastSelected: []
+          }
+        }
+      };
+
+      setupLiveBroadcastChannel(code);
+      renderLiveLobby();
+      showLiveSubView('lobby');
+
+      const statusEl = document.getElementById('live-connection-status');
+      if (statusEl) statusEl.textContent = '🟢 Salon local & multi-onglets actif • Initialisation du relais P2P...';
+
+      const peerLoaded = await ensurePeerJsLoaded();
+      if (peerLoaded && window.Peer && liveRoomState && liveRoomState.roomCode === code) {
+        try {
+          const peerId = `ut2j-live-{{UE_CODE}}-${code}`;
+          livePeerInstance = new window.Peer(peerId);
+          livePeerInstance.on('open', () => {
+            if (statusEl) statusEl.textContent = '🟢 Salon Live synchronisé (Multi-appareils WebRTC & Multi-onglets prêts)';
+          });
+          livePeerInstance.on('connection', (conn) => {
+            liveHostConnections.push(conn);
+            conn.on('data', (data) => handleIncomingLiveMessage(data, conn));
+            conn.on('open', () => {
+              conn.send({ type: 'ROOM_STATE', state: serializeLiveRoomPublicState() });
+            });
+          });
+          livePeerInstance.on('error', () => {
+            if (statusEl) statusEl.textContent = '🟢 Salon actif (Mode réseau local / multi-onglets)';
+          });
+        } catch (e) {}
+      }
+    }
+
+    function joinLiveQuizRoomFromInput() {
+      const inp = document.getElementById('live-join-code-input');
+      const code = (inp ? inp.value : '').trim().toUpperCase();
+      if (!code || code.length < 3) {
+        alert("Veuillez saisir le code du salon (ex: 4829).");
+        return;
+      }
+      joinLiveQuizRoom(code);
+    }
+
+    async function joinLiveQuizRoom(code) {
+      cleanupLiveTransports();
+      const cleanCode = String(code).trim().toUpperCase();
+      const myId = getMyLivePlayerId();
+      const myName = getMemberShortDisplayName();
+
+      liveRoomState = {
+        isHost: false,
+        roomCode: cleanCode,
+        hostId: null,
+        hostName: 'Hôte',
+        timerSeconds: 25,
+        questions: [],
+        questionKeys: [],
+        status: 'lobby',
+        currentQIndex: 0,
+        questionStartedAt: 0,
+        mySelectedOptions: new Set(),
+        myLockedAnswer: false,
+        myPersonalHistory: [],
+        recordedToProfile: false,
+        players: {
+          [myId]: {
+            id: myId,
+            name: myName,
+            isHost: false,
+            score: 0,
+            correctCount: 0,
+            answeredCurrent: false,
+            lastDelta: 0,
+            lastCorrect: false,
+            lastSelected: []
+          }
+        }
+      };
+
+      setupLiveBroadcastChannel(cleanCode);
+      renderLiveLobby();
+      showLiveSubView('lobby');
+
+      const statusEl = document.getElementById('live-connection-status');
+      if (statusEl) statusEl.textContent = `🔄 Connexion au salon #${cleanCode} en cours...`;
+
+      // Broadcast join over local BroadcastChannel immediately
+      broadcastLiveMessage({
+        type: 'PLAYER_JOIN',
+        roomCode: cleanCode,
+        player: { id: myId, name: myName }
+      });
+
+      // Also connect via PeerJS for cross-device WebRTC
+      const peerLoaded = await ensurePeerJsLoaded();
+      if (peerLoaded && window.Peer && liveRoomState && liveRoomState.roomCode === cleanCode) {
+        try {
+          livePeerInstance = new window.Peer();
+          livePeerInstance.on('open', () => {
+            const hostPeerId = `ut2j-live-{{UE_CODE}}-${cleanCode}`;
+            const conn = livePeerInstance.connect(hostPeerId, { reliable: true });
+            liveGuestConn = conn;
+            conn.on('open', () => {
+              if (statusEl) statusEl.textContent = `🟢 Connecté en direct au salon #${cleanCode}`;
+              conn.send({
+                type: 'PLAYER_JOIN',
+                roomCode: cleanCode,
+                player: { id: myId, name: myName }
+              });
+            });
+            conn.on('data', (data) => handleIncomingLiveMessage(data));
+          });
+        } catch (e) {}
+      }
+    }
+
+    function handleIncomingLiveMessage(msg, sourceConn) {
+      if (!msg || !liveRoomState) return;
+      if (msg.roomCode && msg.roomCode !== liveRoomState.roomCode) return;
+
+      if (liveRoomState.isHost) {
+        if (msg.type === 'PLAYER_JOIN' && msg.player) {
+          const p = msg.player;
+          if (!liveRoomState.players[p.id]) {
+            liveRoomState.players[p.id] = {
+              id: p.id,
+              name: p.name || 'Participant',
+              isHost: false,
+              score: 0,
+              correctCount: 0,
+              answeredCurrent: false,
+              lastDelta: 0,
+              lastCorrect: false,
+              lastSelected: []
+            };
+          } else {
+            liveRoomState.players[p.id].name = p.name || liveRoomState.players[p.id].name;
+          }
+          renderLiveLobby();
+          const stateMsg = {
+            type: 'ROOM_STATE',
+            roomCode: liveRoomState.roomCode,
+            state: serializeLiveRoomPublicState()
+          };
+          broadcastLiveMessage(stateMsg);
+          if (sourceConn && sourceConn.open) {
+            try { sourceConn.send(stateMsg); } catch (e) {}
+          }
+        } else if (msg.type === 'PLAYER_ANSWER' && msg.playerId) {
+          if (liveRoomState.status !== 'question') return;
+          const player = liveRoomState.players[msg.playerId];
+          if (!player || player.answeredCurrent) return;
+          player.answeredCurrent = true;
+          player.lastDelta = msg.delta || 0;
+          player.lastCorrect = Boolean(msg.isCorrect);
+          player.lastSelected = Array.isArray(msg.selected) ? msg.selected : [];
+          player.score = (player.score || 0) + player.lastDelta;
+          if (player.lastCorrect) {
+            player.correctCount = (player.correctCount || 0) + 1;
+          }
+          updateLiveAnsweredCounterUI();
+          broadcastLiveMessage({
+            type: 'ROOM_STATE',
+            roomCode: liveRoomState.roomCode,
+            state: serializeLiveRoomPublicState()
+          });
+          checkIfAllLivePlayersAnswered();
+        }
+      } else {
+        // Guest handling
+        if (msg.type === 'ROOM_STATE' && msg.state) {
+          applyIncomingLiveStateOnGuest(msg.state);
+        }
+      }
+    }
+
+    function applyIncomingLiveStateOnGuest(state) {
+      if (!liveRoomState || liveRoomState.isHost) return;
+      const prevStatus = liveRoomState.status;
+      const prevQIndex = liveRoomState.currentQIndex;
+
+      liveRoomState.hostId = state.hostId;
+      liveRoomState.hostName = state.hostName;
+      liveRoomState.timerSeconds = state.timerSeconds || 25;
+      liveRoomState.players = state.players || liveRoomState.players;
+
+      if (Array.isArray(state.questionKeys) && state.questionKeys.length > 0 && liveRoomState.questions.length === 0) {
+        const qMap = buildQuestionLookupMap();
+        liveRoomState.questionKeys = state.questionKeys;
+        liveRoomState.questions = state.questionKeys.map(k => qMap.get(k)).filter(Boolean);
+      }
+
+      const statusEl = document.getElementById('live-connection-status');
+      if (statusEl) statusEl.textContent = `🟢 Connecté au salon de ${liveRoomState.hostName}`;
+
+      liveRoomState.status = state.status;
+      liveRoomState.currentQIndex = state.currentQIndex || 0;
+      liveRoomState.questionStartedAt = state.questionStartedAt || Date.now();
+
+      if (state.status === 'lobby') {
+        renderLiveLobby();
+        showLiveSubView('lobby');
+      } else if (state.status === 'question') {
+        if (prevStatus !== 'question' || prevQIndex !== liveRoomState.currentQIndex) {
+          startLiveQuestionRound(liveRoomState.currentQIndex, false);
+        } else {
+          updateLiveAnsweredCounterUI();
+        }
+      } else if (state.status === 'reveal') {
+        if (prevStatus !== 'reveal') {
+          renderLiveRevealView();
+        }
+      } else if (state.status === 'podium') {
+        if (prevStatus !== 'podium') {
+          renderLivePodiumView();
+        }
+      }
+    }
+
+    function renderLiveLobby() {
+      if (!liveRoomState) return;
+      const pill = document.getElementById('live-room-code-pill');
+      if (pill) {
+        pill.textContent = `CODE : ${liveRoomState.roomCode}`;
+        pill.classList.remove('hidden');
+      }
+      const codeDisp = document.getElementById('live-lobby-code-display');
+      if (codeDisp) codeDisp.textContent = liveRoomState.roomCode;
+
+      const qCount = (liveRoomState.questionKeys && liveRoomState.questionKeys.length) || (liveRoomState.questions && liveRoomState.questions.length) || 10;
+      const metaDisp = document.getElementById('live-lobby-meta-display');
+      if (metaDisp) metaDisp.textContent = `• ${qCount} QCM • ${liveRoomState.timerSeconds}s / question`;
+
+      const playersList = Object.values(liveRoomState.players || {});
+      const countEl = document.getElementById('live-lobby-player-count');
+      if (countEl) countEl.textContent = String(playersList.length);
+
+      const grid = document.getElementById('live-lobby-players-grid');
+      if (grid) {
+        const myId = getMyLivePlayerId();
+        grid.innerHTML = playersList.map(p => {
+          const isMe = p.id === myId;
+          return `
+            <div class="p-3 rounded-xl bg-white border ${isMe ? 'border-indigo-400 ring-1 ring-indigo-200' : 'border-slate-200'} flex items-center justify-between gap-2 shadow-2xs">
+              <div class="flex items-center gap-2.5 min-w-0">
+                <div class="w-8 h-8 rounded-lg ${p.isHost ? 'bg-rose-100 text-rose-700' : 'bg-indigo-100 text-indigo-700'} font-extrabold text-xs flex items-center justify-center shrink-0">
+                  ${p.isHost ? '👑' : '🎓'}
+                </div>
+                <div class="truncate">
+                  <div class="text-xs font-extrabold text-slate-900 truncate">
+                    ${escapeHtml(p.name)}${isMe ? ' (Vous)' : ''}
+                  </div>
+                  <div class="text-[11px] text-slate-500">
+                    ${p.isHost ? 'Hôte du salon' : 'Prêt(e)'}
+                  </div>
+                </div>
+              </div>
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0"></span>
+            </div>
+          `;
+        }).join('');
+      }
+
+      const startBtn = document.getElementById('live-btn-host-start');
+      const waitMsg = document.getElementById('live-guest-waiting-msg');
+      if (liveRoomState.isHost) {
+        if (startBtn) startBtn.classList.remove('hidden');
+        if (waitMsg) waitMsg.classList.add('hidden');
+      } else {
+        if (startBtn) startBtn.classList.add('hidden');
+        if (waitMsg) waitMsg.classList.remove('hidden');
+      }
+    }
+
+    function copyLiveRoomShareLink() {
+      if (!liveRoomState) return;
+      const baseUrl = window.location.origin + window.location.pathname;
+      const shareUrl = `${baseUrl}?live=${encodeURIComponent(liveRoomState.roomCode)}`;
+      const qCount = (liveRoomState.questionKeys && liveRoomState.questionKeys.length) || 10;
+      const shareText = `📡 Rejoins mon Quiz Live UE {{UE_CODE}} en direct (${qCount} QCM • ${liveRoomState.timerSeconds}s/question) !\n🔑 Code du salon : ${liveRoomState.roomCode}\n👉 Lien direct : ${shareUrl}`;
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(shareText).then(() => {
+          alert(`📡 Lien d'invitation et code (${liveRoomState.roomCode}) copiés dans le presse-papiers ! Partagez-les avec vos camarades.`);
+        }).catch(() => {
+          prompt("Copiez ce lien d'invitation :", shareUrl);
+        });
+      } else {
+        prompt("Copiez ce lien d'invitation :", shareUrl);
+      }
+    }
+
+    function hostStartLiveGame() {
+      if (!liveRoomState || !liveRoomState.isHost) return;
+      startLiveQuestionRound(0, true);
+    }
+
+    function startLiveQuestionRound(qIdx, broadcastFromHost) {
+      if (!liveRoomState) return;
+      if (liveCountdownInterval) {
+        clearInterval(liveCountdownInterval);
+        liveCountdownInterval = null;
+      }
+
+      liveRoomState.status = 'question';
+      liveRoomState.currentQIndex = qIdx;
+      liveRoomState.questionStartedAt = Date.now();
+      liveRoomState.mySelectedOptions = new Set();
+      liveRoomState.myLockedAnswer = false;
+
+      Object.values(liveRoomState.players).forEach(p => {
+        p.answeredCurrent = false;
+        p.lastDelta = 0;
+        p.lastCorrect = false;
+        p.lastSelected = [];
+      });
+
+      if (broadcastFromHost && liveRoomState.isHost) {
+        broadcastLiveMessage({
+          type: 'ROOM_STATE',
+          roomCode: liveRoomState.roomCode,
+          state: serializeLiveRoomPublicState()
+        });
+      }
+
+      const q = liveRoomState.questions[qIdx];
+      if (!q) return;
+
+      showLiveSubView('question');
+
+      const totalQ = liveRoomState.questions.length;
+      const counterBadge = document.getElementById('live-q-counter-badge');
+      if (counterBadge) counterBadge.textContent = `Question ${qIdx + 1} / ${totalQ}`;
+
+      const themeBadge = document.getElementById('live-q-theme-badge');
+      if (themeBadge) themeBadge.textContent = `${q.theme} — ${q.subtheme || ''}`;
+
+      const qText = document.getElementById('live-q-text');
+      if (qText) qText.textContent = q.question;
+
+      const lockNotice = document.getElementById('live-q-locked-notice');
+      const lockBtn = document.getElementById('live-btn-lock-answer');
+      if (lockNotice) lockNotice.classList.add('hidden');
+      if (lockBtn) {
+        lockBtn.classList.remove('hidden');
+        lockBtn.disabled = false;
+      }
+
+      renderLiveQuestionOptions();
+      updateLiveAnsweredCounterUI();
+
+      const totalMs = (liveRoomState.timerSeconds || 25) * 1000;
+      const timerBadge = document.getElementById('live-q-timer-badge');
+      const timerBar = document.getElementById('live-q-timer-bar');
+
+      const updateTick = () => {
+        if (!liveRoomState || liveRoomState.status !== 'question') {
+          clearInterval(liveCountdownInterval);
+          return;
+        }
+        const elapsed = Date.now() - liveRoomState.questionStartedAt;
+        const remainingMs = Math.max(0, totalMs - elapsed);
+        const remainingSec = Math.ceil(remainingMs / 1000);
+        const pct = Math.max(0, Math.min(100, (remainingMs / totalMs) * 100));
+
+        if (timerBadge) timerBadge.textContent = `⏱️ ${remainingSec}s`;
+        if (timerBar) timerBar.style.width = `${pct}%`;
+
+        if (remainingMs <= 0) {
+          clearInterval(liveCountdownInterval);
+          liveCountdownInterval = null;
+          if (!liveRoomState.myLockedAnswer) {
+            submitLivePlayerAnswer(true);
+          }
+          if (liveRoomState.isHost) {
+            setTimeout(() => transitionHostToReveal(), 350);
+          }
+        }
+      };
+
+      updateTick();
+      liveCountdownInterval = setInterval(updateTick, 200);
+    }
+
+    function renderLiveQuestionOptions() {
+      if (!liveRoomState) return;
+      const q = liveRoomState.questions[liveRoomState.currentQIndex];
+      const list = document.getElementById('live-q-options-list');
+      if (!q || !list) return;
+
+      const normOpts = getNormalizedLiveQcmOptions(q);
+      list.innerHTML = normOpts.map(opt => {
+        const letter = opt.letter;
+        const isSelected = liveRoomState.mySelectedOptions.has(letter);
+        const locked = liveRoomState.myLockedAnswer;
+        const baseCls = isSelected
+          ? 'bg-indigo-50 border-indigo-500 text-indigo-950 ring-2 ring-indigo-200'
+          : 'bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-800';
+        const badgeCls = isSelected
+          ? 'bg-indigo-600 text-white'
+          : 'bg-white text-slate-700 border border-slate-300';
+        return `
+          <button type="button"
+            onclick="toggleLiveOption('${letter}')"
+            ${locked ? 'disabled' : ''}
+            class="w-full p-3.5 rounded-xl border ${baseCls} transition flex items-start gap-3 text-left ${locked ? 'opacity-75 cursor-not-allowed' : 'cursor-pointer'}">
+            <span class="w-6 h-6 rounded-lg text-xs font-extrabold flex items-center justify-center shrink-0 ${badgeCls}">
+              ${letter}
+            </span>
+            <span class="text-xs sm:text-sm font-semibold leading-snug pt-0.5">${escapeHtml(opt.text)}</span>
+          </button>
+        `;
+      }).join('');
+    }
+
+    function toggleLiveOption(letter) {
+      if (!liveRoomState || liveRoomState.status !== 'question' || liveRoomState.myLockedAnswer) return;
+      if (liveRoomState.mySelectedOptions.has(letter)) {
+        liveRoomState.mySelectedOptions.delete(letter);
+      } else {
+        liveRoomState.mySelectedOptions.add(letter);
+      }
+      renderLiveQuestionOptions();
+    }
+
+    function submitLivePlayerAnswer(autoTimeout) {
+      if (!liveRoomState || liveRoomState.status !== 'question' || liveRoomState.myLockedAnswer) return;
+      liveRoomState.myLockedAnswer = true;
+
+      const q = liveRoomState.questions[liveRoomState.currentQIndex];
+      const selectedArr = Array.from(liveRoomState.mySelectedOptions).sort();
+      const correctArr = Array.isArray(q.correct) ? [...q.correct].sort() : [];
+      const isCorrect = selectedArr.length === correctArr.length && selectedArr.every((v, i) => v === correctArr[i]);
+
+      const totalMs = (liveRoomState.timerSeconds || 25) * 1000;
+      const elapsed = Math.max(0, Date.now() - liveRoomState.questionStartedAt);
+      const remainingRatio = Math.max(0, Math.min(1, (totalMs - elapsed) / totalMs));
+      const speedBonus = isCorrect ? Math.round(500 * remainingRatio) : 0;
+      const deltaPoints = isCorrect ? (1000 + speedBonus) : 0;
+
+      // Record for personal Member Profile history at end of game
+      liveRoomState.myPersonalHistory.push({
+        question: q,
+        userAnswer: selectedArr,
+        earned: isCorrect ? 1 : 0,
+        status: selectedArr.length === 0 ? 'unanswered' : (isCorrect ? 'correct' : 'incorrect')
+      });
+
+      const lockNotice = document.getElementById('live-q-locked-notice');
+      const lockBtn = document.getElementById('live-btn-lock-answer');
+      if (lockNotice) {
+        lockNotice.textContent = autoTimeout && selectedArr.length === 0
+          ? '⌛ Temps écoulé ! Aucune réponse sélectionnée.'
+          : `🔒 Réponse verrouillée (${selectedArr.join(', ') || 'Aucune'}) ! En attente des autres joueurs...`;
+        lockNotice.classList.remove('hidden');
+      }
+      if (lockBtn) lockBtn.classList.add('hidden');
+      renderLiveQuestionOptions();
+
+      const myId = getMyLivePlayerId();
+      if (liveRoomState.isHost) {
+        const me = liveRoomState.players[myId];
+        if (me && !me.answeredCurrent) {
+          me.answeredCurrent = true;
+          me.lastDelta = deltaPoints;
+          me.lastCorrect = isCorrect;
+          me.lastSelected = selectedArr;
+          me.score = (me.score || 0) + deltaPoints;
+          if (isCorrect) me.correctCount = (me.correctCount || 0) + 1;
+        }
+        updateLiveAnsweredCounterUI();
+        broadcastLiveMessage({
+          type: 'ROOM_STATE',
+          roomCode: liveRoomState.roomCode,
+          state: serializeLiveRoomPublicState()
+        });
+        checkIfAllLivePlayersAnswered();
+      } else {
+        broadcastLiveMessage({
+          type: 'PLAYER_ANSWER',
+          roomCode: liveRoomState.roomCode,
+          playerId: myId,
+          selected: selectedArr,
+          isCorrect: isCorrect,
+          delta: deltaPoints
+        });
+      }
+    }
+
+    function updateLiveAnsweredCounterUI() {
+      if (!liveRoomState) return;
+      const playersList = Object.values(liveRoomState.players || {});
+      const answeredCount = playersList.filter(p => p.answeredCurrent).length;
+      const statusEl = document.getElementById('live-q-answered-status');
+      if (statusEl) {
+        statusEl.textContent = `${answeredCount} / ${playersList.length} ont répondu`;
+      }
+    }
+
+    function checkIfAllLivePlayersAnswered() {
+      if (!liveRoomState || !liveRoomState.isHost || liveRoomState.status !== 'question') return;
+      const playersList = Object.values(liveRoomState.players || {});
+      if (playersList.length > 0 && playersList.every(p => p.answeredCurrent)) {
+        if (liveCountdownInterval) {
+          clearInterval(liveCountdownInterval);
+          liveCountdownInterval = null;
+        }
+        setTimeout(() => transitionHostToReveal(), 300);
+      }
+    }
+
+    function transitionHostToReveal() {
+      if (!liveRoomState || !liveRoomState.isHost) return;
+      liveRoomState.status = 'reveal';
+      broadcastLiveMessage({
+        type: 'ROOM_STATE',
+        roomCode: liveRoomState.roomCode,
+        state: serializeLiveRoomPublicState()
+      });
+      renderLiveRevealView();
+    }
+
+    function renderLiveRevealView() {
+      if (!liveRoomState) return;
+      if (liveCountdownInterval) {
+        clearInterval(liveCountdownInterval);
+        liveCountdownInterval = null;
+      }
+      showLiveSubView('reveal');
+
+      const qIdx = liveRoomState.currentQIndex;
+      const totalQ = liveRoomState.questions.length;
+      const q = liveRoomState.questions[qIdx];
+      const myId = getMyLivePlayerId();
+      const me = (liveRoomState.players && liveRoomState.players[myId]) || { lastCorrect: false, lastDelta: 0 };
+
+      const selfBadge = document.getElementById('live-reveal-self-badge');
+      if (selfBadge) {
+        if (me.lastCorrect) {
+          selfBadge.className = 'px-3 py-1 rounded-full text-xs font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-300';
+          selfBadge.textContent = `✓ Bonne réponse ! +${me.lastDelta} pts`;
+        } else {
+          selfBadge.className = 'px-3 py-1 rounded-full text-xs font-extrabold bg-rose-100 text-rose-800 border border-rose-300';
+          selfBadge.textContent = `✗ Incorrect (+0 pt)`;
+        }
+      }
+
+      const qNumEl = document.getElementById('live-reveal-q-num');
+      if (qNumEl) qNumEl.textContent = `Question ${qIdx + 1} / ${totalQ}`;
+
+      if (q) {
+        const qTextEl = document.getElementById('live-reveal-q-text');
+        if (qTextEl) qTextEl.textContent = q.question;
+
+        const correctBox = document.getElementById('live-reveal-correct-box');
+        if (correctBox) {
+          const normOpts = getNormalizedLiveQcmOptions(q);
+          const optMap = {};
+          normOpts.forEach(o => { optMap[o.letter] = o.text; });
+          const correctLines = (q.correct || []).map(letter => `<div><strong>${letter}.</strong> ${escapeHtml(optMap[letter] || '')}</div>`).join('');
+          correctBox.innerHTML = `<div class="font-extrabold text-emerald-800 uppercase text-[11px]">Réponse(s) exacte(s) :</div>${correctLines}`;
+        }
+
+        const expBox = document.getElementById('live-reveal-explanation');
+        if (expBox) {
+          expBox.innerHTML = `<span class="font-extrabold text-slate-900">💡 Explication :</span> ${escapeHtml(q.explanation || q.rationale || 'Proposition validée par le corrigé officiel et le cours.')}`;
+        }
+      }
+
+      // Render Live Leaderboard
+      const boardEl = document.getElementById('live-reveal-leaderboard');
+      if (boardEl) {
+        const sorted = Object.values(liveRoomState.players || {}).sort((a, b) => (b.score || 0) - (a.score || 0));
+        boardEl.innerHTML = sorted.map((p, idx) => {
+          const rankMedal = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `#${idx + 1}`;
+          const isMe = p.id === myId;
+          const deltaStr = p.lastDelta > 0 ? `+${p.lastDelta}` : '+0';
+          const deltaCls = p.lastDelta > 0 ? 'text-emerald-600 font-extrabold' : 'text-slate-400 font-semibold';
+          return `
+            <div class="p-2.5 rounded-xl border ${isMe ? 'bg-indigo-50/70 border-indigo-300' : 'bg-slate-50 border-slate-200'} flex items-center justify-between gap-2 text-xs">
+              <div class="flex items-center gap-2 min-w-0">
+                <span class="font-extrabold w-6 text-center">${rankMedal}</span>
+                <span class="font-bold text-slate-900 truncate">${escapeHtml(p.name)}${isMe ? ' (Vous)' : ''}</span>
+              </div>
+              <div class="flex items-center gap-2 shrink-0">
+                <span class="text-[11px] ${deltaCls}">(${deltaStr})</span>
+                <span class="px-2 py-0.5 rounded-lg bg-indigo-600 text-white font-extrabold font-mono">${p.score || 0} pts</span>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      const nextBtn = document.getElementById('live-btn-host-next');
+      const nextLabel = document.getElementById('live-btn-host-next-label');
+      const guestWait = document.getElementById('live-reveal-guest-wait');
+
+      if (liveRoomState.isHost) {
+        if (nextBtn) nextBtn.classList.remove('hidden');
+        if (guestWait) guestWait.classList.add('hidden');
+        if (nextLabel) {
+          nextLabel.textContent = (qIdx + 1 < totalQ) ? 'Question suivante →' : '🏆 Afficher le Podium Final';
+        }
+      } else {
+        if (nextBtn) nextBtn.classList.add('hidden');
+        if (guestWait) guestWait.classList.remove('hidden');
+      }
+    }
+
+    function hostNextLiveQuestion() {
+      if (!liveRoomState || !liveRoomState.isHost) return;
+      const nextIdx = liveRoomState.currentQIndex + 1;
+      if (nextIdx < liveRoomState.questions.length) {
+        startLiveQuestionRound(nextIdx, true);
+      } else {
+        liveRoomState.status = 'podium';
+        broadcastLiveMessage({
+          type: 'ROOM_STATE',
+          roomCode: liveRoomState.roomCode,
+          state: serializeLiveRoomPublicState()
+        });
+        renderLivePodiumView();
+      }
+    }
+
+    function renderLivePodiumView() {
+      if (!liveRoomState) return;
+      showLiveSubView('podium');
+
+      // Save the player's own answers to their personal Member Profile once
+      if (!liveRoomState.recordedToProfile && liveRoomState.myPersonalHistory.length > 0) {
+        liveRoomState.recordedToProfile = true;
+        const earned = liveRoomState.myPersonalHistory.reduce((acc, it) => acc + (it.earned || 0), 0);
+        const max = liveRoomState.myPersonalHistory.length;
+        try {
+          recordQuizToMemberProfile({
+            earned: earned,
+            max: max,
+            percentage: max > 0 ? Math.round((earned / max) * 100) : 0,
+            correctCount: earned,
+            partialCount: 0,
+            incorrectCount: max - earned,
+            unansweredCount: 0,
+            elapsedSeconds: max * (liveRoomState.timerSeconds || 25),
+            allSessionQuestions: liveRoomState.myPersonalHistory
+          });
+        } catch (e) {}
+      }
+
+      const podiumEl = document.getElementById('live-podium-list');
+      if (!podiumEl) return;
+      const myId = getMyLivePlayerId();
+      const sorted = Object.values(liveRoomState.players || {}).sort((a, b) => (b.score || 0) - (a.score || 0));
+      const totalQ = (liveRoomState.questions && liveRoomState.questions.length) || 10;
+
+      podiumEl.innerHTML = sorted.map((p, idx) => {
+        const medal = idx === 0 ? '🥇 1er' : idx === 1 ? '🥈 2e' : idx === 2 ? '🥉 3e' : `#${idx + 1}`;
+        const isMe = p.id === myId;
+        const cardCls = idx === 0
+          ? 'bg-amber-50/80 border-amber-300 ring-2 ring-amber-200'
+          : isMe
+            ? 'bg-indigo-50/70 border-indigo-300'
+            : 'bg-slate-50 border-slate-200';
+        return `
+          <div class="p-3.5 rounded-2xl border ${cardCls} flex items-center justify-between gap-3">
+            <div class="flex items-center gap-3 min-w-0">
+              <span class="px-2.5 py-1 rounded-xl bg-white border border-slate-200 font-extrabold text-xs shrink-0">${medal}</span>
+              <div class="truncate">
+                <div class="text-sm font-extrabold text-slate-900 truncate">${escapeHtml(p.name)}${isMe ? ' (Vous)' : ''}</div>
+                <div class="text-xs text-slate-500">${p.correctCount || 0} / ${totalQ} réponses exactes</div>
+              </div>
+            </div>
+            <div class="text-right shrink-0">
+              <div class="text-base font-extrabold font-mono text-indigo-700">${p.score || 0} pts</div>
+            </div>
+          </div>
+        `;
+      }).join('');
     }
 
     function switchProfileSubtab(subtab) {
